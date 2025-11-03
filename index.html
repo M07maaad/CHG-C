@@ -1,59 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
   <base target="_top">
   <title>CHG - Clinical Toolkit</title>
-  
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Viewport & PWA Settings -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name_description="Clinical calculation toolkit for CHG Hospital.">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
   
-  <!-- PWA Theme Color -->
-  <meta name="theme-color" content="#00bcd4">
-
   <style>
-    /* *** START: FIXED DESIGN ***
-      This is your original custom CSS.
-      It has been added back to fix the "sloppy" design.
-    */
+    /* --- (A) Base Styles (From Original Design) --- */
     body {
       font-family: 'Inter', sans-serif;
-      direction: ltr;
-      text-align: left;
-      background: linear-gradient(to bottom right, #e0f7fa, #80deea);
+      /* --- FIX: Changed direction to RTL as per user's language --- */
+      direction: rtl;
+      text-align: right;
+      background: linear-gradient(to bottom left, #e0f7fa, #80deea); /* Flipped gradient */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start; /* Start from top */
+      justify-content: center;
       padding: 1rem;
-      padding-top: 2.5rem; /* Add padding to top */
     }
     .container {
       max-width: 480px;
       background-color: #ffffff;
       padding: 2.5rem 2rem;
       border-radius: 1.5rem;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      /* --- DESIGN UPGRADE: Stronger Shadow --- */
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       width: 100%;
       border: 1px solid rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
-      min-height: 300px; /* Minimum height */
     }
     h1 {
       color: #006064;
-      font-size: 2.5rem; /* Slightly smaller for tool pages */
+      font-size: 2.75rem;
       margin-bottom: 1.5rem;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
     }
@@ -62,6 +52,11 @@
       font-size: 1.1rem;
       margin-bottom: 2.5rem;
     }
+    
+    /* --- (B) Form & Input Styles (From Original Design) --- */
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
     .input-group label {
       display: block;
       margin-bottom: 0.6rem;
@@ -69,7 +64,7 @@
       color: #2d3748;
       font-size: 0.95rem;
     }
-    .input-group input, .input-group select, .input-group textarea {
+    .input-group input, .input-group select {
       width: 100%;
       padding: 0.85rem;
       border: 1px solid #b2ebf2;
@@ -78,36 +73,45 @@
       background-color: #f8fafc;
       transition: all 0.2s ease-in-out;
     }
-    .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+    .input-group input:focus, .input-group select:focus {
       outline: none;
       border-color: #00bcd4;
       box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.3);
       background-color: #ffffff;
     }
+    
+    /* --- (C) Button Styles (From Original + UPGRADE) --- */
     .btn {
       padding: 1rem 2rem;
       border-radius: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease-in-out;
-      background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
+      background-image: linear-gradient(to left, #00bcd4, #4dd0e1); /* Flipped gradient */
       color: white;
       box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
       border: none;
-      width: 100%;
-      text-align: center;
+      
+      /* --- DESIGN UPGRADE: Flex layout for Icons --- */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem; /* 12px space between icon and text */
     }
-    .btn:hover:not(:disabled) {
-      background-image: linear-gradient(to right, #00acc1, #26c6da);
+    .btn:hover {
+      background-image: linear-gradient(to left, #00acc1, #26c6da); /* Flipped gradient */
+      /* --- DESIGN UPGRADE: Stronger hover effect --- */
       box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
-      transform: translateY(-2px);
+      transform: translateY(-2px) scale(1.01);
     }
-    .btn:disabled {
-      opacity: 0.5;
+    .btn:disabled, .btn[disabled] {
+      opacity: 0.7;
       cursor: not-allowed;
+      background-image: linear-gradient(to left, #9e9e9e, #bdbdbd);
+      box-shadow: none;
+      transform: none;
     }
-    
-    /* Toggle Buttons */
+
     .mode-toggle-buttons {
       display: flex;
       justify-content: center;
@@ -127,7 +131,7 @@
       flex-grow: 1;
     }
     .mode-btn.active {
-      background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
+      background-image: linear-gradient(to left, #00bcd4, #4dd0e1); /* Flipped gradient */
       color: white;
       box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
       border-color: #00bcd4;
@@ -136,7 +140,7 @@
       background-color: #c5e9f1;
     }
     
-    /* Result Boxes */
+    /* --- (D) Result & Box Styles (From Original) --- */
     .result-box, .error-box, .info-box {
       padding: 1.5rem;
       border-radius: 1rem;
@@ -144,31 +148,33 @@
       font-size: 1.05rem;
       line-height: 1.6;
       box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      /* --- DESIGN UPGRADE: Added slight border --- */
+      border: 1px solid transparent; 
     }
     .result-box {
       background-color: #e0f7fa;
-      border: 1px solid #00bcd4;
+      border-color: #00bcd4;
       color: #006064;
     }
     .error-box {
       background-color: #ffebee;
-      border: 1px solid #ef5350;
+      border-color: #ef5350;
       color: #c62828;
     }
     .info-box {
-      background-color: #fffde7;
-      border: 1px solid #ffeb3b;
-      color: #f57f17;
+      background-color: #fff8e1;
+      border-color: #ffc107;
+      color: #e65100;
     }
-    .result-box .font-bold, .error-box .font-bold {
+    .result-box .font-bold, .error-box .font-bold, .info-box .font-bold {
       color: inherit;
     }
     
-    /* Risk Factor Checklists */
+    /* --- (E) Checklist Styles (From Original + UPGRADE) --- */
     .risk-factors-container {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem; /* Tighter spacing */
+        gap: 1rem;
         margin-top: 1rem;
     }
     .risk-group-heading {
@@ -178,38 +184,109 @@
         margin-top: 1.5rem;
     }
     .risk-factor-card {
-        padding: 0.75rem 1rem; /* Smaller padding */
+        padding: 1rem;
         background-color: #f8fafc;
         border: 1px solid #e0f2f7;
         border-radius: 0.75rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
         gap: 0.75rem;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
+        /* --- RTL FIX --- */
+        padding-right: 1.5rem;
     }
     .risk-factor-card:hover {
         background-color: #e0f2f7;
+        /* --- DESIGN UPGRADE: Hover effect --- */
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     }
+    /* --- DESIGN UPGRADE: Style for checked card --- */
     .risk-factor-card.checked {
-        background-color: #e0f7fa;
+        background-color: #c5e9f1;
         border-color: #00bcd4;
+        box-shadow: 0 4px 10px rgba(0, 188, 212, 0.2);
     }
     .risk-factor-card input[type="checkbox"] {
         transform: scale(1.2);
         accent-color: #00bcd4;
+        /* --- RTL FIX --- */
+        margin-left: 0.75rem;
     }
     .risk-factor-card span {
         font-weight: 500;
         color: #2d3748;
-        font-size: 0.9rem; /* Smaller font */
     }
     
-    /* Header/Footer */
-    .header-image {
-      max-width: 250px;
-      height: auto;
+    /* --- (F) History Log Styles (NEW) --- */
+    .log-card {
+      background-color: #ffffff;
+      border-radius: 1rem;
+      /* --- DESIGN UPGRADE: Shadow & Border --- */
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.07);
       margin-bottom: 1.5rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .log-card:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    }
+    .log-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8fafc;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .log-card-title {
+      font-weight: 700;
+      color: #006064;
+      font-size: 1.1rem;
+      text-transform: capitalize;
+    }
+    .log-card-time {
+      font-size: 0.8rem;
+      color: #546e7a;
+    }
+    .log-card-patient {
+      font-weight: 600;
+      color: #37474f;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px dashed #b2ebf2;
+    }
+    .log-card-body {
+      padding: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .log-card-body ul {
+      margin-top: 0.5rem !important;
+      /* --- RTL FIX --- */
+      padding-right: 1.5rem;
+    }
+    .log-card-body strong {
+      color: #00796b;
+    }
+    
+    /* --- (G) Misc & Responsive Styles (From Original) --- */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: #00796b;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+      transition: all 0.2s ease;
+    }
+    .back-button:hover {
+      color: #004d40;
+      transform: translateX(5px); /* --- RTL FIX: Flipped direction --- */
     }
     .footer-wrapper {
         width: 100%;
@@ -219,138 +296,76 @@
         color: #607d8b;
         font-size: 0.7rem;
     }
-    .whatsapp-link {
-        text-decoration: none;
-        color: inherit;
-    }
-    .whatsapp-link:hover {
-        text-decoration: underline;
-    }
+    /* ... (rest of footer styles are fine) ... */
     
-    /* Back Button */
-    .back-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      color: #006064;
-      margin-bottom: 1rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .back-button:hover {
-      opacity: 0.7;
-    }
-    
-    /* History Log Card */
-    .log-card {
-      background-color: #f8fafc;
-      border: 1px solid #e0f2f7;
-      border-radius: 0.75rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-    .log-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-    .log-card-title {
-      font-weight: 700;
-      color: #006064;
-      font-size: 1.1rem;
-    }
-    .log-card-time {
-      font-size: 0.75rem;
-      color: #607d8b;
-    }
-    .log-card-patient {
-      font-weight: 500;
-      color: #2d3748;
-      font-size: 0.9rem;
-      margin-bottom: 0.75rem;
-    }
-    .log-card-body {
-      font-size: 0.9rem;
-      color: #4a5568;
-      line-height: 1.5;
-    }
-    .log-card-body pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      background-color: #e0f2f7;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      font-family: monospace;
-    }
-
     @media (max-width: 640px) {
-      body { padding: 0.5rem; padding-top: 1rem; }
       .container { padding: 1.5rem; border-radius: 1rem; }
       h1 { font-size: 2rem; }
-      .description { font-size: 1rem; }
+      p.description { font-size: 1rem; }
       .mode-btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
       .risk-factor-card span { font-size: 0.9rem; }
       .risk-group-heading { font-size: 1rem; }
       .btn { padding: 0.75rem 1.5rem; font-size: 1rem; }
-      .header-image { max-width: 200px; }
     }
+    
+    /* Utility */
+    .hidden { display: none; }
+    .text-center { text-align: center; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .gap-4 { gap: 1rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .font-bold { font-weight: 700; }
+    .text-lg { font-size: 1.125rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-red-700 { color: #b91c1c; }
   </style>
 </head>
 <body>
 
-  <!-- 1. Header Logo -->
   <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s1600/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png"
        onerror="this.onerror=null;this.src='https://placehold.co/300x100/E0F7FA/006064?text=Image+Not+Found';"
-       alt="Nile Badrawi Hospital Logo" class="header-image">
+       alt="Nile Badrawi Hospital Logo" style="max-width: 250px; height: auto; margin-bottom: 1.5rem;">
 
-  <!-- 2. Main App Container (This is where JS will render content) -->
-  <div class="container" id="app-container">
-    <!-- Loading... -->
-    <p class="text-center text-gray-500">Loading Toolkit...</p>
+  <div class="container">
+    <!-- This div is the main container where JS will render the views -->
+    <div id="app-container">
+      <!-- Initial Loading State -->
+      <h1 class="text-center">Loading...</h1>
+    </div>
   </div>
   
-  <!-- 3. Footer -->
   <div class="footer-wrapper">
     <p>
       Developed By
-      <a href="https://wa.me/201208087322" target="_blank" class="whatsapp-link">
-        <span class="relative inline-block group cursor-pointer text-teal-700 font-semibold">
-          7MAD
-        </span>
+      <a href="https://wa.me/201208087322" target="_blank" style="text-decoration: none; color: #006064; font-weight: 600;">
+        7MAD (Mohamed Hammad - Clinical Pharmacy)
       </a>
-      (Mohamed Hammad - Clinical Pharmacy)
     </p>
   </div>
 
-  <!-- 
-    SCRIPTS
-    (Loaded at the end)
-  -->
-
-  <!-- 1. Supabase Client Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 2. Main Application Logic -->
+  <!-- Main Application Logic -->
   <script src="index.js"></script>
-
-  <!-- 3. PWA Service Worker Registration -->
+  
+  <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
+        navigator.serviceWorker.register('/sw.js')
           .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
           })
-          .catch(error => {
-            console.error('Service Worker registration failed:', error);
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
           });
       });
     }
   </script>
-
 </body>
 </html>
 
