@@ -243,20 +243,18 @@ async function renderHistoryLogs() {
     }
     
     // Build HTML for each log card
+    // ***FIX***: Use the new formatLogData function instead of pre/JSON.stringify
     const logsHtml = logs.map(log => `
       <div class="log-card">
         <div class="log-card-header">
-          <span class="log-card-title">${log.tool_name.replace('_', ' ')}</span>
+          <span class="log-card-title">${log.tool_name.replace(/_/g, ' ')}</span>
           <span class="log-card-time">${formatDateTime(log.created_at)}</span>
         </div>
         <div class="log-card-patient">
           Patient: ${log.patient_name || 'N/A'} (ID: ${log.patient_identifier || 'N/A'})
         </div>
         <div class="log-card-body">
-          <strong>Inputs:</strong>
-          <pre>${JSON.stringify(log.inputs, null, 2)}</pre>
-          <strong>Result:</strong>
-          <pre>${JSON.stringify(log.result, null, 2)}</pre>
+          ${formatLogData(log)}
         </div>
       </div>
     `).join('');
@@ -657,7 +655,9 @@ async function handleHeparinSubmit(e) {
         );
       }
       // Save to Supabase
-      await saveCalculation(
+      // ***FIX***: Removed 'await' to prevent the UI from "hanging" or getting stuck.
+      // The save will now happen in the background.
+      saveCalculation(
         toolName,
         formData.patientName,
         formData.patientIdentifier,
@@ -724,7 +724,7 @@ async function handleProphylaxisSubmit(e) {
   const result = calculateStressUlcerProphylaxis(selectedFactors); // Recalculate to get clean log data
   
   appState.currentPatientName = form.patientName.value || 'N/A';
-  appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
+    appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
   
   const saved = await saveCalculation(
     'stress_ulcer_prophylaxis',
@@ -851,7 +851,8 @@ async function handleIVSubmit(e) {
     resultArea.innerHTML = result.html;
     
     // Save to Supabase
-    await saveCalculation(
+    // ***FIX***: Removed 'await' to prevent the UI from "hanging".
+    saveCalculation(
       'iv_calculator',
       appState.currentPatientName,
       appState.currentPatientIdentifier,
@@ -1162,74 +1163,71 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
 }
 
 /**
- * New logic for Padua Score
+ * ***NEW HELPER FUNCTION***
+ * Formats the log data (inputs and results) into readable HTML.
+ * @param {object} log - The log object from Supabase.
+ * @returns {string} HTML string.
  */
-function calculatePaduaScore(score) {
-  const isHighRisk = score >= 4;
-  const logData = {
-    score: score,
-    risk_level: isHighRisk ? 'High Risk' : 'Low Risk'
-  };
-  
-  let html = '';
-  if (isHighRisk) {
-    html = `
-      <div class="error-box">
-        <p class="text-lg font-bold">Total Score: ${score}</p>
-        <p class="mt-1">High Risk for VTE. Pharmacological prophylaxis recommended.</p>
-      </div>
-    `;
-  } else {
-    html = `
-      <div class="result-box">
-        <p class="text-lg font-bold">Total Score: ${score}</p>
-        <p class="mt-1">Low Risk for VTE. Prophylaxis not required.</p>
-      </div>
-    `;
-  }
-  
-  return { html, logData };
-}
+function formatLogData(log) {
+  let inputsHtml = '<strong>Inputs:</strong><ul class="list-disc list-inside mt-1">';
+  let resultHtml = '<strong>Result:</strong><ul class="list-disc list-inside mt-1">';
 
-/**
- * New logic for IV Calculator
- */
-function calculateIVRate(inputs) {
-  const { weight_kg, drugAmount_mg, solutionVolume_ml, drugDose, doseUnit } = inputs;
+  const inputs = log.inputs || {};
+  const result = log.result || {};
 
-  if (!weight_kg || !drugAmount_mg || !solutionVolume_ml || !drugDose) {
-    throw new Error('Please fill all fields.');
+  try {
+    switch (log.tool_name) {
+      case 'heparin_initial':
+        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>Concentration: ${inputs.concentration} u/mL</li>`;
+        inputsHtml += `<li>Indication: ${inputs.indication}</li>`;
+        resultHtml += `<li>Loading Dose: ${result.loading_dose}</li>`;
+        resultHtml += `<li>Initial Rate: ${result.initial_rate}</li>`;
+        resultHtml += `<li>Next PTT: ${result.next_ptt}</li>`;
+        break;
+      
+      case 'heparin_maintenance':
+        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>Concentration: ${inputs.concentration} u/mL</li>`;
+        inputsHtml += `<li>Current Rate: ${inputs.current_rate_ml_hr} mL/hr</li>`;
+        inputsHtml += `<li>Current PTT: ${inputs.current_ptt_sec} sec</li>`;
+        resultHtml += `<li>New Rate: ${result.new_rate}</li>`;
+        resultHtml += `<li>Bolus Dose: ${result.bolus_dose}</li>`;
+        resultHtml += `<li>Stop Infusion: ${result.stop_infusion_min} min</li>`;
+        resultHtml += `<li>Next PTT: ${result.next_ptt}</li>`;
+        break;
+        
+      case 'stress_ulcer_prophylaxis':
+      case 'padua_score':
+        inputsHtml += `<li>Factors: ${inputs.factors.join(', ') || 'None'}</li>`;
+        if(result.score !== undefined) resultHtml += `<li>Score: ${result.score}</li>`;
+        resultHtml += `<li>Risk Level: ${result.risk_level}</li>`;
+        if(result.is_indicated !== undefined) resultHtml += `<li>Indicated: ${result.is_indicated ? 'Yes' : 'No'}</li>`;
+        break;
+
+      case 'iv_calculator':
+        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>Drug Amount: ${inputs.drugAmount_mg} mg</li>`;
+        inputsHtml += `<li>Solution Volume: ${inputs.solutionVolume_ml} mL</li>`;
+        inputsHtml += `<li>Dose: ${inputs.drugDose} ${inputs.doseUnit}</li>`;
+        resultHtml += `<li>Rate: ${result.rate_ml_hr} mL/hr</li>`;
+        break;
+        
+      default:
+        // Fallback for other tools (like renal dosing, if we save it)
+        inputsHtml += `<li>${JSON.stringify(inputs)}</li>`;
+        resultHtml += `<li>${JSON.stringify(result)}</li>`;
+    }
+  } catch (e) {
+    // In case of any error during formatting, show the raw JSON
+    console.error("Error formatting log:", e);
+    inputsHtml = `<strong>Inputs:</strong><pre>${JSON.stringify(inputs, null, 2)}</pre>`;
+    resultHtml = `<strong>Result:</strong><pre>${JSON.stringify(result, null, 2)}</pre>`;
   }
 
-  const concentrationMgMl = drugAmount_mg / solutionVolume_ml;
-  const concentrationMcgMl = concentrationMgMl * 1000;
-  
-  let rateMlHr;
-
-  if (doseUnit === 'mcg/kg/min') {
-    rateMlHr = (drugDose * weight_kg * 60) / concentrationMcgMl;
-  } else if (doseUnit === 'mg/hr') {
-    rateMlHr = drugDose / concentrationMgMl;
-  } else { // mcg/min
-    rateMlHr = (drugDose * 60) / concentrationMcgMl;
-  }
-  
-  if (isNaN(rateMlHr) || !isFinite(rateMlHr)) {
-    throw new Error('Calculation error. Check for division by zero (e.g., concentration).');
-  }
-  
-  const logData = {
-    rate_ml_hr: rateMlHr.toFixed(2)
-  };
-  
-  const html = `
-    <div class="result-box">
-      <p class="text-lg text-center">Set Infusion Pump to:</p>
-      <p class="text-3xl font-bold text-center my-2">${logData.rate_ml_hr} mL/hr</p>
-    </div>
-  `;
-  
-  return { html, logData };
+  inputsHtml += '</ul>';
+  resultHtml += '</ul>';
+  return `${inputsHtml}<br>${resultHtml}`;
 }
 
 /**
@@ -1397,4 +1395,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render the initial view
   navigateTo('dashboard');
 });
+
 
