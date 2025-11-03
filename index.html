@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!-- ***FIX: Reverted to LTR (English) layout*** -->
+<html lang="en" dir="ltr">
 <head>
   <base target="_top">
   <title>CHG - Clinical Toolkit</title>
@@ -18,10 +19,10 @@
     /* --- (A) Base Styles (From Original Design) --- */
     body {
       font-family: 'Inter', sans-serif;
-      /* --- FIX: Changed direction to RTL as per user's language --- */
-      direction: rtl;
-      text-align: right;
-      background: linear-gradient(to bottom left, #e0f7fa, #80deea); /* Flipped gradient */
+      /* --- FIX: Reverted to LTR (English) --- */
+      direction: ltr;
+      text-align: left;
+      background: linear-gradient(to bottom right, #e0f7fa, #80deea);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -81,33 +82,36 @@
     }
     
     /* --- (C) Button Styles (From Original + UPGRADE) --- */
+    
+    /* ***FIX: This class is for FORM SUBMIT buttons (Calculate, Save)*** */
     .btn {
       padding: 1rem 2rem;
       border-radius: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease-in-out;
-      background-image: linear-gradient(to left, #00bcd4, #4dd0e1); /* Flipped gradient */
+      background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
       color: white;
       box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
       border: none;
       
-      /* --- DESIGN UPGRADE: Flex layout for Icons --- */
+      /* ***FIX: Re-added width: 100% to fix layout*** */
+      width: 100%; 
+      
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem; /* 12px space between icon and text */
+      gap: 0.75rem;
     }
     .btn:hover {
-      background-image: linear-gradient(to left, #00acc1, #26c6da); /* Flipped gradient */
-      /* --- DESIGN UPGRADE: Stronger hover effect --- */
+      background-image: linear-gradient(to right, #00acc1, #26c6da);
       box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
       transform: translateY(-2px) scale(1.01);
     }
     .btn:disabled, .btn[disabled] {
       opacity: 0.7;
       cursor: not-allowed;
-      background-image: linear-gradient(to left, #9e9e9e, #bdbdbd);
+      background-image: linear-gradient(to right, #9e9e9e, #bdbdbd);
       box-shadow: none;
       transform: none;
     }
@@ -131,7 +135,7 @@
       flex-grow: 1;
     }
     .mode-btn.active {
-      background-image: linear-gradient(to left, #00bcd4, #4dd0e1); /* Flipped gradient */
+      background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
       color: white;
       box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
       border-color: #00bcd4;
@@ -148,7 +152,6 @@
       font-size: 1.05rem;
       line-height: 1.6;
       box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-      /* --- DESIGN UPGRADE: Added slight border --- */
       border: 1px solid transparent; 
     }
     .result-box {
@@ -194,16 +197,14 @@
         gap: 0.75rem;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
-        /* --- RTL FIX --- */
-        padding-right: 1.5rem;
+        /* --- LTR FIX --- */
+        padding-left: 1.5rem;
     }
     .risk-factor-card:hover {
         background-color: #e0f2f7;
-        /* --- DESIGN UPGRADE: Hover effect --- */
         transform: scale(1.02);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     }
-    /* --- DESIGN UPGRADE: Style for checked card --- */
     .risk-factor-card.checked {
         background-color: #c5e9f1;
         border-color: #00bcd4;
@@ -212,8 +213,8 @@
     .risk-factor-card input[type="checkbox"] {
         transform: scale(1.2);
         accent-color: #00bcd4;
-        /* --- RTL FIX --- */
-        margin-left: 0.75rem;
+        /* --- LTR FIX --- */
+        margin-right: 0.75rem;
     }
     .risk-factor-card span {
         font-weight: 500;
@@ -224,7 +225,6 @@
     .log-card {
       background-color: #ffffff;
       border-radius: 1rem;
-      /* --- DESIGN UPGRADE: Shadow & Border --- */
       border: 1px solid #e0e0e0;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.07);
       margin-bottom: 1.5rem;
@@ -266,14 +266,65 @@
     }
     .log-card-body ul {
       margin-top: 0.5rem !important;
-      /* --- RTL FIX --- */
-      padding-right: 1.5rem;
+      /* --- LTR FIX --- */
+      padding-left: 1.5rem;
     }
     .log-card-body strong {
       color: #00796b;
     }
+
+    /* --- (G) ***NEW*** Professional Dashboard Grid --- */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem; /* 20px */
+      margin-top: 2rem;
+    }
+    .tool-card {
+      background: #ffffff;
+      border-radius: 1rem; /* 16px */
+      padding: 1.5rem 1rem; /* 24px 16px */
+      text-align: center;
+      border: 1px solid #b2ebf2;
+      box-shadow: 0 10px 15px -3px rgba(0, 188, 212, 0.1);
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+    }
+    .tool-card:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 0 20px 25px -5px rgba(0, 188, 212, 0.3), 0 10px 10px -5px rgba(0, 188, 212, 0.2);
+    }
+    .tool-card svg {
+      /* Center icon and give space below */
+      margin: 0 auto 1rem auto;
+      stroke: #00bcd4;
+      width: 28px; /* 24px */
+      height: 28px; /* 24px */
+    }
+    .tool-card span {
+      font-weight: 600;
+      color: #006064;
+      font-size: 0.9rem; /* 14px */
+      line-height: 1.3;
+    }
+    /* Special style for History card */
+    .tool-card.history-card {
+      background: #607d8b;
+      border-color: #607d8b;
+      box-shadow: 0 10px 15px -3px rgba(96, 125, 139, 0.2);
+    }
+    .tool-card.history-card:hover {
+      box-shadow: 0 20px 25px -5px rgba(96, 125, 139, 0.4);
+      background: #546e7a;
+    }
+    .tool-card.history-card svg {
+      stroke: #ffffff;
+    }
+    .tool-card.history-card span {
+      color: #ffffff;
+    }
     
-    /* --- (G) Misc & Responsive Styles (From Original) --- */
+    /* --- (H) Misc & Responsive Styles (From Original) --- */
     .back-button {
       display: inline-flex;
       align-items: center;
@@ -286,7 +337,7 @@
     }
     .back-button:hover {
       color: #004d40;
-      transform: translateX(5px); /* --- RTL FIX: Flipped direction --- */
+      transform: translateX(-5px); /* --- LTR FIX --- */
     }
     .footer-wrapper {
         width: 100%;
@@ -306,6 +357,9 @@
       .risk-factor-card span { font-size: 0.9rem; }
       .risk-group-heading { font-size: 1rem; }
       .btn { padding: 0.75rem 1.5rem; font-size: 1rem; }
+      /* --- NEW: Grid responsive --- */
+      .dashboard-grid { gap: 0.75rem; }
+      .tool-card { padding: 1.25rem 0.5rem; }
     }
     
     /* Utility */
