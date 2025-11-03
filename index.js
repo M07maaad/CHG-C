@@ -611,7 +611,8 @@ async function handleHeparinSubmit(e) {
       patientIdentifier: appState.currentPatientIdentifier,
       weight: parseFloat(form.weight.value),
       heparinConcentration: parseFloat(form.heparinConcentration.value),
-      mode: form.querySelector('.mode-btn.active').id === 'initialModeBtn' ? 'initial' : 'maintenance',
+      // ***CRITICAL FIX***: Search the whole document ($), not just the form.
+      mode: $('.mode-btn.active').id === 'initialModeBtn' ? 'initial' : 'maintenance',
       indication: form.indication.value,
       currentInfusionRate: parseFloat(form.currentInfusionRate.value),
       currentPtt: parseFloat(form.currentPtt.value),
