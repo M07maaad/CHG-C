@@ -167,36 +167,72 @@ const BackButton = () => `
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
     </svg>
-    <span>Back to Dashboard</span>
+    <span>العودة للرئيسية</span>
   </div>
 `;
 
 // Patient Info fields component (reusable)
 const PatientInfoFields = (name = appState.currentPatientName, identifier = appState.currentPatientIdentifier) => `
   <div class="input-group">
-    <label for="patientName">Patient Name:</label>
+    <label for="patientName">اسم المريض:</label>
     <input type="text" id="patientName" name="patientName" value="${name}" required>
   </div>
   <div class="input-group">
-    <label for="patientIdentifier">Patient ID / Room No.:</label>
+    <label for="patientIdentifier">رقم المريض / الغرفة:</label>
     <input type="text" id="patientIdentifier" name="patientIdentifier" value="${identifier}" required>
   </div>
 `;
 
-// Renders the main Dashboard
+// --- DESIGN UPGRADE: Inline SVG Icons ---
+const Icons = {
+  heparin: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>`,
+  prophylaxis: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+  padua: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>`,
+  ivCalculator: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path><path d="M12 18v-2"></path><path d="M12 8V6"></path><path d="M12 13V11"></path></svg>`,
+  renalDosing: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 1 7 7c0 5-7 11-7 11s-7-6-7-11a7 7 0 0 1 7-7z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+  scores: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>`,
+  converter: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M3 4l18 18"></path></svg>`,
+  history: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`
+};
+
+// Renders the main Dashboard (with Icons)
 function renderDashboard() {
   render(`
     <h1 class="text-center" style="font-size: 2.75rem;">CHG - Clinical Toolkit</h1>
-    <p class="description text-center">Select a tool to proceed.</p>
+    <p class="description text-center">اختر أداة للبدء.</p>
     <div class="flex flex-col gap-4 mt-8">
-      <button type="button" class="btn" data-nav="heparin">Heparin Calculator</button>
-      <button type="button" class="btn" data-nav="prophylaxis">Stress Ulcer Prophylaxis</button>
-      <button type="button" class="btn" data-nav="padua">Padua Score (VTE)</button>
-      <button type="button" class="btn" data-nav="ivCalculator">IV Infusion Calculator</button>
-      <button type="button" class="btn" data-nav="renalDosing">Renal Dosing (CrCl)</button>
-      <button type="button" class="btn" data-nav="scores">Other Clinical Scores</button>
-      <button type="button" class="btn" data-nav="converter">Unit Converter</button>
-      <button type="button" class="btn" data-nav="history" style="background-image: linear-gradient(to right, #607d8b, #78909c);">View Calculation History</button>
+      <button type="button" class="btn" data-nav="heparin">
+        ${Icons.heparin}
+        <span>حاسبة الهيبارين</span>
+      </button>
+      <button type="button" class="btn" data-nav="prophylaxis">
+        ${Icons.prophylaxis}
+        <span>تقييم قرحة المعدة</span>
+      </button>
+      <button type="button" class="btn" data-nav="padua">
+        ${Icons.padua}
+        <span>تقييم Padua (VTE)</span>
+      </button>
+      <button type="button" class="btn" data-nav="ivCalculator">
+        ${Icons.ivCalculator}
+        <span>حاسبة المحاليل الوريدية</span>
+      </button>
+      <button type="button" class="btn" data-nav="renalDosing">
+        ${Icons.renalDosing}
+        <span>تعديل جرعات الكلى (CrCl)</span>
+      </button>
+      <button type="button" class="btn" data-nav="scores">
+        ${Icons.scores}
+        <span>تقييمات أخرى</span>
+      </button>
+      <button type="button" class="btn" data-nav="converter">
+        ${Icons.converter}
+        <span>محول الوحدات</span>
+      </button>
+      <button type="button" class="btn" data-nav="history" style="background-image: linear-gradient(to right, #607d8b, #78909c);">
+        ${Icons.history}
+        <span>عرض سجل الحسابات</span>
+      </button>
     </div>
   `);
 }
@@ -205,14 +241,14 @@ function renderDashboard() {
 function renderHistoryPasswordPrompt() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">View History</h1>
-    <p class="description text-center">Please enter the password to view the calculation history.</p>
+    <h1 class="text-center">عرض السجل</h1>
+    <p class="description text-center">الرجاء إدخال كلمة المرور لعرض سجل الحسابات.</p>
     <form id="history-password-form" class="space-y-6">
       <div class="input-group">
-        <label for="historyPassword">Password:</label>
+        <label for="historyPassword">كلمة المرور:</label>
         <input type="password" id="historyPassword" name="historyPassword" required>
       </div>
-      <button type="submit" class="btn">Unlock</button>
+      <button type="submit" class="btn">فتح</button>
       <div id="history-result" class="mt-4"></div>
     </form>
   `);
@@ -222,9 +258,9 @@ function renderHistoryPasswordPrompt() {
 async function renderHistoryLogs() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">Calculation History</h1>
-    <p class="description text-center">Showing the last 50 calculations.</p>
-    <div id="logs-container"><p class="text-center">Loading logs...</p></div>
+    <h1 class="text-center">سجل الحسابات</h1>
+    <p class="description text-center">عرض آخر 50 عملية حسابية.</p>
+    <div id="logs-container"><p class="text-center">جاري تحميل السجلات...</p></div>
   `);
 
   appState.isLoading = true;
@@ -238,12 +274,11 @@ async function renderHistoryLogs() {
     if (error) throw error;
 
     if (!logs || logs.length === 0) {
-      $('#logs-container').innerHTML = '<p class="text-center">No calculation logs found.</p>';
+      $('#logs-container').innerHTML = '<p class="text-center">لم يتم العثور على أي سجلات.</p>';
       return;
     }
     
     // Build HTML for each log card
-    // ***FIX***: Use the new formatLogData function instead of pre/JSON.stringify
     const logsHtml = logs.map(log => `
       <div class="log-card">
         <div class="log-card-header">
@@ -251,7 +286,7 @@ async function renderHistoryLogs() {
           <span class="log-card-time">${formatDateTime(log.created_at)}</span>
         </div>
         <div class="log-card-patient">
-          Patient: ${log.patient_name || 'N/A'} (ID: ${log.patient_identifier || 'N/A'})
+          المريض: ${log.patient_name || 'N/A'} (رقم: ${log.patient_identifier || 'N/A'})
         </div>
         <div class="log-card-body">
           ${formatLogData(log)}
@@ -263,11 +298,10 @@ async function renderHistoryLogs() {
     
   } catch (error) {
     console.error('Error fetching history:', error);
-    $('#logs-container').innerHTML = `<div class="error-box"><p>Failed to load history. Please check the connection and try again.</p><p>${error.message}</p></div>`;
+    $('#logs-container').innerHTML = `<div class="error-box"><p>فشل تحميل السجل. الرجاء التحقق من الاتصال والمحاولة مرة أخرى.</p><p>${error.message}</p></div>`;
   } finally {
     appState.isLoading = false;
     // ***FIX***: Re-add event listeners *after* rendering the new view
-    // This will make the "Back" button work on this async-loaded page.
     addEventListeners();
   }
 }
@@ -276,11 +310,11 @@ async function renderHistoryLogs() {
 function renderHeparinCalculator() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">Heparin Calculator</h1>
+    <h1 class="text-center">حاسبة الهيبارين</h1>
     
     <div class="mode-toggle-buttons">
-      <button type="button" id="initialModeBtn" class="mode-btn active">Initial Heparin</button>
-      <button type="button" id="maintenanceModeBtn" class="mode-btn">Maintenance Heparin</button>
+      <button type="button" id="initialModeBtn" class="mode-btn active">الجرعة المبدئية</button>
+      <button type="button" id="maintenanceModeBtn" class="mode-btn">تعديل الجرعة</button>
     </div>
     
     <form id="heparin-form" class="space-y-6">
@@ -290,20 +324,20 @@ function renderHeparinCalculator() {
 
       <!-- Common Fields -->
       <div class="input-group">
-        <label for="weight">Patient Weight (kg):</label>
+        <label for="weight">وزن المريض (kg):</label>
         <input type="number" id="weight" name="weight" step="0.1" required>
       </div>
       <div class="input-group">
-        <label for="heparinConcentration">Heparin Concentration (units/mL):</label>
+        <label for="heparinConcentration">تركيز الهيبارين (units/mL):</label>
         <input type="number" id="heparinConcentration" name="heparinConcentration" value="100" step="0.1" required>
       </div>
 
       <!-- Initial-Only Fields -->
       <div id="initialFields" class="space-y-6">
         <div class="input-group">
-          <label for="indication">Indication:</label>
+          <label for="indication">الداعي للاستعمال (Indication):</label>
           <select id="indication" name="indication" required>
-            <option value="">Select Indication...</option>
+            <option value="">اختر...</option>
             <option value="AF">AF (Atrial Fibrillation)</option>
             <option value="Venous thromboembolism">Venous Thromboembolism</option>
             <option value="Acute coronary syndrome">Acute Coronary Syndrome</option>
@@ -314,16 +348,19 @@ function renderHeparinCalculator() {
       <!-- Maintenance-Only Fields -->
       <div id="maintenanceFields" class="space-y-6 hidden">
         <div class="input-group">
-          <label for="currentInfusionRate">Current Infusion Rate (mL/hour):</label>
+          <label for="currentInfusionRate">المعدل الحالي (mL/hour):</label>
           <input type="number" id="currentInfusionRate" name="currentInfusionRate" step="0.1" required>
         </div>
         <div class="input-group">
-          <label for="currentPtt">Current PTT Value (seconds):</label>
+          <label for="currentPtt">قيمة الـ PTT الحالية (seconds):</label>
           <input type="number" id="currentPtt" name="currentPtt" step="0.1" required>
         </div>
       </div>
 
-      <button type="submit" class="btn" id="calculateBtn">Calculate</button>
+      <button type="submit" class="btn" id="calculateBtn">
+        ${Icons.heparin}
+        <span>احسب</span>
+      </button>
       
       <!-- Result area -->
       <div id="result-area" class="mt-4"></div>
@@ -354,20 +391,20 @@ function renderProphylaxisCalculator() {
 
   render(`
     ${BackButton()}
-    <h1 class="text-center">Stress Ulcer Prophylaxis</h1>
+    <h1 class="text-center">تقييم قرحة المعدة</h1>
     <form id="prophylaxis-form" class="space-y-6">
       
       <!-- Patient Info -->
       ${PatientInfoFields()}
       
-      <p class="font-bold text-lg mb-2">Select all applicable risk factors:</p>
+      <p class="font-bold text-lg mb-2">اختر جميع عوامل الخطورة المنطبقة:</p>
       
-      <div class="risk-group-heading">High Risk Factors:</div>
+      <div class="risk-group-heading">عوامل خطورة عالية:</div>
       <div class="risk-factors-container">
         ${createChecklist(highRiskFactors)}
       </div>
 
-      <div class="risk-group-heading">Moderate to Low Risk Factors:</div>
+      <div class="risk-group-heading">عوامل خطورة متوسطة/منخفضة:</div>
       <div class="risk-factors-container">
         ${createChecklist(moderateRiskFactors)}
       </div>
@@ -377,7 +414,10 @@ function renderProphylaxisCalculator() {
 
       <!-- ***FIX***: Added a save button -->
       <div class="mt-6">
-        <button type="submit" class="btn" id="saveBtn">Save Calculation</button>
+        <button type="submit" class="btn" id="saveBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>حفظ النتيجة</span>
+        </button>
       </div>
     </form>
   `);
@@ -408,13 +448,13 @@ function renderPaduaScore() {
   
   render(`
     ${BackButton()}
-    <h1 class="text-center">Padua Score (VTE)</h1>
+    <h1 class="text-center">تقييم Padua (VTE)</h1>
     <form id="padua-form" class="space-y-6">
       
       <!-- Patient Info -->
       ${PatientInfoFields()}
       
-      <p class="font-bold text-lg mb-2">Select all applicable risk factors:</p>
+      <p class="font-bold text-lg mb-2">اختر جميع عوامل الخطورة المنطبقة:</p>
       
       <div class="risk-factors-container">
         ${createChecklist(paduaFactors)}
@@ -425,7 +465,10 @@ function renderPaduaScore() {
 
       <!-- ***FIX***: Added a save button -->
       <div class="mt-6">
-        <button type="submit" class="btn" id="saveBtn">Save Calculation</button>
+        <button type="submit" class="btn" id="saveBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>حفظ النتيجة</span>
+        </button>
       </div>
     </form>
   `);
@@ -435,30 +478,30 @@ function renderPaduaScore() {
 function renderIVCalculator() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">IV Infusion Calculator</h1>
+    <h1 class="text-center">حاسبة المحاليل الوريدية</h1>
     <form id="iv-form" class="space-y-6">
       
       <!-- Patient Info -->
       ${PatientInfoFields()}
       
       <div class="input-group">
-        <label for="weight">Patient Weight (kg):</label>
+        <label for="weight">وزن المريض (kg):</label>
         <input type="number" id="weight" name="weight" step="0.1" required>
       </div>
       <div class="input-group">
-        <label for="drugAmount">Total Drug Amount in Solution (mg):</label>
+        <label for="drugAmount">إجمالي كمية الدواء (mg):</label>
         <input type="number" id="drugAmount" name="drugAmount" step="0.1" required>
       </div>
       <div class="input-group">
-        <label for="solutionVolume">Total Solution Volume (mL):</label>
+        <label for="solutionVolume">إجمالي حجم المحلول (mL):</label>
         <input type="number" id="solutionVolume" name="solutionVolume" value="250" step="1" required>
       </div>
       <div class="input-group">
-        <label for="drugDose">Desired Dose:</label>
+        <label for="drugDose">الجرعة المطلوبة:</label>
         <input type="number" id="drugDose" name="drugDose" step="0.01" required>
       </div>
       <div class="input-group">
-        <label for="doseUnit">Dose Unit:</label>
+        <label for="doseUnit">وحدة الجرعة:</label>
         <select id="doseUnit" name="doseUnit" required>
           <option value="mcg/kg/min">mcg/kg/min</option>
           <option value="mcg/min">mcg/min</option>
@@ -466,7 +509,10 @@ function renderIVCalculator() {
         </select>
       </div>
       
-      <button type="submit" class="btn" id="calculateBtn">Calculate Rate</button>
+      <button type="submit" class="btn" id="calculateBtn">
+        ${Icons.ivCalculator}
+        <span>احسب المعدل</span>
+      </button>
       
       <!-- Result area -->
       <div id="result-area" class="mt-4"></div>
@@ -478,30 +524,30 @@ function renderIVCalculator() {
 function renderRenalDosing() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">Renal Dosing (CrCl)</h1>
-    <p class="description text-center">Calculates Creatinine Clearance using Cockcroft-Gault equation.</p>
+    <h1 class="text-center">تعديل جرعات الكلى (CrCl)</h1>
+    <p class="description text-center">حساب تصفية الكرياتينين (Cockcroft-Gault).</p>
     <form id="renal-form" class="space-y-6">
       
       <!-- Patient Info -->
       ${PatientInfoFields()}
       
       <div class="input-group">
-        <label for="age">Age (years):</label>
+        <label for="age">العمر (سنوات):</label>
         <input type="number" id="age" name="age">
       </div>
       <div class="input-group">
-        <label for="weight">Weight (kg):</label>
+        <label for="weight">الوزن (kg):</label>
         <input type="number" id="weight" name="weight">
       </div>
       <div class="input-group">
-        <label for="creatinine">Serum Creatinine (mg/dL):</label>
+        <label for="creatinine">نسبة الكرياتينين (mg/dL):</label>
         <input type="number" id="creatinine" name="creatinine" step="0.1">
       </div>
       <div class="input-group">
-        <label for="gender">Gender:</label>
+        <label for="gender">الجنس:</label>
         <select id="gender" name="gender">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
+          <option value="male">ذكر</option>
+          <option value="female">أنثى</option>
         </select>
       </div>
       
@@ -515,34 +561,34 @@ function renderRenalDosing() {
 function renderUnitConverter() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">Unit Converter</h1>
+    <h1 class="text-center">محول الوحدات</h1>
     <form id="converter-form" class="space-y-6">
       <div class="input-group">
-        <label for="fromValue">From:</label>
+        <label for="fromValue">من:</label>
         <input type="number" id="fromValue" name="fromValue" value="1">
         <select id="fromUnit" name="fromUnit" class="mt-2">
-          <optgroup label="Mass">
+          <optgroup label="كتلة">
             <option value="kg">kg</option><option value="g">g</option><option value="mg" selected>mg</option><option value="mcg">mcg</option>
           </optgroup>
-          <optgroup label="Volume">
+          <optgroup label="حجم">
             <option value="L">L</option><option value="mL">mL</option>
           </optgroup>
-          <optgroup label="Weight">
+          <optgroup label="وزن">
             <option value="lbs">lbs</option>
           </optgroup>
         </select>
       </div>
       <div class="input-group">
-        <label for="toValue">To:</label>
+        <label for="toValue">إلى:</label>
         <input type="text" id="toValue" name="toValue" disabled class="bg-gray-200">
         <select id="toUnit" name="toUnit" class="mt-2">
-          <optgroup label="Mass">
+          <optgroup label="كتلة">
             <option value="kg">kg</option><option value="g">g</option><option value="mg">mg</option><option value="mcg" selected>mcg</option>
           </optgroup>
-          <optgroup label="Volume">
+          <optgroup label="حجم">
             <option value="L">L</option><option value="mL">mL</option>
           </optgroup>
-          <optgroup label="Weight">
+          <optgroup label="وزن">
             <option value="lbs">lbs</option>
           </optgroup>
         </select>
@@ -556,8 +602,8 @@ function renderUnitConverter() {
 function renderClinicalScores() {
   render(`
     ${BackButton()}
-    <h1 class="text-center">Clinical Scoring</h1>
-    <p class="description text-center">More scoring systems will be added soon.</p>
+    <h1 class="text-center">تقييمات إكلينيكية</h1>
+    <p class="description text-center">سيتم إضافة المزيد من التقييمات قريباً.</p>
     <div class="space-y-4">
       <button type="button" class="btn opacity-50" disabled>CURB-65 (Pneumonia)</button>
       <button type="button" class="btn opacity-50" disabled>SOFA Score (Sepsis)</button>
@@ -594,15 +640,13 @@ async function handleHeparinSubmit(e) {
   const resultArea = $('#result-area');
   const calculateBtn = $('#calculateBtn');
   
-  // ***FIX***: Check if button exists before disabling
   if (calculateBtn) {
     calculateBtn.disabled = true;
-    calculateBtn.textContent = 'Calculating...';
+    calculateBtn.innerHTML = `${Icons.heparin} <span>جاري الحساب...</span>`;
   }
   resultArea.innerHTML = '';
   
   try {
-    // ***FIX***: All data collection is now INSIDE the try block
     appState.currentPatientName = form.patientName.value;
     appState.currentPatientIdentifier = form.patientIdentifier.value;
     
@@ -611,7 +655,6 @@ async function handleHeparinSubmit(e) {
       patientIdentifier: appState.currentPatientIdentifier,
       weight: parseFloat(form.weight.value),
       heparinConcentration: parseFloat(form.heparinConcentration.value),
-      // ***CRITICAL FIX***: Search the whole document ($), not just the form.
       mode: $('.mode-btn.active').id === 'initialModeBtn' ? 'initial' : 'maintenance',
       indication: form.indication.value,
       currentInfusionRate: parseFloat(form.currentInfusionRate.value),
@@ -658,9 +701,7 @@ async function handleHeparinSubmit(e) {
           result.notification_ptt.delayInMinutes
         );
       }
-      // Save to Supabase
-      // ***FIX***: Removed 'await' to prevent the UI from "hanging" or getting stuck.
-      // The save will now happen in the background.
+      // Save to Supabase (in the background)
       saveCalculation(
         toolName,
         formData.patientName,
@@ -673,10 +714,9 @@ async function handleHeparinSubmit(e) {
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>An unexpected error occurred: ${error.message}</p></div>`;
   } finally {
-    // ***FIX***: This will now ALWAYS run, un-sticking the button
     if (calculateBtn) {
       calculateBtn.disabled = false;
-      calculateBtn.textContent = 'Calculate';
+      calculateBtn.innerHTML = `${Icons.heparin} <span>احسب</span>`;
     }
   }
 }
@@ -686,13 +726,11 @@ async function handleProphylaxisCheck(e) {
   // Toggle checked state for styling
   const card = e.currentTarget;
   const checkbox = card.querySelector('input[type="checkbox"]');
-  // Handle click on label
   if (e.target.tagName !== 'INPUT') {
     checkbox.checked = !checkbox.checked;
   }
   card.classList.toggle('checked', checkbox.checked);
   
-  // Get all selected factors
   const form = $('#prophylaxis-form');
   const selectedFactors = Array.from(form.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
   
@@ -704,37 +742,30 @@ async function handleProphylaxisCheck(e) {
   }
   
   const result = calculateStressUlcerProphylaxis(selectedFactors);
-  
-  // Display result
   resultArea.innerHTML = result.html;
-  
-  // --- ***FIX***: REMOVED auto-save from here ---
-  // The save logic is moved to handleProphylaxisSubmit
 }
 
-// ***NEW FUNCTION***: Handles the "Save" button submit for Prophylaxis
+// "Save" button submit for Prophylaxis
 async function handleProphylaxisSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const resultArea = $('#result-area');
   const saveBtn = $('#saveBtn');
   
-  // Check if there is a result to save
   const resultHtml = resultArea.innerHTML;
   if (!resultHtml || resultHtml === '') {
-    alert('Please select risk factors to calculate before saving.');
+    alert('الرجاء اختيار عوامل الخطورة أولاً لحساب النتيجة قبل الحفظ.');
     return;
   }
   
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    saveBtn.textContent = 'جاري الحفظ...';
   }
   
   try {
-    // Get data to save
     const selectedFactors = Array.from(form.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
-    const result = calculateStressUlcerProphylaxis(selectedFactors); // Recalculate to get clean log data
+    const result = calculateStressUlcerProphylaxis(selectedFactors); 
     
     appState.currentPatientName = form.patientName.value || 'N/A';
     appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
@@ -748,20 +779,19 @@ async function handleProphylaxisSubmit(e) {
     );
     
     if (saved) {
-      if(saveBtn) saveBtn.textContent = 'Saved!';
-      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+      if(saveBtn) saveBtn.textContent = 'تم الحفظ!';
+      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">تم حفظ النتيجة بنجاح.</p></div>`;
     } else {
-      if(saveBtn) saveBtn.textContent = 'Save Failed';
-      // The saveCalculation function already prepends an error box
+      if(saveBtn) saveBtn.textContent = 'فشل الحفظ';
     }
   } catch (error) {
-    if(saveBtn) saveBtn.textContent = 'Save Failed';
-    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
+    if(saveBtn) saveBtn.textContent = 'فشل الحفظ';
+    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>خطأ في الحفظ:</strong> ${error.message}</p></div>`;
   } finally {
     setTimeout(() => {
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Calculation';
+        saveBtn.textContent = 'حفظ النتيجة';
       }
     }, 2000);
   }
@@ -772,7 +802,6 @@ async function handleProphylaxisSubmit(e) {
 async function handlePaduaCheck(e) {
   const card = e.currentTarget;
   const checkbox = card.querySelector('input[type="checkbox"]');
-  // Handle click on label
   if (e.target.tagName !== 'INPUT') {
     checkbox.checked = !checkbox.checked;
   }
@@ -795,38 +824,34 @@ async function handlePaduaCheck(e) {
   
   const result = calculatePaduaScore(score);
   resultArea.innerHTML = result.html;
-  
-  // --- ***FIX***: REMOVED auto-save from here ---
 }
 
-// ***NEW FUNCTION***: Handles the "Save" button submit for Padua
+// "Save" button submit for Padua
 async function handlePaduaSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const resultArea = $('#result-area');
   const saveBtn = $('#saveBtn');
 
-  // Check if there is a result to save
   const resultHtml = resultArea.innerHTML;
   if (!resultHtml || resultHtml === '') {
-    alert('Please select risk factors to calculate before saving.');
+    alert('الرجاء اختيار عوامل الخطورة أولاً لحساب النتيجة قبل الحفظ.');
     return;
   }
 
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    saveBtn.textContent = 'جاري الحفظ...';
   }
 
   try {
-    // Get data to save
     let score = 0;
     const selectedFactors = [];
     form.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
       score += parseInt(cb.dataset.score, 10);
       selectedFactors.push(cb.value);
     });
-    const result = calculatePaduaScore(score); // Recalculate to get clean log data
+    const result = calculatePaduaScore(score); 
 
     appState.currentPatientName = form.patientName.value || 'N/A';
     appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
@@ -840,19 +865,19 @@ async function handlePaduaSubmit(e) {
     );
 
     if (saved) {
-      if(saveBtn) saveBtn.textContent = 'Saved!';
-      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+      if(saveBtn) saveBtn.textContent = 'تم الحفظ!';
+      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">تم حفظ النتيجة بنجاح.</p></div>`;
     } else {
-      if(saveBtn) saveBtn.textContent = 'Save Failed';
+      if(saveBtn) saveBtn.textContent = 'فشل الحفظ';
     }
   } catch (error) {
-    if(saveBtn) saveBtn.textContent = 'Save Failed';
-    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
+    if(saveBtn) saveBtn.textContent = 'فشل الحفظ';
+    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>خطأ في الحفظ:</strong> ${error.message}</p></div>`;
   } finally {
     setTimeout(() => {
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Calculation';
+        saveBtn.textContent = 'حفظ النتيجة';
       }
     }, 2000);
   }
@@ -864,16 +889,15 @@ async function handleIVSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const resultArea = $('#result-area');
-  const calculateBtn = $('#calculateBtn'); // ***FIX***: Get the button
+  const calculateBtn = $('#calculateBtn'); 
   
   if(calculateBtn) {
     calculateBtn.disabled = true;
-    calculateBtn.textContent = 'Calculating...';
+    calculateBtn.innerHTML = `${Icons.ivCalculator} <span>جاري الحساب...</span>`;
   }
   resultArea.innerHTML = '';
   
   try {
-    // ***FIX***: Move data collection inside try block
     appState.currentPatientName = form.patientName.value;
     appState.currentPatientIdentifier = form.patientIdentifier.value;
     
@@ -888,8 +912,7 @@ async function handleIVSubmit(e) {
     const result = calculateIVRate(inputs);
     resultArea.innerHTML = result.html;
     
-    // Save to Supabase
-    // ***FIX***: Removed 'await' to prevent the UI from "hanging".
+    // Save to Supabase (in background)
     saveCalculation(
       'iv_calculator',
       appState.currentPatientName,
@@ -901,10 +924,9 @@ async function handleIVSubmit(e) {
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>${error.message}</p></div>`;
   } finally {
-    // ***FIX***: Add finally block to re-enable button
     if(calculateBtn) {
       calculateBtn.disabled = false;
-      calculateBtn.textContent = 'Calculate Rate';
+      calculateBtn.innerHTML = `${Icons.ivCalculator} <span>احسب المعدل</span>`;
     }
   }
 }
@@ -922,19 +944,14 @@ function handleRenalDosingInput() {
       gender: form.gender.value
     };
     
-    // Only calculate if all fields are valid
     if (inputs.age > 0 && inputs.weight_kg > 0 && inputs.creatinine_mg_dl > 0) {
       const result = calculateCrCl(inputs);
       resultArea.innerHTML = result.html;
-      
-      // Save to Supabase (we can save live, or add a save button)
-      // For now, let's not auto-save this one to avoid spamming.
-      // We can add a "Save" button if needed.
     } else {
       resultArea.innerHTML = '';
     }
   } catch (error) {
-    resultArea.innerHTML = `<div class="error-box"><p>Calculation error: ${error.message}</p></div>`;
+    resultArea.innerHTML = `<div class="error-box"><p>خطأ في الحساب: ${error.message}</p></div>`;
   }
 }
 
@@ -970,12 +987,9 @@ function handleHistoryPasswordSubmit(e) {
   const resultArea = $('#history-result');
   
   if (password === HISTORY_PASSWORD) {
-    // Password is correct, fetch and render logs
     renderHistoryLogs();
-    // ***FIX***: No need to call addEventListeners() here,
-    // it's now called *inside* renderHistoryLogs()
   } else {
-    resultArea.innerHTML = `<div class="error-box"><p>Invalid password. Try again.</p></div>`;
+    resultArea.innerHTML = `<div class="error-box"><p>كلمة المرور غير صحيحة. حاول مرة أخرى.</p></div>`;
   }
 }
 
@@ -988,7 +1002,7 @@ function calculateInitialHeparinRate(formData) {
   const { weight, heparinConcentration, indication, patientName } = formData;
 
   if (isNaN(weight) || isNaN(heparinConcentration) || weight <= 0 || heparinConcentration <= 0 || !indication) {
-    return { error: 'Please enter valid numeric values for all fields and select an indication.' };
+    return { error: 'الرجاء إدخال قيم رقمية صحيحة واختيار الداعي للاستعمال.' };
   }
 
   let suggestedLoadingDoseUnits = 0;
@@ -1024,12 +1038,12 @@ function calculateInitialHeparinRate(formData) {
   
   const html = `
     <div class="result-box">
-      <p class="text-lg">Suggested Loading Dose: <span class="font-bold">${logData.loading_dose}</span></p>
-      <p class="text-lg mt-2">Initial Infusion Rate: <span class="font-bold">${logData.initial_rate}</span></p>
-      <p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData.next_ptt}</span></p>
+      <p class="text-lg">الجرعة التحميلية المقترحة: <span class="font-bold">${logData.loading_dose}</span></p>
+      <p class="text-lg mt-2">معدل المحلول المبدئي: <span class="font-bold">${logData.initial_rate}</span></p>
+      <p class="text-lg mt-2">فحص الـ PTT القادم: <span class="font-bold">${logData.next_ptt}</span></p>
     </div>
     <div class="info-box">
-      <p class="font-bold">Notification set for ${patientName} in ${repeatPttHours} hours to check PTT.</p>
+      <p class="font-bold">تم ضبط تنبيه للمريض ${patientName} خلال ${repeatPttHours} ساعات لفحص الـ PTT.</p>
     </div>
   `;
 
@@ -1037,8 +1051,8 @@ function calculateInitialHeparinRate(formData) {
     html: html,
     logData: logData,
     notification_ptt: {
-      title: `Heparin Alert: ${patientName}`,
-      body: `Time for next PTT check (scheduled in ${repeatPttHours} hours).`,
+      title: `تنبيه هيبارين: ${patientName}`,
+      body: `حان وقت فحص الـ PTT القادم (المجدول خلال ${repeatPttHours} ساعات).`,
       delayInMinutes: repeatPttHours * 60
     }
   };
@@ -1051,7 +1065,7 @@ function calculateMaintenanceHeparinRate(formData) {
   const { weight, heparinConcentration, currentInfusionRate, currentPtt, patientName } = formData;
 
   if (isNaN(weight) || isNaN(heparinConcentration) || isNaN(currentInfusionRate) || isNaN(currentPtt) || weight <= 0 || heparinConcentration <= 0 || currentInfusionRate < 0 || currentPtt <= 0) {
-    return { error: 'Please enter valid numeric values for all fields.' };
+    return { error: 'الرجاء إدخال قيم رقمية صحيحة لكل الحقول.' };
   }
 
   const currentUnitsPerHour = currentInfusionRate * heparinConcentration;
@@ -1068,43 +1082,43 @@ function calculateMaintenanceHeparinRate(formData) {
   if (currentPtt < 40) {
     bolusDoseUnits = 25 * weight;
     newUnitsPerKgPerHour += 3;
-    message = 'Very low PTT (<40). Give bolus and increase infusion rate.';
+    message = 'PTT منخفض جداً (<40). أعط جرعة Bolus وقم بزيادة المعدل.';
     boxClass = 'error-box';
   } else if (currentPtt >= 40 && currentPtt <= 49) {
     newUnitsPerKgPerHour += 2;
-    message = 'Low PTT (40-49). Increase infusion rate.';
+    message = 'PTT منخفض (40-49). قم بزيادة المعدل.';
     boxClass = 'info-box';
   } else if (currentPtt >= 50 && currentPtt <= 69) {
     newUnitsPerKgPerHour += 1;
-    message = 'Relatively low PTT (50-69). Increase infusion rate.';
+    message = 'PTT منخفض نسبياً (50-69). قم بزيادة المعدل.';
     boxClass = 'info-box';
   } else if (currentPtt >= 70 && currentPtt <= 110) {
     newUnitsPerKgPerHour = currentUnitsPerKgPerHour;
-    message = 'PTT is within therapeutic range (70-110). No change in rate.';
+    message = 'PTT في المعدل العلاجي (70-110). لا تغيير في المعدل.';
     // boxClass remains 'result-box' (green)
   } else if (currentPtt >= 111 && currentPtt <= 120) {
     newUnitsPerKgPerHour -= 1;
-    message = 'Relatively high PTT (111-120). Decrease infusion rate.';
+    message = 'PTT مرتفع نسبياً (111-120). قم بتقليل المعدل.';
     boxClass = 'info-box';
   } else if (currentPtt >= 121 && currentPtt <= 130) {
     stopInfusionMin = 60;
     newUnitsPerKgPerHour -= 2;
-    message = `High PTT (121-130). Stop infusion for ${stopInfusionMin} min then decrease.`;
+    message = `PTT مرتفع (121-130). أوقف المحلول ${stopInfusionMin} دقيقة ثم قلل المعدل.`;
     boxClass = 'error-box';
   } else if (currentPtt >= 131 && currentPtt <= 140) {
     stopInfusionMin = 60;
     newUnitsPerKgPerHour -= 3;
-    message = `Very high PTT (131-140). Stop infusion for ${stopInfusionMin} min then decrease.`;
+    message = `PTT مرتفع جداً (131-140). أوقف المحلول ${stopInfusionMin} دقيقة ثم قلل المعدل.`;
     boxClass = 'error-box';
   } else if (currentPtt >= 141 && currentPtt <= 150) {
     stopInfusionMin = 120;
     newUnitsPerKgPerHour -= 5;
-    message = `Extremely high PTT (141-150). Stop infusion for ${stopInfusionMin} min then decrease.`;
+    message = `PTT مرتفع للغاية (141-150). أوقف المحلول ${stopInfusionMin} دقيقة ثم قلل المعدل.`;
     boxClass = 'error-box';
   } else if (currentPtt > 150) {
     stopInfusionMin = 180;
     newUnitsPerKgPerHour = 0;
-    message = `Critically high PTT (>150). Stop infusion for ${stopInfusionMin} min. Contact physician.`;
+    message = `PTT حرج (>150). أوقف المحلول ${stopInfusionMin} دقيقة وتواصل مع الطبيب.`;
     repeatPttHours = 0; // No automatic PTT check
     boxClass = 'error-box';
   }
@@ -1119,19 +1133,19 @@ function calculateMaintenanceHeparinRate(formData) {
     new_rate: `${newRateMl} mL/hour`,
     bolus_dose: bolusDoseUnits > 0 ? `${bolusDoseUnits.toFixed(0)} units (${bolusDoseMl} mL)` : 'N/A',
     stop_infusion_min: stopInfusionMin > 0 ? stopInfusionMin : 'N/A',
-    next_ptt: repeatPttHours > 0 ? `in ${repeatPttHours} hours` : `According to physician's instructions`,
+    next_ptt: repeatPttHours > 0 ? `in ${repeatPttHours} hours` : `حسب تعليمات الطبيب`,
     message: message
   };
 
   let html = `<div class="${boxClass}">`;
   if (logData.bolus_dose !== 'N/A') {
-    html += `<p class="text-lg">Bolus Dose: <span class="font-bold">${logData.bolus_dose}</span></p>`;
+    html += `<p class="text-lg">جرعة Bolus: <span class="font-bold">${logData.bolus_dose}</span></p>`;
   }
   if (logData.stop_infusion_min !== 'N/A') {
-    html += `<p class="text-lg mt-2 text-red-700">Stop Infusion For: <span class="font-bold">${logData.stop_infusion_min} minutes</span></p>`;
+    html += `<p class="text-lg mt-2 text-red-700">إيقاف المحلول لمدة: <span class="font-bold">${logData.stop_infusion_min} دقيقة</span></p>`;
   }
-  html += `<p class="text-lg mt-2">New Infusion Rate: <span class="font-bold">${logData.new_rate}</span></p>`;
-  html += `<p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData.next_ptt}</span></p>`;
+  html += `<p class="text-lg mt-2">المعدل الجديد للمحلول: <span class="font-bold">${logData.new_rate}</span></p>`;
+  html += `<p class="text-lg mt-2">فحص الـ PTT القادم: <span class="font-bold">${logData.next_ptt}</span></p>`;
   html += `<p class="text-sm mt-3">${logData.message}</p>`;
   html += `</div>`;
   
@@ -1140,21 +1154,21 @@ function calculateMaintenanceHeparinRate(formData) {
   // Add stop infusion notification
   if (stopInfusionMin > 0) {
     notifications.notification = {
-      title: `Heparin Alert: ${patientName}`,
-      body: `Time to RESTART infusion (stopped for ${stopInfusionMin} min).`,
+      title: `تنبيه هيبارين: ${patientName}`,
+      body: `حان وقت إعادة تشغيل المحلول (المتوقف ${stopInfusionMin} دقيقة).`,
       delayInMinutes: stopInfusionMin
     };
-    html += `<div class="info-box"><p class="font-bold">Notification set for ${patientName} in ${stopInfusionMin} minutes to restart infusion.</p></div>`;
+    html += `<div class="info-box"><p class="font-bold">تم ضبط تنبيه للمريض ${patientName} خلال ${stopInfusionMin} دقيقة لإعادة تشغيل المحلول.</p></div>`;
   }
   
   // Add PTT check notification
   if (repeatPttHours > 0) {
     notifications.notification_ptt = {
-      title: `Heparin Alert: ${patientName}`,
-      body: `Time for next PTT check (scheduled in ${repeatPttHours} hours).`,
+      title: `تنبيه هيبارين: ${patientName}`,
+      body: `حان وقت فحص الـ PTT القادم (المجدول خلال ${repeatPttHours} ساعات).`,
       delayInMinutes: repeatPttHours * 60
     };
-    html += `<div class="info-box"><p class="font-bold">Notification set for ${patientName} in ${repeatPttHours} hours to check PTT.</p></div>`;
+    html += `<div class="info-box"><p class="font-bold">تم ضبط تنبيه للمريض ${patientName} خلال ${repeatPttHours} ساعات لفحص الـ PTT.</p></div>`;
   }
 
   return {
@@ -1198,15 +1212,15 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
   if (isIndicated) {
     html = `
       <div class="error-box">
-        <p class="text-lg font-bold">Risk Level: ${riskLevel}</p>
-        <p class="mt-1">Patient is INDICATED and requires prophylaxis.</p>
+        <p class="text-lg font-bold">مستوى الخطورة: ${riskLevel}</p>
+        <p class="mt-1">المريض يحتاج إلى علاج وقائي (Indicated).</p>
       </div>
     `;
   } else {
     html = `
       <div class="result-box">
-        <p class="text-lg font-bold">Risk Level: ${riskLevel}</p>
-        <p class="mt-1">Patient is NOT indicated for prophylaxis.</p>
+        <p class="text-lg font-bold">مستوى الخطورة: ${riskLevel}</p>
+        <p class="mt-1">المريض لا يحتاج إلى علاج وقائي (Not Indicated).</p>
       </div>
     `;
   }
@@ -1215,14 +1229,100 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
 }
 
 /**
+ * ***NEW LOGIC*** for Padua Score (not in code.gs)
+ */
+function calculatePaduaScore(score) {
+  let riskLevel = 'Low Risk';
+  if (score >= 4) {
+    riskLevel = 'High Risk';
+  }
+  
+  const isIndicated = (riskLevel === 'High Risk');
+  const logData = {
+    score: score,
+    risk_level: riskLevel,
+    is_indicated: isIndicated
+  };
+  
+  let html = '';
+  if (isIndicated) {
+    html = `
+      <div class="error-box">
+        <p class="text-lg font-bold">النقاط: ${score} (مستوى الخطورة: ${riskLevel})</p>
+        <p class="mt-1">المريض عرضة للجلطات (HIGH RISK) وينصح بالعلاج الوقائي.</p>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="result-box">
+        <p class="text-lg font-bold">النقاط: ${score} (مستوى الخطورة: ${riskLevel})</p>
+        <p class="mt-1">المريض ليس عرضة للجلطات (LOW RISK) ولا ينصح بالعلاج الوقائي.</p>
+      </div>
+    `;
+  }
+  
+  return { html, logData };
+}
+
+
+/**
+ * ***NEW LOGIC*** for IV Infusion Calculator (not in code.gs)
+ */
+function calculateIVRate(inputs) {
+  const { weight_kg, drugAmount_mg, solutionVolume_ml, drugDose, doseUnit } = inputs;
+  
+  if (isNaN(weight_kg) || isNaN(drugAmount_mg) || isNaN(solutionVolume_ml) || isNaN(drugDose) ||
+      weight_kg <= 0 || drugAmount_mg <= 0 || solutionVolume_ml <= 0 || drugDose <= 0) {
+    return { error: 'الرجاء إدخال قيم رقمية صحيحة (أكبر من صفر) لكل الحقول.' };
+  }
+  
+  // 1. Calculate concentration in mg/mL
+  const concentration_mg_ml = drugAmount_mg / solutionVolume_ml;
+  
+  let rate_ml_hr = 0;
+  
+  // 2. Calculate rate based on unit
+  switch (doseUnit) {
+    case 'mcg/kg/min':
+      // (Dose * weight * 60) / (concentration_mg_ml * 1000)
+      rate_ml_hr = (drugDose * weight_kg * 60) / (concentration_mg_ml * 1000);
+      break;
+    case 'mcg/min':
+      // (Dose * 60) / (concentration_mg_ml * 1000)
+      rate_ml_hr = (drugDose * 60) / (concentration_mg_ml * 1000);
+      break;
+    case 'mg/hr':
+      // Dose / concentration_mg_ml
+      rate_ml_hr = drugDose / concentration_mg_ml;
+      break;
+    default:
+      return { error: 'وحدة الجرعة المختارة غير صحيحة.' };
+  }
+  
+  const logData = {
+    rate_ml_hr: rate_ml_hr.toFixed(2)
+  };
+  
+  const html = `
+    <div class="result-box">
+      <p class="text-lg text-center">اضبط معدل المضخة (Pump Rate) إلى:</p>
+      <p class="text-3xl font-bold text-center my-2">${logData.rate_ml_hr} mL/hr</p>
+    </div>
+  `;
+  
+  return { html, logData };
+}
+
+
+/**
  * ***NEW HELPER FUNCTION***
  * Formats the log data (inputs and results) into readable HTML.
  * @param {object} log - The log object from Supabase.
  * @returns {string} HTML string.
  */
 function formatLogData(log) {
-  let inputsHtml = '<strong>Inputs:</strong><ul class="list-disc list-inside mt-1">';
-  let resultHtml = '<strong>Result:</strong><ul class="list-disc list-inside mt-1">';
+  let inputsHtml = '<strong>المدخلات:</strong><ul class="list-disc" style="padding-right: 1.5rem; margin-top: 0.5rem;">';
+  let resultHtml = '<strong>النتيجة:</strong><ul class="list-disc" style="padding-right: 1.5rem; margin-top: 0.5rem;">';
 
   const inputs = log.inputs || {};
   const result = log.result || {};
@@ -1230,39 +1330,43 @@ function formatLogData(log) {
   try {
     switch (log.tool_name) {
       case 'heparin_initial':
-        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
-        inputsHtml += `<li>Concentration: ${inputs.concentration} u/mL</li>`;
-        inputsHtml += `<li>Indication: ${inputs.indication}</li>`;
-        resultHtml += `<li>Loading Dose: ${result.loading_dose}</li>`;
-        resultHtml += `<li>Initial Rate: ${result.initial_rate}</li>`;
-        resultHtml += `<li>Next PTT: ${result.next_ptt}</li>`;
+        inputsHtml += `<li>الوزن: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>التركيز: ${inputs.concentration} u/mL</li>`;
+        inputsHtml += `<li>الداعي: ${inputs.indication}</li>`;
+        resultHtml += `<li>الجرعة التحميلية: ${result.loading_dose}</li>`;
+        resultHtml += `<li>المعدل المبدئي: ${result.initial_rate}</li>`;
+        resultHtml += `<li>الـ PTT القادم: ${result.next_ptt}</li>`;
         break;
       
       case 'heparin_maintenance':
-        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
-        inputsHtml += `<li>Concentration: ${inputs.concentration} u/mL</li>`;
-        inputsHtml += `<li>Current Rate: ${inputs.current_rate_ml_hr} mL/hr</li>`;
-        inputsHtml += `<li>Current PTT: ${inputs.current_ptt_sec} sec</li>`;
-        resultHtml += `<li>New Rate: ${result.new_rate}</li>`;
-        resultHtml += `<li>Bolus Dose: ${result.bolus_dose}</li>`;
-        resultHtml += `<li>Stop Infusion: ${result.stop_infusion_min} min</li>`;
-        resultHtml += `<li>Next PTT: ${result.next_ptt}</li>`;
+        inputsHtml += `<li>الوزن: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>التركيز: ${inputs.concentration} u/mL</li>`;
+        inputsHtml += `<li>المعدل الحالي: ${inputs.current_rate_ml_hr} mL/hr</li>`;
+        inputsHtml += `<li>الـ PTT الحالي: ${inputs.current_ptt_sec} sec</li>`;
+        resultHtml += `<li>المعدل الجديد: ${result.new_rate}</li>`;
+        resultHtml += `<li>جرعة Bolus: ${result.bolus_dose}</li>`;
+        resultHtml += `<li>إيقاف المحلول: ${result.stop_infusion_min} min</li>`;
+        resultHtml += `<li>الـ PTT القادم: ${result.next_ptt}</li>`;
         break;
         
       case 'stress_ulcer_prophylaxis':
       case 'padua_score':
-        inputsHtml += `<li>Factors: ${inputs.factors.join(', ') || 'None'}</li>`;
-        if(result.score !== undefined) resultHtml += `<li>Score: ${result.score}</li>`;
-        resultHtml += `<li>Risk Level: ${result.risk_level}</li>`;
-        if(result.is_indicated !== undefined) resultHtml += `<li>Indicated: ${result.is_indicated ? 'Yes' : 'No'}</li>`;
+        if(inputs.factors && inputs.factors.length > 0) {
+          inputsHtml += `<li>العوامل: ${inputs.factors.join(', ')}</li>`;
+        } else {
+          inputsHtml += `<li>العوامل: لم يتم اختيار أي عامل</li>`;
+        }
+        if(result.score !== undefined) resultHtml += `<li>النقاط: ${result.score}</li>`;
+        resultHtml += `<li>مستوى الخطورة: ${result.risk_level}</li>`;
+        if(result.is_indicated !== undefined) resultHtml += `<li>يحتاج علاج وقائي: ${result.is_indicated ? 'نعم' : 'لا'}</li>`;
         break;
 
       case 'iv_calculator':
-        inputsHtml += `<li>Weight: ${inputs.weight_kg} kg</li>`;
-        inputsHtml += `<li>Drug Amount: ${inputs.drugAmount_mg} mg</li>`;
-        inputsHtml += `<li>Solution Volume: ${inputs.solutionVolume_ml} mL</li>`;
-        inputsHtml += `<li>Dose: ${inputs.drugDose} ${inputs.doseUnit}</li>`;
-        resultHtml += `<li>Rate: ${result.rate_ml_hr} mL/hr</li>`;
+        inputsHtml += `<li>الوزن: ${inputs.weight_kg} kg</li>`;
+        inputsHtml += `<li>كمية الدواء: ${inputs.drugAmount_mg} mg</li>`;
+        inputsHtml += `<li>حجم المحلول: ${inputs.solutionVolume_ml} mL</li>`;
+        inputsHtml += `<li>الجرعة: ${inputs.drugDose} ${inputs.doseUnit}</li>`;
+        resultHtml += `<li>المعدل: ${result.rate_ml_hr} mL/hr</li>`;
         break;
         
       default:
@@ -1273,8 +1377,8 @@ function formatLogData(log) {
   } catch (e) {
     // In case of any error during formatting, show the raw JSON
     console.error("Error formatting log:", e);
-    inputsHtml = `<strong>Inputs:</strong><pre>${JSON.stringify(inputs, null, 2)}</pre>`;
-    resultHtml = `<strong>Result:</strong><pre>${JSON.stringify(result, null, 2)}</pre>`;
+    inputsHtml = `<strong>المدخلات:</strong><pre>${JSON.stringify(inputs, null, 2)}</pre>`;
+    resultHtml = `<strong>النتيجة:</strong><pre>${JSON.stringify(result, null, 2)}</pre>`;
   }
 
   inputsHtml += '</ul>';
@@ -1299,9 +1403,9 @@ function calculateCrCl(inputs) {
   
   const html = `
     <div class="result-box">
-      <p class="text-lg text-center">Estimated Creatinine Clearance:</p>
+      <p class="text-lg text-center">معدل تصفية الكرياتينين المقدر:</p>
       <p class="text-3xl font-bold text-center my-2">${logData.crcl_ml_min} mL/min</p>
-      <p class="text-sm text-center mt-4">Note: Cockcroft-Gault estimation. Always consult hospital-specific protocols for dose adjustments.</p>
+      <p class="text-sm text-center mt-4">ملحوظة: هذا الحساب تقديري (Cockcroft-Gault). يجب دائماً مراجعة بروتوكولات المستشفى لتعديل الجرعات.</p>
     </div>
   `;
   
@@ -1346,7 +1450,8 @@ function convertUnits(inputs) {
   
   // Format result nicely
   if (result < 0.001) return result.toExponential(4);
-  return result.toFixed(4);
+  if (result.toString().split('.')[1]?.length > 4) return result.toFixed(4);
+  return result;
 }
 
 
@@ -1380,30 +1485,11 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
     if (resultArea) {
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error-box';
-      errorDiv.innerHTML = `<p><strong>Save Error:</strong> Could not save log to database. ${error.message}</p>`;
+      errorDiv.innerHTML = `<p><strong>خطأ في الحفظ:</strong> لم يتم حفظ السجل. ${error.message}</p>`;
       // Prepend error to result area so calculation is still visible
       resultArea.prepend(errorDiv);
     }
     return false;
-  }
-}
-
-/**
- * Requests permission to show notifications.
- * (This function is no longer called on load)
- */
-function requestNotificationPermission() {
-  if (!('Notification' in window)) {
-    console.log('This browser does not support notifications.');
-    return;
-  }
-  
-  if (Notification.permission !== 'denied') {
-    Notification.requestPermission().then(permission => {
-      if (permission === 'granted') {
-        console.log('Notification permission granted.');
-      }
-    });
   }
 }
 
@@ -1414,48 +1500,55 @@ function requestNotificationPermission() {
  * @param {number} delayInMinutes - The delay in minutes.
  */
 async function scheduleNotification(title, body, delayInMinutes) {
-  if (!('Notification' in window)) {
-    console.warn('This browser does not support notifications.');
+  // --- *** NOTIFICATION FIX *** ---
+  // The logic is moved to the Service Worker (sw.js)
+  // This function now just checks permission and passes the message.
+  
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    console.warn('Notifications or Service Worker not supported.');
     return;
   }
-
-  // --- ***NEW LOGIC*** ---
-  // Get current permission status
+  
+  // 1. Check/Request Permission
   let permission = Notification.permission;
-
-  // If permission is not granted or denied, request it
   if (permission === 'default') {
     console.log('Requesting notification permission...');
     permission = await Notification.requestPermission();
   }
 
-  // If permission is denied, log and exit
   if (permission === 'denied') {
     console.warn('Notification permission was denied.');
-    // Maybe show a small, non-intrusive message to the user?
-    // alert('Please enable notifications in your browser settings to receive alerts.');
+    alert('الرجاء تفعيل الإشعارات في إعدادات المتصفح لاستقبال التنبيهات.');
     return;
   }
-  // --- ***END NEW LOGIC*** ---
 
-  // If permission is granted, proceed with scheduling
+  // 2. If permission is granted, pass the job to the Service Worker
   if (permission === 'granted') {
     if (delayInMinutes <= 0) return;
     
+    // (TESTING): Set delay to 10 seconds (0.16 minutes) for testing
+    // const delayInMs = 0.16 * 60 * 1000;
+    
+    // (PRODUCTION): Use the real delay
     const delayInMs = delayInMinutes * 60 * 1000;
     
-    console.log(`Scheduling notification: "${title}" in ${delayInMinutes} minutes.`);
-    
-    setTimeout(() => {
-      // Re-check permission in case user revokes it
-      if (Notification.permission === 'granted') {
-        const notification = new Notification(title, {
-          body: body,
-          icon: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png'
-        });
-        console.log('Notification triggered:', notification);
-      }
-    }, delayInMs);
+    const icon = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png';
+
+    try {
+      const swRegistration = await navigator.serviceWorker.ready;
+      swRegistration.active.postMessage({
+        type: 'scheduleNotification',
+        payload: { title, body, delayInMs, icon }
+      });
+      console.log(`[Main] Notification job passed to SW: "${title}" in ${delayInMinutes} min.`);
+    } catch (error) {
+      console.error('Error passing notification to Service Worker:', error);
+      // Fallback to main thread (less reliable)
+      console.warn('Falling back to main thread for notification.');
+      setTimeout(() => {
+        new Notification(title, { body, icon });
+      }, delayInMs);
+    }
   }
 }
 
@@ -1464,9 +1557,8 @@ async function scheduleNotification(title, body, delayInMinutes) {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-  // Request notification permission on first load
-  // ***FIX***: We no longer request permission on load.
-  // requestNotificationPermission(); 
+  // We no longer request permission on load.
+  // It's requested on-demand by scheduleNotification().
   
   // Render the initial view
   navigateTo('dashboard');
