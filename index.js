@@ -466,7 +466,7 @@ function renderIVCalculator() {
         </select>
       </div>
       
-      <button type="submit" class="btn">Calculate Rate</button>
+      <button type="submit" class="btn" id="calculateBtn">Calculate Rate</button>
       
       <!-- Result area -->
       <div id="result-area" class="mt-4"></div>
@@ -594,26 +594,29 @@ async function handleHeparinSubmit(e) {
   const resultArea = $('#result-area');
   const calculateBtn = $('#calculateBtn');
   
-  calculateBtn.disabled = true;
-  calculateBtn.textContent = 'Calculating...';
+  // ***FIX***: Check if button exists before disabling
+  if (calculateBtn) {
+    calculateBtn.disabled = true;
+    calculateBtn.textContent = 'Calculating...';
+  }
   resultArea.innerHTML = '';
   
-  // Store patient info in state
-  appState.currentPatientName = form.patientName.value;
-  appState.currentPatientIdentifier = form.patientIdentifier.value;
-  
-  const formData = {
-    patientName: appState.currentPatientName,
-    patientIdentifier: appState.currentPatientIdentifier,
-    weight: parseFloat(form.weight.value),
-    heparinConcentration: parseFloat(form.heparinConcentration.value),
-    mode: form.querySelector('.mode-btn.active').id === 'initialModeBtn' ? 'initial' : 'maintenance',
-    indication: form.indication.value,
-    currentInfusionRate: parseFloat(form.currentInfusionRate.value),
-    currentPtt: parseFloat(form.currentPtt.value),
-  };
-  
   try {
+    // ***FIX***: All data collection is now INSIDE the try block
+    appState.currentPatientName = form.patientName.value;
+    appState.currentPatientIdentifier = form.patientIdentifier.value;
+    
+    const formData = {
+      patientName: appState.currentPatientName,
+      patientIdentifier: appState.currentPatientIdentifier,
+      weight: parseFloat(form.weight.value),
+      heparinConcentration: parseFloat(form.heparinConcentration.value),
+      mode: form.querySelector('.mode-btn.active').id === 'initialModeBtn' ? 'initial' : 'maintenance',
+      indication: form.indication.value,
+      currentInfusionRate: parseFloat(form.currentInfusionRate.value),
+      currentPtt: parseFloat(form.currentPtt.value),
+    };
+
     let result, inputs, toolName;
     if (formData.mode === 'initial') {
       result = calculateInitialHeparinRate(formData);
@@ -669,8 +672,11 @@ async function handleHeparinSubmit(e) {
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>An unexpected error occurred: ${error.message}</p></div>`;
   } finally {
-    calculateBtn.disabled = false;
-    calculateBtn.textContent = 'Calculate';
+    // ***FIX***: This will now ALWAYS run, un-sticking the button
+    if (calculateBtn) {
+      calculateBtn.disabled = false;
+      calculateBtn.textContent = 'Calculate';
+    }
   }
 }
 
@@ -679,7 +685,10 @@ async function handleProphylaxisCheck(e) {
   // Toggle checked state for styling
   const card = e.currentTarget;
   const checkbox = card.querySelector('input[type="checkbox"]');
-  checkbox.checked = !checkbox.checked;
+  // Handle click on label
+  if (e.target.tagName !== 'INPUT') {
+    checkbox.checked = !checkbox.checked;
+  }
   card.classList.toggle('checked', checkbox.checked);
   
   // Get all selected factors
@@ -716,36 +725,45 @@ async function handleProphylaxisSubmit(e) {
     return;
   }
   
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving...';
-  
-  // Get data to save
-  const selectedFactors = Array.from(form.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
-  const result = calculateStressUlcerProphylaxis(selectedFactors); // Recalculate to get clean log data
-  
-  appState.currentPatientName = form.patientName.value || 'N/A';
-    appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
-  
-  const saved = await saveCalculation(
-    'stress_ulcer_prophylaxis',
-    appState.currentPatientName,
-    appState.currentPatientIdentifier,
-    { factors: selectedFactors },
-    result.logData
-  );
-  
-  if (saved) {
-    saveBtn.textContent = 'Saved!';
-    resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
-  } else {
-    saveBtn.textContent = 'Save Failed';
-    // The saveCalculation function already prepends an error box
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
   }
   
-  setTimeout(() => {
-    saveBtn.disabled = false;
-    saveBtn.textContent = 'Save Calculation';
-  }, 2000);
+  try {
+    // Get data to save
+    const selectedFactors = Array.from(form.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
+    const result = calculateStressUlcerProphylaxis(selectedFactors); // Recalculate to get clean log data
+    
+    appState.currentPatientName = form.patientName.value || 'N/A';
+    appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
+    
+    const saved = await saveCalculation(
+      'stress_ulcer_prophylaxis',
+      appState.currentPatientName,
+      appState.currentPatientIdentifier,
+      { factors: selectedFactors },
+      result.logData
+    );
+    
+    if (saved) {
+      if(saveBtn) saveBtn.textContent = 'Saved!';
+      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+    } else {
+      if(saveBtn) saveBtn.textContent = 'Save Failed';
+      // The saveCalculation function already prepends an error box
+    }
+  } catch (error) {
+    if(saveBtn) saveBtn.textContent = 'Save Failed';
+    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
+  } finally {
+    setTimeout(() => {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Calculation';
+      }
+    }, 2000);
+  }
 }
 
 
@@ -753,7 +771,10 @@ async function handleProphylaxisSubmit(e) {
 async function handlePaduaCheck(e) {
   const card = e.currentTarget;
   const checkbox = card.querySelector('input[type="checkbox"]');
-  checkbox.checked = !checkbox.checked;
+  // Handle click on label
+  if (e.target.tagName !== 'INPUT') {
+    checkbox.checked = !checkbox.checked;
+  }
   card.classList.toggle('checked', checkbox.checked);
   
   const form = $('#padua-form');
@@ -791,40 +812,49 @@ async function handlePaduaSubmit(e) {
     return;
   }
 
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving...';
-
-  // Get data to save
-  let score = 0;
-  const selectedFactors = [];
-  form.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
-    score += parseInt(cb.dataset.score, 10);
-    selectedFactors.push(cb.value);
-  });
-  const result = calculatePaduaScore(score); // Recalculate to get clean log data
-
-  appState.currentPatientName = form.patientName.value || 'N/A';
-  appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
-
-  const saved = await saveCalculation(
-    'padua_score',
-    appState.currentPatientName,
-    appState.currentPatientIdentifier,
-    { factors: selectedFactors },
-    result.logData
-  );
-
-  if (saved) {
-    saveBtn.textContent = 'Saved!';
-    resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
-  } else {
-    saveBtn.textContent = 'Save Failed';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
   }
 
-  setTimeout(() => {
-    saveBtn.disabled = false;
-    saveBtn.textContent = 'Save Calculation';
-  }, 2000);
+  try {
+    // Get data to save
+    let score = 0;
+    const selectedFactors = [];
+    form.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
+      score += parseInt(cb.dataset.score, 10);
+      selectedFactors.push(cb.value);
+    });
+    const result = calculatePaduaScore(score); // Recalculate to get clean log data
+
+    appState.currentPatientName = form.patientName.value || 'N/A';
+    appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
+
+    const saved = await saveCalculation(
+      'padua_score',
+      appState.currentPatientName,
+      appState.currentPatientIdentifier,
+      { factors: selectedFactors },
+      result.logData
+    );
+
+    if (saved) {
+      if(saveBtn) saveBtn.textContent = 'Saved!';
+      resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+    } else {
+      if(saveBtn) saveBtn.textContent = 'Save Failed';
+    }
+  } catch (error) {
+    if(saveBtn) saveBtn.textContent = 'Save Failed';
+    resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
+  } finally {
+    setTimeout(() => {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Calculation';
+      }
+    }, 2000);
+  }
 }
 
 
@@ -833,20 +863,27 @@ async function handleIVSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const resultArea = $('#result-area');
+  const calculateBtn = $('#calculateBtn'); // ***FIX***: Get the button
+  
+  if(calculateBtn) {
+    calculateBtn.disabled = true;
+    calculateBtn.textContent = 'Calculating...';
+  }
   resultArea.innerHTML = '';
   
-  appState.currentPatientName = form.patientName.value;
-  appState.currentPatientIdentifier = form.patientIdentifier.value;
-  
-  const inputs = {
-    weight_kg: parseFloat(form.weight.value),
-    drugAmount_mg: parseFloat(form.drugAmount.value),
-    solutionVolume_ml: parseFloat(form.solutionVolume.value),
-    drugDose: parseFloat(form.drugDose.value),
-    doseUnit: form.doseUnit.value
-  };
-  
   try {
+    // ***FIX***: Move data collection inside try block
+    appState.currentPatientName = form.patientName.value;
+    appState.currentPatientIdentifier = form.patientIdentifier.value;
+    
+    const inputs = {
+      weight_kg: parseFloat(form.weight.value),
+      drugAmount_mg: parseFloat(form.drugAmount.value),
+      solutionVolume_ml: parseFloat(form.solutionVolume.value),
+      drugDose: parseFloat(form.drugDose.value),
+      doseUnit: form.doseUnit.value
+    };
+
     const result = calculateIVRate(inputs);
     resultArea.innerHTML = result.html;
     
@@ -862,6 +899,12 @@ async function handleIVSubmit(e) {
     
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>${error.message}</p></div>`;
+  } finally {
+    // ***FIX***: Add finally block to re-enable button
+    if(calculateBtn) {
+      calculateBtn.disabled = false;
+      calculateBtn.textContent = 'Calculate Rate';
+    }
   }
 }
 
@@ -870,23 +913,27 @@ function handleRenalDosingInput() {
   const form = $('#renal-form');
   const resultArea = $('#result-area');
   
-  const inputs = {
-    age: parseFloat(form.age.value),
-    weight_kg: parseFloat(form.weight.value),
-    creatinine_mg_dl: parseFloat(form.creatinine.value),
-    gender: form.gender.value
-  };
-  
-  // Only calculate if all fields are valid
-  if (inputs.age > 0 && inputs.weight_kg > 0 && inputs.creatinine_mg_dl > 0) {
-    const result = calculateCrCl(inputs);
-    resultArea.innerHTML = result.html;
+  try {
+    const inputs = {
+      age: parseFloat(form.age.value),
+      weight_kg: parseFloat(form.weight.value),
+      creatinine_mg_dl: parseFloat(form.creatinine.value),
+      gender: form.gender.value
+    };
     
-    // Save to Supabase (we can save live, or add a save button)
-    // For now, let's not auto-save this one to avoid spamming.
-    // We can add a "Save" button if needed.
-  } else {
-    resultArea.innerHTML = '';
+    // Only calculate if all fields are valid
+    if (inputs.age > 0 && inputs.weight_kg > 0 && inputs.creatinine_mg_dl > 0) {
+      const result = calculateCrCl(inputs);
+      resultArea.innerHTML = result.html;
+      
+      // Save to Supabase (we can save live, or add a save button)
+      // For now, let's not auto-save this one to avoid spamming.
+      // We can add a "Save" button if needed.
+    } else {
+      resultArea.innerHTML = '';
+    }
+  } catch (error) {
+    resultArea.innerHTML = `<div class="error-box"><p>Calculation error: ${error.message}</p></div>`;
   }
 }
 
@@ -895,19 +942,23 @@ function handleConverterInput() {
   const form = $('#converter-form');
   const resultField = $('#toValue');
   
-  const inputs = {
-    value: parseFloat(form.fromValue.value),
-    fromUnit: form.fromUnit.value,
-    toUnit: form.toUnit.value
-  };
-  
-  if (isNaN(inputs.value)) {
-    resultField.value = 'Invalid Input';
-    return;
+  try {
+    const inputs = {
+      value: parseFloat(form.fromValue.value),
+      fromUnit: form.fromUnit.value,
+      toUnit: form.toUnit.value
+    };
+    
+    if (isNaN(inputs.value)) {
+      resultField.value = 'Invalid Input';
+      return;
+    }
+    
+    const result = convertUnits(inputs);
+    resultField.value = result;
+  } catch (error) {
+    resultField.value = 'Error';
   }
-  
-  const result = convertUnits(inputs);
-  resultField.value = result;
 }
 
 // --- History Password ---
@@ -1395,5 +1446,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render the initial view
   navigateTo('dashboard');
 });
-
 
