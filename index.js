@@ -128,6 +128,8 @@ function addEventListeners() {
     prophylaxisForm.querySelectorAll('.risk-factor-card').forEach(card => {
       card.addEventListener('click', handleProphylaxisCheck);
     });
+    // ***FIX***: Add submit listener for the new "Save" button
+    prophylaxisForm.addEventListener('submit', handleProphylaxisSubmit);
   }
   
   const paduaForm = $('#padua-form');
@@ -135,6 +137,8 @@ function addEventListeners() {
     paduaForm.querySelectorAll('.risk-factor-card').forEach(card => {
       card.addEventListener('click', handlePaduaCheck);
     });
+    // ***FIX***: Add submit listener for the new "Save" button
+    paduaForm.addEventListener('submit', handlePaduaSubmit);
   }
 
   const ivForm = $('#iv-form');
@@ -264,6 +268,9 @@ async function renderHistoryLogs() {
     $('#logs-container').innerHTML = `<div class="error-box"><p>Failed to load history. Please check the connection and try again.</p><p>${error.message}</p></div>`;
   } finally {
     appState.isLoading = false;
+    // ***FIX***: Re-add event listeners *after* rendering the new view
+    // This will make the "Back" button work on this async-loaded page.
+    addEventListeners();
   }
 }
 
@@ -369,6 +376,11 @@ function renderProphylaxisCalculator() {
       
       <!-- Result area -->
       <div id="result-area" class="mt-4"></div>
+
+      <!-- ***FIX***: Added a save button -->
+      <div class="mt-6">
+        <button type="submit" class="btn" id="saveBtn">Save Calculation</button>
+      </div>
     </form>
   `);
 }
@@ -412,6 +424,11 @@ function renderPaduaScore() {
       
       <!-- Result area -->
       <div id="result-area" class="mt-4"></div>
+
+      <!-- ***FIX***: Added a save button -->
+      <div class="mt-6">
+        <button type="submit" class="btn" id="saveBtn">Save Calculation</button>
+      </div>
     </form>
   `);
 }
@@ -681,19 +698,56 @@ async function handleProphylaxisCheck(e) {
   // Display result
   resultArea.innerHTML = result.html;
   
-  // Save to Supabase
-  // We save on every check
+  // --- ***FIX***: REMOVED auto-save from here ---
+  // The save logic is moved to handleProphylaxisSubmit
+}
+
+// ***NEW FUNCTION***: Handles the "Save" button submit for Prophylaxis
+async function handleProphylaxisSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const resultArea = $('#result-area');
+  const saveBtn = $('#saveBtn');
+  
+  // Check if there is a result to save
+  const resultHtml = resultArea.innerHTML;
+  if (!resultHtml || resultHtml === '') {
+    alert('Please select risk factors to calculate before saving.');
+    return;
+  }
+  
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+  
+  // Get data to save
+  const selectedFactors = Array.from(form.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
+  const result = calculateStressUlcerProphylaxis(selectedFactors); // Recalculate to get clean log data
+  
   appState.currentPatientName = form.patientName.value || 'N/A';
   appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
   
-  await saveCalculation(
+  const saved = await saveCalculation(
     'stress_ulcer_prophylaxis',
     appState.currentPatientName,
     appState.currentPatientIdentifier,
     { factors: selectedFactors },
     result.logData
   );
+  
+  if (saved) {
+    saveBtn.textContent = 'Saved!';
+    resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+  } else {
+    saveBtn.textContent = 'Save Failed';
+    // The saveCalculation function already prepends an error box
+  }
+  
+  setTimeout(() => {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Calculation';
+  }, 2000);
 }
+
 
 // --- Padua Score ---
 async function handlePaduaCheck(e) {
@@ -720,18 +774,59 @@ async function handlePaduaCheck(e) {
   const result = calculatePaduaScore(score);
   resultArea.innerHTML = result.html;
   
-  // Save on every check
+  // --- ***FIX***: REMOVED auto-save from here ---
+}
+
+// ***NEW FUNCTION***: Handles the "Save" button submit for Padua
+async function handlePaduaSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const resultArea = $('#result-area');
+  const saveBtn = $('#saveBtn');
+
+  // Check if there is a result to save
+  const resultHtml = resultArea.innerHTML;
+  if (!resultHtml || resultHtml === '') {
+    alert('Please select risk factors to calculate before saving.');
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+
+  // Get data to save
+  let score = 0;
+  const selectedFactors = [];
+  form.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
+    score += parseInt(cb.dataset.score, 10);
+    selectedFactors.push(cb.value);
+  });
+  const result = calculatePaduaScore(score); // Recalculate to get clean log data
+
   appState.currentPatientName = form.patientName.value || 'N/A';
   appState.currentPatientIdentifier = form.patientIdentifier.value || 'N/A';
-  
-  await saveCalculation(
+
+  const saved = await saveCalculation(
     'padua_score',
     appState.currentPatientName,
     appState.currentPatientIdentifier,
     { factors: selectedFactors },
     result.logData
   );
+
+  if (saved) {
+    saveBtn.textContent = 'Saved!';
+    resultArea.innerHTML += `<div class="result-box mt-4"><p class="font-bold">Calculation saved successfully.</p></div>`;
+  } else {
+    saveBtn.textContent = 'Save Failed';
+  }
+
+  setTimeout(() => {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Calculation';
+  }, 2000);
 }
+
 
 // --- IV Calculator ---
 async function handleIVSubmit(e) {
@@ -824,6 +919,8 @@ function handleHistoryPasswordSubmit(e) {
   if (password === HISTORY_PASSWORD) {
     // Password is correct, fetch and render logs
     renderHistoryLogs();
+    // ***FIX***: No need to call addEventListeners() here,
+    // it's now called *inside* renderHistoryLogs()
   } else {
     resultArea.innerHTML = `<div class="error-box"><p>Invalid password. Try again.</p></div>`;
   }
@@ -1300,3 +1397,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render the initial view
   navigateTo('dashboard');
 });
+
