@@ -1390,6 +1390,7 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
 
 /**
  * Requests permission to show notifications.
+ * (This function is no longer called on load)
  */
 function requestNotificationPermission() {
   if (!('Notification' in window)) {
@@ -1412,28 +1413,50 @@ function requestNotificationPermission() {
  * @param {string} body - The body text of the notification.
  * @param {number} delayInMinutes - The delay in minutes.
  */
-function scheduleNotification(title, body, delayInMinutes) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    console.warn(`Cannot schedule notification (permission ${Notification.permission}). Title: ${title}`);
+async function scheduleNotification(title, body, delayInMinutes) {
+  if (!('Notification' in window)) {
+    console.warn('This browser does not support notifications.');
     return;
   }
-  
-  if (delayInMinutes <= 0) return;
-  
-  const delayInMs = delayInMinutes * 60 * 1000;
-  
-  console.log(`Scheduling notification: "${title}" in ${delayInMinutes} minutes.`);
-  
-  setTimeout(() => {
-    // We need to re-check permission in case user revokes it
-    if (Notification.permission === 'granted') {
-      const notification = new Notification(title, {
-        body: body,
-        icon: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png'
-      });
-      console.log('Notification triggered:', notification);
-    }
-  }, delayInMs);
+
+  // --- ***NEW LOGIC*** ---
+  // Get current permission status
+  let permission = Notification.permission;
+
+  // If permission is not granted or denied, request it
+  if (permission === 'default') {
+    console.log('Requesting notification permission...');
+    permission = await Notification.requestPermission();
+  }
+
+  // If permission is denied, log and exit
+  if (permission === 'denied') {
+    console.warn('Notification permission was denied.');
+    // Maybe show a small, non-intrusive message to the user?
+    // alert('Please enable notifications in your browser settings to receive alerts.');
+    return;
+  }
+  // --- ***END NEW LOGIC*** ---
+
+  // If permission is granted, proceed with scheduling
+  if (permission === 'granted') {
+    if (delayInMinutes <= 0) return;
+    
+    const delayInMs = delayInMinutes * 60 * 1000;
+    
+    console.log(`Scheduling notification: "${title}" in ${delayInMinutes} minutes.`);
+    
+    setTimeout(() => {
+      // Re-check permission in case user revokes it
+      if (Notification.permission === 'granted') {
+        const notification = new Notification(title, {
+          body: body,
+          icon: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png'
+        });
+        console.log('Notification triggered:', notification);
+      }
+    }, delayInMs);
+  }
 }
 
 
@@ -1442,7 +1465,8 @@ function scheduleNotification(title, body, delayInMinutes) {
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
   // Request notification permission on first load
-  requestNotificationPermission();
+  // ***FIX***: We no longer request permission on load.
+  // requestNotificationPermission(); 
   
   // Render the initial view
   navigateTo('dashboard');
