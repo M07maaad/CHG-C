@@ -130,7 +130,7 @@ body.dark .app-header {
   height: auto;
   filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); /* Subtle glow for logo */
 }
-.header-back-button, #dark-mode-toggle {
+#header-back-button, #dark-mode-toggle {
   background: none;
   border: none;
   color: var(--text-header);
