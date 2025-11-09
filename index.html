@@ -1,107 +1,111 @@
 <!DOCTYPE html>
-<!-- ***FIX: Reverted to English*** -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  
+  <!-- Title & PWA Manifest -->
   <title>CHG - Clinical Toolkit</title>
-
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
   
-  <!-- Apple Touch Icon (for iOS "Add to Home Screen") -->
-  <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png">
-  
-  <!-- Theme Color for Safari -->
+  <!-- Apple PWA Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#00bcd4">
+  <meta name="apple-mobile-web-app-title" content="CHG Toolkit">
+  <!-- Link to your icon file -->
+  <link rel="apple-touch-icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png">
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- *** NEW: Linking the external CSS file *** -->
-  <link rel="stylesheet" href="style.css">
-  
-  <!-- Supabase Library -->
+  <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- ** NEW: Linking the external CSS file ** -->
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
   <!-- 
-    This is the new "App" structure:
-    1. Fixed Header
-    2. Scrollable Content
-    3. Fixed Bottom Navigation
+    App Shell: Header
+    (Fixed at the top)
   -->
-
-  <!-- 1. App Header (Fixed Top) -->
   <header class="app-header">
-    <!-- Back button (hidden by default, shown by JS) -->
-    <button id="header-back-button" class="header-back-button">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path>
-      </svg>
+    <button class="header-back-button" id="header-back-button" aria-label="Go back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
     </button>
-    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png" 
-         alt="Logo" class="app-header-logo">
+    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png" alt="Logo" class="app-header-logo">
     <h1 id="app-title">CHG Toolkit</h1>
+
+    <!-- ** NEW: Dark Mode Toggle Button ** -->
+    <div class="header-spacer"></div>
+    <button id="dark-mode-toggle" class="header-back-button" aria-label="Toggle dark mode">
+      <!-- Sun Icon (Light Mode) -->
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <!-- Moon Icon (Dark Mode) -->
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
   </header>
 
-  <!-- 2. Main Content Area (Scrollable) -->
+  <!-- 
+    App Shell: Content
+    (Scrollable area in the middle)
+    This contains all the "views" (pages).
+  -->
   <main class="app-content">
 
     <!-- 
-      All views are now static HTML, hidden by default.
-      JS will toggle the 'active' class to show/hide them.
+      View 1: Dashboard
+      (This is the main screen)
     -->
-
-    <!-- View: Dashboard (Default View) -->
-    <section id="view-dashboard" class="view active">
+    <div id="view-dashboard" class="view active">
       <div class="dashboard-grid">
-        <!-- JS will add click listeners based on data-nav -->
+        <!-- Heparin -->
         <div class="tool-card" data-nav="heparin">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.9 2.1a2.4 2.4 0 0 1 2.2 0l1.8 1.1 2.4.4a2.4 2.4 0 0 1 1.7 2.3l-.3 2.5 1.5 1.9a2.4 2.4 0 0 1 0 2.2l-1.5 1.9.3 2.5a2.4 2.4 0 0 1-1.7 2.3l-2.4.4-1.8 1.1a2.4 2.4 0 0 1-2.2 0l-1.8-1.1-2.4-.4a2.4 2.4 0 0 1-1.7-2.3l.3-2.5-1.5-1.9a2.4 2.4 0 0 1 0-2.2l1.5-1.9-.3-2.5a2.4 2.4 0 0 1 1.7-2.3l2.4-.4 1.8-1.1zM12 11V8"></path><line x1="12" y1="16" x2="12" y2="16" stroke-width="3"></line></svg>
           <span class="tool-card-title">Heparin<br>Calculator</span>
         </div>
+        <!-- Prophylaxis -->
         <div class="tool-card" data-nav="prophylaxis">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M9 12l2 2 4-4"></path></svg>
           <span class="tool-card-title">Stress Ulcer<br>Prophylaxis</span>
         </div>
+        <!-- Padua -->
         <div class="tool-card" data-nav="padua">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path><path d="m9 9.5 2 2 4-4"></path><path d="M12 15h.01"></path></svg>
           <span class="tool-card-title">Padua (VTE)<br>Score</span>
         </div>
-        <div class="tool-card" data-nav="ivCalculator">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path><path d="M12 18v-2"></path><path d="M12 8V6"></path><path d="M12 13V11"></path></svg>
+        <!-- IV Infusion -->
+        <div class="tool-card" data-nav="iv">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path><path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
           <span class="tool-card-title">IV Infusion<br>Calculator</span>
         </div>
-        <div class="tool-card" data-nav="renalDosing">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 1 7 7c0 5-7 11-7 11s-7-6-7-11a7 7 0 0 1 7-7z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <!-- Renal Dosing -->
+        <div class="tool-card" data-nav="renal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.9 2.1a2.4 2.4 0 0 1 2.2 0l1.8 1.1 2.4.4a2.4 2.4 0 0 1 1.7 2.3l-.3 2.5 1.5 1.9a2.4 2.4 0 0 1 0 2.2l-1.5 1.9.3 2.5a2.4 2.4 0 0 1-1.7 2.3l-2.4.4-1.8 1.1a2.4 2.4 0 0 1-2.2 0l-1.8-1.1-2.4-.4a2.4 2.4 0 0 1-1.7-2.3l.3-2.5-1.5-1.9a2.4 2.4 0 0 1 0-2.2l1.5-1.9-.3-2.5a2.4 2.4 0 0 1 1.7-2.3l2.4-.4 1.8-1.1zM12 11V8"></path><path d="M2 12h20"></path></svg>
           <span class="tool-card-title">Renal Dosing<br>(CrCl)</span>
         </div>
+        <!-- Other Scores -->
         <div class="tool-card" data-nav="scores">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="m9 14 2 2 4-4"></path></svg>
           <span class="tool-card-title">Other<br>Clinical Scores</span>
         </div>
+        <!-- Unit Converter -->
         <div class="tool-card" data-nav="converter">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><path d="M4 20L21 3"></path><path d="M21 16v5h-5"></path><path d="M3 4l18 18"></path></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="6" x2="12" y2="18"></line><polyline points="7 13 12 18 17 13"></polyline><polyline points="7 6 12 1 17 6"></polyline></svg>
           <span class="tool-card-title">Unit<br>Converter</span>
         </div>
       </div>
-    </section>
-
-    <!-- View: Heparin Calculator -->
-    <section id="view-heparin" class="view">
+    </div>
+    
+    <!-- 
+      View 2: Heparin Calculator
+    -->
+    <div id="view-heparin" class="view">
       <div class="calculator-view">
-        <h2 class="calculator-title">Heparin Calculator</h2>
-        
         <div class="mode-toggle-buttons">
-          <button type="button" id="heparin-mode-initial" class="mode-btn active" data-mode="initial">Initial Dose</button>
-          <button type="button" id="heparin-mode-maintenance" class="mode-btn" data-mode="maintenance">Maintenance Dose</button>
+          <button id="heparin-mode-initial" class="mode-btn active">Initial Heparin</button>
+          <button id="heparin-mode-maintenance" class="mode-btn">Maintenance Heparin</button>
         </div>
-        
-        <form id="heparin-form" class="space-y-6">
+        <form id="heparin-form" class="space-y-4">
           <div class="input-group">
             <label for="heparin-patientName">Patient Name:</label>
             <input type="text" id="heparin-patientName" name="patientName" required>
@@ -110,31 +114,29 @@
             <label for="heparin-patientIdentifier">Patient ID / Room No.:</label>
             <input type="text" id="heparin-patientIdentifier" name="patientIdentifier" required>
           </div>
-          
           <div class="input-group">
             <label for="heparin-weight">Patient Weight (kg):</label>
             <input type="number" id="heparin-weight" name="weight" step="0.1" required>
           </div>
           <div class="input-group">
             <label for="heparin-concentration">Heparin Concentration (units/mL):</label>
-            <input type="number" id="heparin-concentration" name="heparinConcentration" value="100" step="0.1" required>
+            <input type="number" id="heparin-concentration" name="heparinConcentration" step="0.1" value="100" required>
           </div>
-
-          <!-- Initial-Only Fields -->
-          <div id="heparin-initial-fields" class="space-y-6">
+          
+          <!-- Initial Fields -->
+          <div id="heparin-initial-fields" class="space-y-4">
             <div class="input-group">
               <label for="heparin-indication">Indication:</label>
               <select id="heparin-indication" name="indication" required>
-                <option value="">Select...</option>
                 <option value="AF">AF (Atrial Fibrillation)</option>
                 <option value="Venous thromboembolism">Venous Thromboembolism</option>
                 <option value="Acute coronary syndrome">Acute Coronary Syndrome</option>
               </select>
             </div>
           </div>
-
-          <!-- Maintenance-Only Fields -->
-          <div id="heparin-maintenance-fields" class="space-y-6 hidden">
+          
+          <!-- Maintenance Fields -->
+          <div id="heparin-maintenance-fields" class="hidden space-y-4">
             <div class="input-group">
               <label for="heparin-currentRate">Current Infusion Rate (mL/hour):</label>
               <input type="number" id="heparin-currentRate" name="currentInfusionRate" step="0.1">
@@ -144,22 +146,23 @@
               <input type="number" id="heparin-currentPtt" name="currentPtt" step="0.1">
             </div>
           </div>
-
-          <button type="submit" class="btn" id="heparin-calculate-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+          
+          <button type="submit" class="btn w-full" id="heparin-calculate-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
             <span>Calculate</span>
           </button>
-          
-          <div id="heparin-result-area" class="mt-4"></div>
         </form>
+        <div id="heparin-result-area" class="mt-4"></div>
       </div>
-    </section>
-
-    <!-- View: Stress Ulcer Prophylaxis -->
-    <section id="view-prophylaxis" class="view">
+    </div>
+    
+    <!-- 
+      View 3: Stress Ulcer Prophylaxis
+    -->
+    <div id="view-prophylaxis" class="view">
       <div class="calculator-view">
         <h2 class="calculator-title">Stress Ulcer Prophylaxis</h2>
-        <form id="prophylaxis-form" class="space-y-6">
+        <form id="prophylaxis-form" class="space-y-4">
           <div class="input-group">
             <label for="prophylaxis-patientName">Patient Name:</label>
             <input type="text" id="prophylaxis-patientName" name="patientName" required>
@@ -169,11 +172,8 @@
             <input type="text" id="prophylaxis-patientIdentifier" name="patientIdentifier" required>
           </div>
           
-          <p class="font-bold text-lg mb-2">Select all applicable risk factors:</p>
-          
           <div class="risk-group-heading">High Risk Factors:</div>
-          <div class="risk-factors-container">
-            <!-- JS will add listeners to these -->
+          <div class="space-y-2">
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Mechanical Ventilation with no enteral feeding (>48h)"><span>Mechanical Ventilation with no enteral feeding (>48h)</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Chronic Liver Disease"><span>Chronic Liver Disease</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Concerning Coagulopathy"><span>Concerning Coagulopathy</span></label>
@@ -186,11 +186,11 @@
           </div>
 
           <div class="risk-group-heading">Moderate to Low Risk Factors:</div>
-          <div class="risk-factors-container">
+          <div class="space-y-2">
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Mechanical Ventilation with enteral nutrition"><span>Mechanical Ventilation with enteral nutrition</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Single Antiplatelet Therapy"><span>Single Antiplatelet Therapy</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Oral Anticoagulation"><span>Oral Anticoagulation</span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Sepsis"><span>Sepsis</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="SepsIS"><span>Sepsis</span></label> <!-- Fixed typo -->
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="ICU stay > 7 days"><span>ICU stay > 7 days</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Renal Replacement Therapy"><span>Renal Replacement Therapy</span></label>
             <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="High Dose Steroids or Immunosuppressant"><span>High Dose Steroids or Immunosuppressant</span></label>
@@ -198,20 +198,22 @@
           </div>
           
           <div id="prophylaxis-result-area" class="mt-4"></div>
-
-          <button type="submit" class="btn btn-save" id="prophylaxis-save-btn">
+          
+          <button type="submit" class="btn btn-save w-full" id="prophylaxis-save-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             <span>Save Result</span>
           </button>
         </form>
       </div>
-    </section>
+    </div>
     
-    <!-- View: Padua Score -->
-    <section id="view-padua" class="view">
+    <!-- 
+      View 4: Padua Score
+    -->
+    <div id="view-padua" class="view">
       <div class="calculator-view">
         <h2 class="calculator-title">Padua (VTE) Score</h2>
-        <form id="padua-form" class="space-y-6">
+        <form id="padua-form" class="space-y-4">
           <div class="input-group">
             <label for="padua-patientName">Patient Name:</label>
             <input type="text" id="padua-patientName" name="patientName" required>
@@ -221,37 +223,38 @@
             <input type="text" id="padua-patientIdentifier" name="patientIdentifier" required>
           </div>
           
-          <p class="font-bold text-lg mb-2">Select all applicable risk factors:</p>
-          
-          <div class="risk-factors-container">
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Active cancer" data-score="3"><span>Active cancer <strong>(+3)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Previous VTE" data-score="3"><span>Previous VTE <strong>(+3)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Reduced mobility" data-score="3"><span>Reduced mobility <strong>(+3)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Known thrombophilic condition" data-score="3"><span>Known thrombophilic condition <strong>(+3)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Recent trauma/surgery (<1 month)" data-score="2"><span>Recent trauma/surgery (&lt;1 month) <strong>(+2)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Age > 70 years" data-score="1"><span>Age > 70 years <strong>(+1)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Heart/respiratory failure" data-score="1"><span>Heart/respiratory failure <strong>(+1)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Acute MI or ischemic stroke" data-score="1"><span>Acute MI or ischemic stroke <strong>(+1)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Acute infection/rheumatologic disorder" data-score="1"><span>Acute infection/rheumatologic disorder <strong>(+1)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Obesity (BMI > 30)" data-score="1"><span>Obesity (BMI > 30) <strong>(+1)</strong></span></label>
-            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Hormonal treatment" data-score="1"><span>Hormonal treatment <strong>(+1)</strong></span></label>
+          <div class="risk-group-heading">Select Risk Factors:</div>
+          <div class="space-y-2">
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Active cancer" data-score="3"><span>Active cancer (+3)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Previous VTE" data-score="3"><span>Previous VTE (+3)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Reduced mobility" data-score="3"><span>Reduced mobility (≥3 days) (+3)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Known thrombophilic condition" data-score="3"><span>Known thrombophilic condition (+3)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Recent trauma/surgery" data-score="2"><span>Recent trauma/surgery (≤1 mo) (+2)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Age > 70" data-score="1"><span>Age > 70 years (+1)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Heart/respiratory failure" data-score="1"><span>Heart/respiratory failure (+1)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Acute MI or ischemic stroke" data-score="1"><span>Acute MI or ischemic stroke (+1)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Acute infection/rheumatologic" data-score="1"><span>Acute infection/rheumatologic (+1)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Obesity (BMI > 30)" data-score="1"><span>Obesity (BMI > 30) (+1)</span></label>
+            <label class="risk-factor-card"><input type="checkbox" name="riskFactor" value="Hormonal treatment" data-score="1"><span>Hormonal treatment (+1)</span></label>
           </div>
           
           <div id="padua-result-area" class="mt-4"></div>
-
-          <button type="submit" class="btn btn-save" id="padua-save-btn">
+          
+          <button type="submit" class="btn btn-save w-full" id="padua-save-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             <span>Save Score</span>
           </button>
         </form>
       </div>
-    </section>
+    </div>
     
-    <!-- View: IV Infusion Calculator -->
-    <section id="view-ivCalculator" class="view">
+    <!-- 
+      View 5: IV Infusion
+    -->
+    <div id="view-iv" class="view">
       <div class="calculator-view">
         <h2 class="calculator-title">IV Infusion Calculator</h2>
-        <form id="iv-form" class="space-y-6">
+        <form id="iv-form" class="space-y-4">
           <div class="input-group">
             <label for="iv-patientName">Patient Name:</label>
             <input type="text" id="iv-patientName" name="patientName" required>
@@ -260,18 +263,17 @@
             <label for="iv-patientIdentifier">Patient ID / Room No.:</label>
             <input type="text" id="iv-patientIdentifier" name="patientIdentifier" required>
           </div>
-          
           <div class="input-group">
             <label for="iv-weight">Patient Weight (kg):</label>
             <input type="number" id="iv-weight" name="weight" step="0.1" required>
           </div>
           <div class="input-group">
-            <label for="iv-drugAmount">Total Drug Amount (mg):</label>
+            <label for="iv-drugAmount">Total Drug Amount in Solution (mg):</label>
             <input type="number" id="iv-drugAmount" name="drugAmount" step="0.1" required>
           </div>
           <div class="input-group">
             <label for="iv-solutionVolume">Total Solution Volume (mL):</label>
-            <input type="number" id="iv-solutionVolume" name="solutionVolume" value="250" step="1" required>
+            <input type="number" id="iv-solutionVolume" name="solutionVolume" step="0.1" required>
           </div>
           <div class="input-group">
             <label for="iv-drugDose">Desired Dose:</label>
@@ -286,32 +288,33 @@
             </select>
           </div>
           
-          <button type="submit" class="btn" id="iv-calculate-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path><path d="M12 18v-2"></path><path d="M12 8V6"></path><path d="M12 13V11"></path></svg>
+          <button type="submit" class="btn w-full" id="iv-calculate-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
             <span>Calculate Rate</span>
           </button>
-          
-          <div id="iv-result-area" class="mt-4"></div>
         </form>
+        <div id="iv-result-area" class="mt-4"></div>
       </div>
-    </section>
+    </div>
     
-    <!-- View: Renal Dosing -->
-    <section id="view-renalDosing" class="view">
+    <!-- 
+      View 6: Renal Dosing
+    -->
+    <div id="view-renal" class="view">
       <div class="calculator-view">
         <h2 class="calculator-title">Renal Dosing (CrCl)</h2>
-        <form id="renal-form" class="space-y-6">
+        <form id="renal-form" class="space-y-4">
           <div class="input-group">
             <label for="renal-age">Age (years):</label>
-            <input type="number" id="renal-age" name="age">
+            <input type="number" id="renal-age" name="age" step="1">
           </div>
           <div class="input-group">
             <label for="renal-weight">Weight (kg):</label>
-            <input type="number" id="renal-weight" name="weight">
+            <input type="number" id="renal-weight" name="weight" step="0.1">
           </div>
           <div class="input-group">
             <label for="renal-creatinine">Serum Creatinine (mg/dL):</label>
-            <input type="number" id="renal-creatinine" name="creatinine" step="0.1">
+            <input type="number" id="renal-creatinine" name="creatinine" step="0.01">
           </div>
           <div class="input-group">
             <label for="renal-gender">Gender:</label>
@@ -320,103 +323,145 @@
               <option value="female">Female</option>
             </select>
           </div>
-          <div id="renal-result-area" class="mt-4"></div>
         </form>
+        <p class="text-sm text-center text-gray-500">Result will appear below as you type.</p>
+        <div id="renal-result-area" class="mt-4"></div>
       </div>
-    </section>
-    
-    <!-- View: Other Scores -->
-    <section id="view-scores" class="view">
+    </div>
+
+    <!-- 
+      View 7: Other Scores
+    -->
+    <div id="view-scores" class="view">
       <div class="calculator-view">
-        <h2 class="calculator-title">Clinical Scores</h2>
-        <p class="text-center text-gray-600 mb-6">More tools coming soon.</p>
-        <div class="space-y-4">
-          <button type="button" class="btn opacity-50" disabled>CURB-65 (Pneumonia)</button>
-          <button type="button" class="btn opacity-50" disabled>SOFA Score (Sepsis)</button>
-          <button type="button" class="btn opacity-50" disabled>CHA₂DS₂-VASc (AF Stroke Risk)</button>
-          <button type="button" class="btn opacity-50" disabled>Glasgow Coma Scale (GCS)</button>
-        </div>
+        <h2 class="calculator-title">Other Clinical Scores</h2>
+        <p class="text-center text-gray-600 mb-6">More calculators are coming soon.</p>
+        <!-- This can be a list of disabled buttons or links -->
       </div>
-    </section>
+    </div>
     
-    <!-- View: Unit Converter -->
-    <section id="view-converter" class="view">
+    <!-- 
+      View 8: Unit Converter
+    -->
+    <div id="view-converter" class="view">
       <div class="calculator-view">
         <h2 class="calculator-title">Unit Converter</h2>
-        <form id="converter-form" class="space-y-6">
+        <form id="converter-form" class="space-y-4">
           <div class="input-group">
-            <label for="converter-fromValue">From:</label>
-            <input type="number" id="converter-fromValue" name="fromValue" value="1">
-            <select id="converter-fromUnit" name="fromUnit" class="mt-2">
+            <label for="converter-fromValue">From Value:</label>
+            <input type="number" id="converter-fromValue" name="fromValue" step="any" value="1">
+          </div>
+          <div class="input-group">
+            <label for="converter-fromUnit">From Unit:</label>
+            <select id="converter-fromUnit" name="fromUnit">
               <optgroup label="Mass">
-                <option value="kg">kg</option><option value="g">g</option><option value="mg" selected>mg</option><option value="mcg">mcg</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="mg">mg</option>
+                <option value="mcg">mcg</option>
               </optgroup>
               <optgroup label="Volume">
-                <option value="L">L</option><option value="mL">mL</option>
+                <option value="L">L</option>
+                <option value="mL">mL</option>
               </optgroup>
               <optgroup label="Weight (Specific)">
-                <option value="lbs_kg">lbs (to kg)</option>
-                <option value="kg_lbs">kg (to lbs)</option>
+                <option value="lbs_kg">Pounds (lbs)</option>
+                <option value="kg_lbs">Kilograms (kg)</option>
               </optgroup>
             </select>
           </div>
           <div class="input-group">
-            <label for="converter-toValue">To:</label>
-            <input type="text" id="converter-toValue" name="toValue" disabled class="bg-gray-200">
-            <select id="converter-toUnit" name="toUnit" class="mt-2">
+            <label for="converter-toValue">To Value:</label>
+            <input type="text" id="converter-toValue" name="toValue" disabled>
+          </div>
+          <div class="input-group">
+            <label for="converter-toUnit">To Unit:</label>
+            <select id="converter-toUnit" name="toUnit">
               <optgroup label="Mass">
-                <option value="kg">kg</option><option value="g">g</option><option value="mg">mg</option><option value="mcg" selected>mcg</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="mg">mg</option>
+                <option value="mcg" selected>mcg</option>
               </optgroup>
               <optgroup label="Volume">
-                <option value="L">L</option><option value="mL">mL</option>
+                <option value="L">L</option>
+                <option value="mL" selected>mL</option>
               </optgroup>
               <optgroup label="Weight (Specific)">
-                <option value="lbs_kg">kg (from lbs)</option>
-                <option value="kg_lbs">lbs (from kg)</option>
+                <option value="lbs_kg">Kilograms (kg)</option>
+                <option value="kg_lbs">Pounds (lbs)</option>
               </optgroup>
             </select>
           </div>
         </form>
+        <p class="text-sm text-center text-gray-500">Result updates automatically.</p>
       </div>
-    </section>
+    </div>
 
-    <!-- View: History (Logs) -->
-    <section id="view-history" class="view">
-      <!-- Content will be loaded by JS after password -->
-    </section>
-
+    <!-- 
+      View 9: History
+    -->
+    <div id="view-history" class="view">
+      <!-- ** NEW: Static Search Bar ** -->
+      <div class="calculator-view" style="margin-bottom: 1rem; padding: 1rem;">
+        <div class="input-group" style="margin-bottom: 0;">
+          <label for="history-search">Search by Patient Name:</label>
+          <input type="search" id="history-search" class="search-bar" placeholder="Type a name to filter logs...">
+        </div>
+      </div>
+      
+      <!-- ** NEW: Dynamic Container for Logs ** -->
+      <!-- JS (loadHistoryLogs) will populate this div -->
+      <div id="history-logs-container" class="history-view">
+        <!-- Loading message or logs will appear here -->
+      </div>
+    </div>
+    
   </main>
 
-  <!-- 3. Bottom Tab Bar (Fixed Bottom) -->
+  <!-- 
+    App Shell: Bottom Nav
+    (Fixed at the bottom)
+  -->
   <nav class="app-bottom-nav">
-    <button id="nav-home" class="nav-button active" data-nav="dashboard">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    <button id="nav-home" class="nav-button active" data-nav="dashboard" aria-label="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       <span>Home</span>
     </button>
-    <button id="nav-history" class="nav-button" data-nav="history">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+    <button id="nav-history" class="nav-button" data-nav="history" aria-label="History">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
       <span>History</span>
     </button>
   </nav>
-
-  <!-- Password Prompt (Hidden by default) -->
+  
+  <!-- 
+    Password Prompt Modal
+    (Hidden by default, shown by JS)
+  -->
   <div id="password-prompt" class="hidden">
     <div id="password-modal">
-      <h3 class="text-xl font-bold text-center mb-4">Access History</h3>
+      <h3 class="calculator-title">Access History</h3>
       <p class="text-center text-gray-600 mb-6">Please enter the password to view logs.</p>
       <form id="password-form" class="space-y-4">
         <div class="input-group">
           <label for="password-input">Password:</label>
           <input type="password" id="password-input" name="password" required>
         </div>
-        <button type="submit" class="btn">Unlock</button>
-        <button type="button" id="password-cancel" class="btn" style="background-image: none; background-color: #718096; box-shadow: none;">Cancel</button>
+        <button type="submit" class="btn w-full">
+          <span>Unlock</span>
+        </button>
+        <button type="button" id="password-cancel" class="btn w-full" style="background: #64748b;">
+          <span>Cancel</span>
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- Main Application Script -->
-  <script src="index.js"></script>
+  <!-- 
+    Main Script
+    (Deferred to load after HTML)
+  -->
+  <script src="index.js" defer></script>
 
 </body>
 </html>
