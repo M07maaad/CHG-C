@@ -6,17 +6,17 @@
   "start_url": "/", 
   
   "display": "standalone",
-  "background_color": "#e0f7fa",
+  "background_color": "#f0f4f8",
   "theme_color": "#00bcd4",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEje8bWFF9Q0CTqpUUiO6wGjb2mkDQjaMzNN2ZJk0lOA2U1ugmOjmaByg1SlmqIE4_xfjzoMFNeks1T5ZoWLdF_Pp5zuq_LEsei9XeaCRqhzubS26lquL6RB94j5G0kMcXfvG9Kh2uh2fT8FHJcNRwYhskEOjoe0afxlurQXqA_CqSNGAqdvOEcEsE86ileX/s1600/Screenshot%202025-11-09%20at%205.33.36%E2%80%AFPM.png",
+      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEje8bWFF9Q0CTqpUUiO6wGjb2mkDQjaMzNN2ZJk0lOA2U1ugmOjmaByg1SlmqIE4_xfjzoMFNeks1T5ZoWLdF_Pp5zuq_LEsei9XeaCRqhzubS26lquL6RB94j5G0kMcXfvG9Kh2uh2fT8FHJcNRwYhskEOjoe0afxlurQXqA_CqSNGAqdvOEcEsE86ileX/s1600/Screenshot%202025-11-09%20at%205.33.36%E2%80%AFPM.png",
+      "src": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s512/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png",
       "type": "image/png",
       "sizes": "512x512"
     }
