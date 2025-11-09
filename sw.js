@@ -1,61 +1,117 @@
-const CACHE_NAME = 'chg-toolkit-cache-v2';
-// This list should include all critical files for the app to work offline
+// --- (1) CACHE CONFIGURATION ---
+// IMPORTANT: Change this name every time you update the app
+const CACHE_NAME = 'chg-toolkit-cache-v3'; 
+
+// This list MUST include every critical file for the app to work offline
 const urlsToCache = [
-  '/',
+  '/', // The base page
   'index.html',
+  'style.css', // The new CSS file
   'index.js',
   'manifest.json',
-  'https://cdn.tailwindcss.com',
+  
+  // --- CDNs ---
+  // Supabase
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  // Tailwind (imported by style.css, caching it is safer)
+  'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css',
+  // Google Font
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s1600/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png'
+  
+  // --- Core Images (from HTML & Manifest) ---
+  // 192px icon
+  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png',
+  // 512px icon
+  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s512/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png'
 ];
 
+// --- (2) PWA LIFECYCLE: INSTALL ---
 // Install event: cache all critical assets
 self.addEventListener('install', event => {
+  console.log('[SW] Install event started. Caching assets...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('[SW] Cache opened. Adding files...');
+        // We use addAll which fails if any single file fails
         return cache.addAll(urlsToCache);
       })
+      .catch(error => {
+        console.error('[SW] Failed to cache assets during install:', error);
+      })
   );
+  // Force the new service worker to activate immediately
   self.skipWaiting();
 });
 
-// Fetch event: serve from cache first
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        // Not in cache - fetch from network
-        return fetch(event.request);
-      }
-    )
-  );
-});
-
+// --- (3) PWA LIFECYCLE: ACTIVATE ---
 // Activate event: clean up old caches
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  console.log('[SW] Activate event started. Cleaning old caches...');
+  const cacheWhitelist = [CACHE_NAME]; // Only keep the current cache
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            // If it's not our current cache, delete it
+            console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  // Take control of all open clients immediately
   return self.clients.claim();
 });
 
-// --- *** NEW NOTIFICATION LOGIC *** ---
+// --- (4) PWA LIFECYCLE: FETCH ---
+// Fetch event: serve from cache first (Cache-First strategy)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response from cache
+        if (response) {
+          return response;
+        }
+        
+        // Not in cache - fetch from network,
+        // then cache it for next time (optional, but good)
+        return fetch(event.request).then(
+          networkResponse => {
+            // Check if we received a valid response
+            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              // Don't cache errors or opaque responses
+              return networkResponse;
+            }
+
+            // IMPORTANT: Clone the response. A response is a stream
+            // and because we want the browser to consume the response
+            // as well as the cache consuming the response, we need
+            // to clone it so we have two streams.
+            const responseToCache = networkResponse.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return networkResponse;
+          }
+        ).catch(error => {
+          // Network fetch failed
+          console.error('[SW] Network fetch failed:', error);
+          // You could return an offline fallback page here if you had one
+        });
+      }
+    )
+  );
+});
+
+// --- (5) NOTIFICATION LOGIC ---
+
 // Listen for messages from the main page (index.js)
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'scheduleNotification') {
@@ -64,7 +120,7 @@ self.addEventListener('message', event => {
     console.log(`[SW] Received notification request. Scheduling in ${delayInMs}ms`);
 
     // Use setTimeout to delay the notification
-    // This is more reliable in a Service Worker than on the main page
+    // This is more reliable in a Service Worker
     setTimeout(() => {
       console.log('[SW] Triggering notification:', title);
       // Show the notification using the Service Worker's registration
@@ -72,6 +128,7 @@ self.addEventListener('message', event => {
         body: body,
         icon: icon,
         badge: icon, // Icon for Android notification tray
+        vibrate: [200, 100, 200] // Vibrate pattern
       });
     }, delayInMs);
   }
@@ -82,15 +139,17 @@ self.addEventListener('notificationclick', event => {
   console.log('[SW] Notification clicked');
   event.notification.close();
 
-  // This attempts to focus an existing tab or open a new one
+  // This attempts to focus an existing app window or open a new one
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientsArr => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientsArr => {
+      // Check if there's already a window open
       const hadWindowToFocus = clientsArr.some(windowClient =>
         windowClient.url === self.location.origin + '/'
           ? (windowClient.focus(), true)
           : null
       );
       
+      // If not, open a new window
       if (!hadWindowToFocus) {
         clients.openWindow(self.location.origin)
           .then(windowClient => (windowClient ? windowClient.focus() : null));
@@ -98,4 +157,3 @@ self.addEventListener('notificationclick', event => {
     })
   );
 });
-
