@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chg-toolkit-cache-v1';
+const CACHE_NAME = 'chg-toolkit-cache-v2';
 // This list should include all critical files for the app to work offline
 const urlsToCache = [
   '/',
