@@ -16,7 +16,7 @@ const urlsToCache = [
   // Tailwind (imported by style.css, caching it is safer)
   'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css',
   // Google Font
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display.swap',
   
   // --- Core Images (from HTML & Manifest) ---
   // 192px icon
@@ -69,6 +69,12 @@ self.addEventListener('activate', event => {
 // --- (4) PWA LIFECYCLE: FETCH ---
 // Fetch event: serve from cache first (Cache-First strategy)
 self.addEventListener('fetch', event => {
+  // We only want to cache GET requests
+  if (event.request.method !== 'GET') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -77,20 +83,17 @@ self.addEventListener('fetch', event => {
           return response;
         }
         
-        // Not in cache - fetch from network,
-        // then cache it for next time (optional, but good)
+        // Not in cache - fetch from network
         return fetch(event.request).then(
           networkResponse => {
             // Check if we received a valid response
-            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              // Don't cache errors or opaque responses
+            // We don't cache Supabase API calls
+            if(!networkResponse || networkResponse.status !== 200 || 
+               event.request.url.includes('supabase.co')) {
               return networkResponse;
             }
 
             // IMPORTANT: Clone the response. A response is a stream
-            // and because we want the browser to consume the response
-            // as well as the cache consuming the response, we need
-            // to clone it so we have two streams.
             const responseToCache = networkResponse.clone();
 
             caches.open(CACHE_NAME)
@@ -102,7 +105,7 @@ self.addEventListener('fetch', event => {
           }
         ).catch(error => {
           // Network fetch failed
-          console.error('[SW] Network fetch failed:', error);
+          console.error('[SW] Network fetch failed:', event.request.url, error);
           // You could return an offline fallback page here if you had one
         });
       }
