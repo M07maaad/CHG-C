@@ -16,7 +16,7 @@ const headerBackButton = $('#header-back-button');
 const allViews = $$('.view');
 const allNavButtons = $$('.nav-button');
 const passwordPrompt = $('#password-prompt');
-const darkModeToggle = $('#dark-mode-toggle');
+const darkModeToggle = $('#dark-mode-toggle'); // ** NEW: Dark Mode Button **
 
 // Forms & Inputs
 const heparinForm = $('#heparin-form');
@@ -144,6 +144,7 @@ function initializeEventListeners() {
     card.addEventListener('click', () => {
       const navTarget = card.dataset.nav;
       const viewId = `view-${navTarget}`;
+      // Get title from the card itself
       const title = card.querySelector('.tool-card-title').innerText.replace('<br>', ' ');
       navigateTo(viewId, title);
     });
@@ -190,8 +191,11 @@ function initializeEventListeners() {
 
 // --- Dark Mode ---
 function initializeDarkMode() {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Check for saved user preference
   const savedMode = localStorage.getItem('darkMode');
+  
+  // Check for OS-level preference
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
   if (savedMode === 'true' || (savedMode === null && prefersDark)) {
     document.body.classList.add('dark');
@@ -201,7 +205,9 @@ function initializeDarkMode() {
 }
 
 function toggleDarkMode() {
+  // Toggle the .dark class on the <body> element
   const isDark = document.body.classList.toggle('dark');
+  // Save the user's preference to localStorage
   localStorage.setItem('darkMode', isDark);
 }
 
@@ -220,19 +226,19 @@ function handlePasswordSubmit(e) {
 
 async function loadHistoryLogs() {
   const historyContainer = $('#history-logs-container');
-  historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 mt-10">Loading history...</p>`;
+  historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 dark:text-gray-400 mt-10">Loading history...</p>`;
   
   try {
     const { data: logs, error } = await db
       .from('calculation_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(50); // Fetch last 50 logs
 
     if (error) throw error;
 
     if (!logs || logs.length === 0) {
-      historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 mt-10">No logs found.</p>`;
+      historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 dark:text-gray-400 mt-10">No logs found.</p>`;
       return;
     }
     
@@ -250,10 +256,11 @@ function renderHistoryLogs(logs) {
   const historyContainer = $('#history-logs-container');
   
   if (!logs || logs.length === 0) {
-    historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 mt-10">No matching logs found.</p>`;
+    historyContainer.innerHTML = `<p class="text-center text-lg text-gray-600 dark:text-gray-400 mt-10">No matching logs found.</p>`;
     return;
   }
   
+  // Create HTML string from log data
   const logsHtml = logs.map(log => `
     <div class="log-entry" data-patient-name="${(log.patient_name || '').toLowerCase()}">
       <div class="log-header">
@@ -277,10 +284,13 @@ function handleHistorySearch(e) {
   const searchTerm = e.target.value.toLowerCase();
   
   // This is a client-side filter (fast)
+  // It filters the logs we already fetched from Supabase
   const filteredLogs = appState.historyLogs.filter(log => {
+    // Check if the patient_name (if it exists) includes the search term
     return (log.patient_name || '').toLowerCase().includes(searchTerm);
   });
   
+  // Re-render the list with only the filtered logs
   renderHistoryLogs(filteredLogs);
 }
 
@@ -296,15 +306,16 @@ function toggleHeparinMode(mode) {
   $('#heparin-initial-fields').classList.toggle('hidden', !isInitial);
   $('#heparin-maintenance-fields').classList.toggle('hidden', isInitial);
   
+  // Toggle 'required' attribute for form validation
   $('#heparin-indication').required = isInitial;
   $('#heparin-currentRate').required = !isInitial;
   $('#heparin-currentPtt').required = !isInitial;
   
-  $('#heparin-result-area').innerHTML = '';
+  $('#heparin-result-area').innerHTML = ''; // Clear old results
 }
 
 async function handleHeparinSubmit(e) {
-  e.preventDefault();
+  e.preventDefault(); // Prevent form from reloading page
   const resultArea = $('#heparin-result-area');
   const calculateBtn = $('#heparin-calculate-btn');
   
@@ -313,6 +324,7 @@ async function handleHeparinSubmit(e) {
   resultArea.innerHTML = '';
   
   try {
+    // Collect all form data
     const formData = {
       patientName: $('#heparin-patientName').value,
       patientIdentifier: $('#heparin-patientIdentifier').value,
@@ -323,6 +335,7 @@ async function handleHeparinSubmit(e) {
       currentPtt: parseFloat($('#heparin-currentPtt').value),
     };
     
+    // Basic validation
     if (!formData.patientName || !formData.patientIdentifier) {
         throw new Error('Patient Name and ID are required.');
     }
@@ -330,10 +343,11 @@ async function handleHeparinSubmit(e) {
     let result, inputs, toolName;
     
     if (appState.currentHeparinMode === 'initial') {
+      // Validate fields for initial mode
       if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || !formData.indication) {
          throw new Error('Weight, Concentration, and Indication are required for initial dose.');
       }
-      result = calculateInitialHeparinRate(formData);
+      result = calculateInitialHeparinRate(formData); // Calculate
       toolName = 'heparin_initial';
       inputs = {
         weight_kg: formData.weight,
@@ -341,10 +355,11 @@ async function handleHeparinSubmit(e) {
         indication: formData.indication
       };
     } else { // Maintenance mode
+      // Validate fields for maintenance mode
       if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || isNaN(formData.currentInfusionRate) || isNaN(formData.currentPtt)) {
          throw new Error('Weight, Concentration, Current Rate, and Current PTT are required for maintenance.');
       }
-      result = calculateMaintenanceHeparinRate(formData);
+      result = calculateMaintenanceHeparinRate(formData); // Calculate
       toolName = 'heparin_maintenance';
       inputs = {
         weight_kg: formData.weight,
@@ -354,10 +369,14 @@ async function handleHeparinSubmit(e) {
       };
     }
     
+    // Display result or error
     if (result.error) {
       resultArea.innerHTML = `<div class="error-box"><p>${result.error}</p></div>`;
     } else {
-      resultArea.innerHTML = result.html;
+      resultArea.innerHTML = result.html; // Display calculation HTML
+      
+      // --- Schedule Notifications ---
+      // This function will handle permission request
       if (result.notification) {
         scheduleNotification(
           result.notification.title,
@@ -373,18 +392,21 @@ async function handleHeparinSubmit(e) {
         );
       }
       
+      // --- Save to Supabase (in the background) ---
       saveCalculation(
         toolName,
         formData.patientName,
         formData.patientIdentifier,
         inputs,
-        result.logData
+        result.logData // Save the clean log data
       );
     }
     
   } catch (error) {
+    // Catch any unexpected errors (like "Patient Name required")
     resultArea.innerHTML = `<div class="error-box"><p>An unexpected error occurred: ${error.message}</p></div>`;
   } finally {
+    // Always re-enable the button
     calculateBtn.disabled = false;
     calculateBtn.querySelector('span').textContent = 'Calculate';
   }
@@ -392,23 +414,26 @@ async function handleHeparinSubmit(e) {
 
 // --- Prophylaxis ---
 function handleProphylaxisCheck() {
+  // This function runs every time a checkbox is clicked
   const selectedFactors = Array.from(prophylaxisForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
   const resultArea = $('#prophylaxis-result-area');
   
   if (selectedFactors.length === 0) {
-    resultArea.innerHTML = '';
+    resultArea.innerHTML = ''; // Clear result if no factors selected
     return;
   }
   
+  // Calculate and display the result live
   const result = calculateStressUlcerProphylaxis(selectedFactors);
   resultArea.innerHTML = result.html;
 }
 
 async function handleProphylaxisSubmit(e) {
-  e.preventDefault();
+  e.preventDefault(); // This is now a "Save" button
   const resultArea = $('#prophylaxis-result-area');
   const saveBtn = $('#prophylaxis-save-btn');
   
+  // Check if there is a result to save
   if (resultArea.innerHTML === '') {
     alert('Please select risk factors to calculate a result before saving.');
     return;
@@ -418,6 +443,7 @@ async function handleProphylaxisSubmit(e) {
   saveBtn.querySelector('span').textContent = 'Saving...';
   
   try {
+    // Re-calculate to get clean data
     const selectedFactors = Array.from(prophylaxisForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
     const result = calculateStressUlcerProphylaxis(selectedFactors); 
     
@@ -428,6 +454,7 @@ async function handleProphylaxisSubmit(e) {
         throw new Error('Patient Name and ID are required to save.');
     }
     
+    // Save to Supabase
     await saveCalculation(
       'stress_ulcer_prophylaxis',
       patientName,
@@ -440,8 +467,10 @@ async function handleProphylaxisSubmit(e) {
     
   } catch (error) {
     saveBtn.querySelector('span').textContent = 'Save Failed';
+    // Show error below the save button
     resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
   } finally {
+    // Reset button text after 2 seconds
     setTimeout(() => {
       saveBtn.disabled = false;
       saveBtn.querySelector('span').textContent = 'Save Result';
@@ -451,6 +480,7 @@ async function handleProphylaxisSubmit(e) {
 
 // --- Padua ---
 function handlePaduaCheck() {
+  // This function runs every time a checkbox is clicked
   const resultArea = $('#padua-result-area');
   
   let score = 0;
@@ -461,16 +491,17 @@ function handlePaduaCheck() {
   const selectedFactors = Array.from(paduaForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
   
   if (selectedFactors.length === 0) {
-    resultArea.innerHTML = '';
+    resultArea.innerHTML = ''; // Clear result if nothing selected
     return;
   }
   
+  // Calculate and display result live
   const result = calculatePaduaScore(score);
   resultArea.innerHTML = result.html;
 }
 
 async function handlePaduaSubmit(e) {
-  e.preventDefault();
+  e.preventDefault(); // This is a "Save" button
   const resultArea = $('#padua-result-area');
   const saveBtn = $('#padua-save-btn');
 
@@ -483,6 +514,7 @@ async function handlePaduaSubmit(e) {
   saveBtn.querySelector('span').textContent = 'Saving...';
 
   try {
+    // Re-calculate to get clean data
     let score = 0;
     const selectedFactors = [];
     paduaForm.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
@@ -498,6 +530,7 @@ async function handlePaduaSubmit(e) {
         throw new Error('Patient Name and ID are required to save.');
     }
 
+    // Save to Supabase
     await saveCalculation(
       'padua_score',
       patientName,
@@ -544,10 +577,16 @@ async function handleIVSubmit(e) {
     if (!patientName || !patientIdentifier) {
         throw new Error('Patient Name and ID are required.');
     }
+    
+    if (isNaN(inputs.weight_kg) || isNaN(inputs.drugAmount_mg) || isNaN(inputs.solutionVolume_ml) || isNaN(inputs.drugDose)) {
+        throw new Error('All calculation fields must be valid numbers.');
+    }
 
+    // Calculate and display
     const result = calculateIVRate(inputs);
     resultArea.innerHTML = result.html;
     
+    // Save to Supabase (in the background)
     saveCalculation(
       'iv_calculator',
       patientName,
@@ -566,6 +605,7 @@ async function handleIVSubmit(e) {
 
 // --- Renal Dosing (Live) ---
 function handleRenalInput() {
+  // This calculates live as the user types
   const resultArea = $('#renal-result-area');
   try {
     const inputs = {
@@ -575,11 +615,12 @@ function handleRenalInput() {
       gender: $('#renal-gender').value
     };
     
+    // Check if all fields are valid numbers > 0
     if (inputs.age > 0 && inputs.weight_kg > 0 && inputs.creatinine_mg_dl > 0) {
       const result = calculateCrCl(inputs);
       resultArea.innerHTML = result.html;
     } else {
-      resultArea.innerHTML = '';
+      resultArea.innerHTML = ''; // Clear result if inputs are incomplete
     }
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>Calculation error: ${error.message}</p></div>`;
@@ -592,6 +633,7 @@ function handleConverterInput() {
   const fromUnit = $('#converter-fromUnit').value;
   const toUnitField = $('#converter-toUnit');
 
+  // Auto-pair logic for lbs/kg
   if (fromUnit === 'lbs_kg') toUnitField.value = 'kg_lbs';
   if (fromUnit === 'kg_lbs') toUnitField.value = 'lbs_kg';
   
@@ -618,30 +660,21 @@ function handleConverterInput() {
 
 // --- (7) CALCULATION LOGIC (Translated from code.gs & New) ---
 
+/**
+ * Calculates Initial Heparin Dose
+ * This is the translated logic from your code.gs
+ * ** INCLUDES 1-MINUTE NOTIFICATION TEST **
+ */
 function calculateInitialHeparinRate(formData) {
   const { weight, heparinConcentration, indication, patientName } = formData;
-  // ... (rest of the function is identical to the one in index.js from the previous step)
-  // ... (it already includes the 1-minute test logic)
-  // [Full calculation logic from previous index.js]
-
-  // This is the important part:
-  const repeatPttMinutes = 1; // *** TEST: 1 Minute Notification ***
-
-  const logData = {
-    loading_dose: `${suggestedLoadingDoseUnits.toFixed(0)} units (${(suggestedLoadingDoseUnits / heparinConcentration).toFixed(2)} mL)`,
-    initial_rate: `${(suggestedInitialInfusionRateUnitsPerKg * weight / heparinConcentration).toFixed(2)} mL/hour`,
-    next_ptt: `in ${repeatPttMinutes} minutes`
-  };
-  
-  // (HTML generation...)
-  // (Return object with notification_ptt...)
-  // [Self-correction: The full logic must be here, not just a comment]
   
   if (isNaN(weight) || isNaN(heparinConcentration) || weight <= 0 || heparinConcentration <= 0 || !indication) {
     return { error: 'Please enter valid numerical values and select an indication.' };
   }
+
   let suggestedLoadingDoseUnits = 0;
   let suggestedInitialInfusionRateUnitsPerKg = 0;
+
   switch (indication) {
     case 'AF':
       suggestedLoadingDoseUnits = Math.min(80 * weight, 5000);
@@ -653,27 +686,33 @@ function calculateInitialHeparinRate(formData) {
       break;
     case 'Acute coronary syndrome':
       suggestedLoadingDoseUnits = 70 * weight;
-      suggestedInitialInfusionRateUnitsPerKg = 18;
+      suggestedInitialInfusionRateUnitsPerKg = 18; // Your code.gs said 18, ACS protocol is often 12. Sticking to your code.gs logic.
       break;
     default:
       return { error: 'Invalid indication selected.' };
   }
+
   const initialInfusionUnitsPerHour = suggestedInitialInfusionRateUnitsPerKg * weight;
   const initialInfusionRateMl = (initialInfusionUnitsPerHour / heparinConcentration).toFixed(2);
   const loadingDoseMl = (suggestedLoadingDoseUnits / heparinConcentration).toFixed(2);
   
-  const logData_final = {
+  // *** TEST: 1 Minute Notification ***
+  const repeatPttMinutes = 1; 
+  
+  // Data for logging
+  const logData = {
     loading_dose: `${suggestedLoadingDoseUnits.toFixed(0)} units (${loadingDoseMl} mL)`,
     initial_rate: `${initialInfusionRateMl} mL/hour`,
-    next_ptt: `in ${repeatPttMinutes} minutes`
+    next_ptt: `in ${repeatPttMinutes} minutes (TEST)`
   };
   
+  // HTML for display
   const html = `
     <div class="result-box">
       <p class="result-title">Initial Dose Calculation</p>
-      <p class="text-lg mt-2">Suggested Loading Dose: <span class="font-bold">${logData_final.loading_dose}</span></p>
-      <p class="text-lg mt-2">Initial Infusion Rate: <span class="font-bold">${logData_final.initial_rate}</span></p>
-      <p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData_final.next_ptt}</span></p>
+      <p class="text-lg mt-2">Suggested Loading Dose: <span class="font-bold">${logData.loading_dose}</span></p>
+      <p class="text-lg mt-2">Initial Infusion Rate: <span class="font-bold">${logData.initial_rate}</span></p>
+      <p class="text-lg mt-2">Next PTT Check: <span class="font-bold">in 6 hours</span></p>
     </div>
     <div class="result-box-notification">
       <p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes} minute(s) for PTT check.</p>
@@ -682,37 +721,37 @@ function calculateInitialHeparinRate(formData) {
 
   return {
     html: html,
-    logData: logData_final,
+    logData: logData,
     notification_ptt: {
       title: `Heparin Alert: ${patientName}`,
       body: `Time for scheduled PTT check.`,
-      delayInMinutes: repeatPttMinutes
+      delayInMinutes: repeatPttMinutes // Send 1-minute test
     }
   };
 }
 
+/**
+ * Calculates Maintenance Heparin Dose
+ * This is the translated logic from your code.gs
+ * ** INCLUDES 1-MINUTE NOTIFICATION TEST **
+ */
 function calculateMaintenanceHeparinRate(formData) {
   const { weight, heparinConcentration, currentInfusionRate, currentPtt, patientName } = formData;
-  // ... (rest of the function is identical to the one in index.js from the previous step)
-  // ... (it already includes the 1-minute test logic)
-  // [Full calculation logic from previous index.js]
-  
-  // This is the important part:
-  let repeatPttMinutes = 1; // *** TEST: 1 Minute Notification ***
 
-  // [Self-correction: The full logic must be here, not just a comment]
-  
   if (isNaN(weight) || isNaN(heparinConcentration) || isNaN(currentInfusionRate) || isNaN(currentPtt) || weight <= 0 || heparinConcentration <= 0 || currentInfusionRate < 0 || currentPtt <= 0) {
     return { error: 'Please enter valid numerical values for all fields.' };
   }
+
   const currentUnitsPerHour = currentInfusionRate * heparinConcentration;
   const currentUnitsPerKgPerHour = currentUnitsPerHour / weight;
   let newUnitsPerKgPerHour = currentUnitsPerKgPerHour;
   let bolusDoseUnits = 0;
   let message = '';
   let stopInfusionMin = 0;
+  let repeatPttHours = 6; // Default PTT check
   let boxClass = 'result-box';
 
+  // Your exact logic from code.gs
   if (currentPtt < 40) {
     bolusDoseUnits = 25 * weight; newUnitsPerKgPerHour += 3; message = 'Very low PTT (<40).'; boxClass = 'error-box';
   } else if (currentPtt <= 49) {
@@ -730,42 +769,69 @@ function calculateMaintenanceHeparinRate(formData) {
   } else if (currentPtt <= 150) {
     stopInfusionMin = 120; newUnitsPerKgPerHour -= 5; message = `Extremely high PTT (141-150). Stop infusion for ${stopInfusionMin} min.`; boxClass = 'error-box';
   } else if (currentPtt > 150) {
-    stopInfusionMin = 180; newUnitsPerKgPerHour = 0; message = `Critically high PTT (>150). Stop infusion for ${stopInfusionMin} min.`; repeatPttMinutes = 0; boxClass = 'error-box';
+    stopInfusionMin = 180; newUnitsPerKgPerHour = 0; message = `Critically high PTT (>150). Stop infusion for ${stopInfusionMin} min.`; repeatPttHours = 0; boxClass = 'error-box';
   }
-  if (newUnitsPerKgPerHour < 0) newUnitsPerKgPerHour = 0;
+  
+  if (newUnitsPerKgPerHour < 0) newUnitsPerKgPerHour = 0; // Prevent negative rate
+  
   const newUnitsPerHour = newUnitsPerKgPerHour * weight;
   const newRateMl = (newUnitsPerHour / heparinConcentration).toFixed(2);
   const bolusDoseMl = (bolusDoseUnits / heparinConcentration).toFixed(2);
+  
+  // *** TEST: 1 Minute Notification ***
+  const repeatPttMinutes_TEST = 1; 
+  
+  let nextPttText = `in ${repeatPttHours} hours`;
+  if (repeatPttHours === 0) {
+    nextPttText = `Per physician's instructions`;
+  }
   
   const logData = {
     new_rate: `${newRateMl} mL/hour`,
     bolus_dose: bolusDoseUnits > 0 ? `${bolusDoseUnits.toFixed(0)} units (${bolusDoseMl} mL)` : 'N/A',
     stop_infusion_min: stopInfusionMin > 0 ? stopInfusionMin : 'N/A',
-    next_ptt: repeatPttMinutes > 0 ? `in ${repeatPttMinutes} minutes` : `Per physician's instructions`,
+    next_ptt: nextPttText,
     message: message
   };
 
+  // Build result HTML
   let html = `<div class="${boxClass}"> <p class="result-title">Maintenance Dose Adjustment</p>`;
   if (logData.bolus_dose !== 'N/A') html += `<p class="text-lg mt-2">Suggested Bolus: <span class="font-bold">${logData.bolus_dose}</span></p>`;
-  if (logData.stop_infusion_min !== 'N/A') html += `<p class="text-lg mt-2 font-bold" style="color: #c62828;">Stop Infusion: <span class="font-bold">${logData.stop_infusion_min} minutes</span></p>`;
+  if (logData.stop_infusion_min !== 'N/A') html += `<p class="text-lg mt-2 font-bold text-red-700 dark:text-red-400">Stop Infusion: <span class="font-bold">${logData.stop_infusion_min} minutes</span></p>`;
   html += `<p class="text-lg mt-2">New Infusion Rate: <span class="font-bold">${logData.new_rate}</span></p>`;
   html += `<p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData.next_ptt}</span></p>`;
-  html += `<p class="text-sm mt-3">${logData.message}</p></div>`;
+  html += `<p class="text-sm mt-3 opacity-80">${logData.message}</p></div>`;
   
   let notifications = {};
+  
+  // Add notification for STOP infusion (TEST: 1 min)
   if (stopInfusionMin > 0) {
-    const stopDelay = 1; // *** TEST: 1 Minute Notification ***
-    notifications.notification = { title: `Heparin Alert: ${patientName}`, body: `TEST: Time to RESTART infusion (Original stop: ${stopInfusionMin} min).`, delayInMinutes: stopDelay };
-    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${stopDelay} min to restart infusion.</p></div>`;
+    const stopDelay_TEST = 1; // *** TEST: 1 Minute Notification ***
+    notifications.notification = { 
+      title: `Heparin Alert: ${patientName}`, 
+      body: `TEST: Time to RESTART infusion (Original stop: ${stopInfusionMin} min).`, 
+      delayInMinutes: stopDelay_TEST 
+    };
+    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${stopDelay_TEST} min to restart infusion.</p></div>`;
   }
-  if (repeatPttMinutes > 0) {
-    notifications.notification_ptt = { title: `Heparin Alert: ${patientName}`, body: `TEST: Time for scheduled PTT check (Original: ${logData.next_ptt}).`, delayInMinutes: repeatPttMinutes };
-    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes} min for PTT check.</p></div>`;
+  
+  // Add notification for PTT check (TEST: 1 min)
+  if (repeatPttHours > 0) {
+    notifications.notification_ptt = { 
+      title: `Heparin Alert: ${patientName}`, 
+      body: `TEST: Time for scheduled PTT check (Original: ${logData.next_ptt}).`, 
+      delayInMinutes: repeatPttMinutes_TEST 
+    };
+    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes_TEST} min for PTT check.</p></div>`;
   }
 
   return { html: html, logData: logData, ...notifications };
 }
 
+/**
+ * Calculates Stress Ulcer Prophylaxis Risk
+ * This is the translated logic from your code.gs
+ */
 function calculateStressUlcerProphylaxis(selectedFactors) {
   const highRiskFactors = [
     'Mechanical Ventilation with no enteral feeding (>48h)', 'Chronic Liver Disease', 'Concerning Coagulopathy',
@@ -776,13 +842,18 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
     'Mechanical Ventilation with enteral nutrition', 'Single Antiplatelet Therapy', 'Oral Anticoagulation', 'SepsIS',
     'ICU stay > 7 days', 'Renal Replacement Therapy', 'High Dose Steroids or Immunosuppressant', 'Shock'
   ];
+
   const highRiskCount = selectedFactors.filter(factor => highRiskFactors.includes(factor)).length;
   const moderateRiskCount = selectedFactors.filter(factor => moderateRiskFactors.includes(factor)).length;
+  
   let riskLevel = 'Low Risk';
   if (highRiskCount > 0) riskLevel = 'High Risk';
   else if (moderateRiskCount >= 2) riskLevel = 'Moderate Risk';
+  
   const isIndicated = (riskLevel === 'High Risk' || riskLevel === 'Moderate Risk');
+  
   const logData = { risk_level: riskLevel, is_indicated: isIndicated };
+  
   let html = '';
   if (isIndicated) {
     html = `<div class="error-box"><p class="result-title">Risk Level: ${riskLevel}</p><p class="mt-1 font-bold">Patient is INDICATED for prophylaxis.</p></div>`;
@@ -792,11 +863,17 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
   return { html, logData };
 }
 
+/**
+ * Calculates Padua Score
+ */
 function calculatePaduaScore(score) {
   let riskLevel = 'Low Risk';
   if (score >= 4) riskLevel = 'High Risk';
+  
   const isIndicated = (riskLevel === 'High Risk');
+  
   const logData = { score: score, risk_level: riskLevel, is_indicated: isIndicated };
+  
   let html = '';
   if (isIndicated) {
     html = `<div class="error-box"><p class="result-title">Score: ${score} (Risk Level: ${riskLevel})</p><p class="mt-1 font-bold">Patient is at HIGH RISK for VTE. Prophylaxis recommended.</p></div>`;
@@ -806,39 +883,79 @@ function calculatePaduaScore(score) {
   return { html, logData };
 }
 
+/**
+ * Calculates IV Infusion Rate
+ */
 function calculateIVRate(inputs) {
   const { weight_kg, drugAmount_mg, solutionVolume_ml, drugDose, doseUnit } = inputs;
+  
   if (isNaN(weight_kg) || isNaN(drugAmount_mg) || isNaN(solutionVolume_ml) || isNaN(drugDose) || weight_kg <= 0 || drugAmount_mg <= 0 || solutionVolume_ml <= 0 || drugDose <= 0) {
     throw new Error('Please enter valid, positive numerical values for all fields.');
   }
+
   const concentration_mg_ml = drugAmount_mg / solutionVolume_ml;
   let rate_ml_hr = 0;
+
   switch (doseUnit) {
-    case 'mcg/kg/min': rate_ml_hr = (drugDose * weight_kg * 60) / (concentration_mg_ml * 1000); break;
-    case 'mcg/min': rate_ml_hr = (drugDose * 60) / (concentration_mg_ml * 1000); break;
-    case 'mg/hr': rate_ml_hr = drugDose / concentration_mg_ml; break;
-    default: throw new Error('Invalid dose unit selected.');
+    case 'mcg/kg/min': 
+      rate_ml_hr = (drugDose * weight_kg * 60) / (concentration_mg_ml * 1000); 
+      break;
+    case 'mcg/min': 
+      rate_ml_hr = (drugDose * 60) / (concentration_mg_ml * 1000); 
+      break;
+    case 'mg/hr': 
+      rate_ml_hr = drugDose / concentration_mg_ml; 
+      break;
+    default: 
+      throw new Error('Invalid dose unit selected.');
   }
+
   const logData = { rate_ml_hr: rate_ml_hr.toFixed(2) };
-  const html = `<div class="result-box"><p class="text-lg text-center">Set Pump Rate to:</p><p class="text-3xl font-bold text-center my-2">${logData.rate_ml_hr} mL/hr</p></div>`;
+  
+  const html = `
+    <div class="result-box">
+      <p class="text-lg text-center">Set Pump Rate to:</p>
+      <p class="text-3xl font-bold text-center my-2">${logData.rate_ml_hr} mL/hr</p>
+    </div>
+  `;
+  
   return { html, logData };
 }
 
+/**
+ * Calculates Creatinine Clearance
+ */
 function calculateCrCl(inputs) {
   const { age, weight_kg, creatinine_mg_dl, gender } = inputs;
+  
   let crcl = ((140 - age) * weight_kg) / (72 * creatinine_mg_dl);
   if (gender === 'female') crcl *= 0.85;
+  
   const logData = { crcl_ml_min: crcl.toFixed(1) };
-  const html = `<div class="result-box"><p class="text-lg text-center">Estimated Creatinine Clearance:</p><p class="text-3xl font-bold text-center my-2">${logData.crcl_ml_min} mL/min</p><p class="text-sm text-center mt-4">Note: Cockcroft-Gault. Always consult hospital protocols.</p></div>`;
+  
+  const html = `
+    <div class="result-box">
+      <p class="text-lg text-center">Estimated Creatinine Clearance:</p>
+      <p class="text-3xl font-bold text-center my-2">${logData.crcl_ml_min} mL/min</p>
+      <p class="text-sm text-center mt-4 opacity-80">Note: Cockcroft-Gault. Always consult hospital protocols.</p>
+    </div>
+  `;
   return { html, logData };
 }
 
+/**
+ * Converts Units
+ */
 function convertUnits(inputs) {
   const { value, fromUnit, toUnit } = inputs;
+  
+  // Base units: mcg, mL, kg
   const massConversions = { 'kg': 1000000000, 'g': 1000000, 'mg': 1000, 'mcg': 1 };
   const volumeConversions = { 'L': 1000, 'mL': 1 };
   const weightConversions = { 'lbs_kg': 0.453592, 'kg_lbs': 2.20462 };
+
   let result;
+
   if (fromUnit in massConversions && toUnit in massConversions) {
     const baseValue = value * massConversions[fromUnit];
     result = baseValue / massConversions[toUnit];
@@ -846,10 +963,14 @@ function convertUnits(inputs) {
     const baseValue = value * volumeConversions[fromUnit];
     result = baseValue / volumeConversions[toUnit];
   } else if (fromUnit === 'lbs_kg' && toUnit === 'kg_lbs') {
-    result = value * weightConversions['lbs_kg'];
+    result = value * weightConversions['lbs_kg']; // lbs to kg
   } else if (fromUnit === 'kg_lbs' && toUnit === 'lbs_kg') {
-    result = value * weightConversions['kg_lbs'];
-  } else { return 'N/A'; }
+    result = value * weightConversions['kg_lbs']; // kg to lbs
+  } else {
+    return 'N/A'; // Incompatible units
+  }
+
+  // Formatting the result
   if (result < 0.0001 && result > 0) return result.toExponential(4);
   if (result.toString().split('.')[1]?.length > 4) return result.toFixed(4);
   return result.toString();
@@ -857,6 +978,10 @@ function convertUnits(inputs) {
 
 // --- (8) SUPABASE & NOTIFICATION FUNCTIONS ---
 
+/**
+ * Saves a calculation log to Supabase.
+ * Runs in the background, does not block UI.
+ */
 async function saveCalculation(toolName, patientName, patientIdentifier, inputs, result) {
   try {
     const { data, error } = await db
@@ -868,15 +993,20 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
         inputs: inputs,
         result: result
       });
+      
     if (error) throw error;
+    
     console.log('Calculation saved:', data);
+    
   } catch (error) {
     console.error('Error saving to Supabase:', error.message);
+    // Find the result area of the *current* view and append an error
     const currentViewId = appState.currentView;
     const resultArea = $(`#${currentViewId} .result-box, #${currentViewId} .error-box`);
-    if (resultArea) {
+    
+    if (resultArea && !resultArea.parentNode.querySelector('.save-error-box')) {
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'error-box';
+      errorDiv.className = 'error-box save-error-box'; // Add specific class
       errorDiv.style.marginTop = '1rem';
       errorDiv.innerHTML = `<p><strong>Save Error:</strong> Log was not saved. ${error.message}</p>`;
       resultArea.parentNode.insertBefore(errorDiv, resultArea.nextSibling);
@@ -884,25 +1014,37 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
   }
 }
 
+/**
+ * Requests permission and schedules a notification via the Service Worker.
+ */
 async function scheduleNotification(title, body, delayInMinutes) {
+  // 1. Check for browser support
   if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     console.warn('Notifications or Service Worker not supported.');
     return;
   }
+  
+  // 2. Request permission (if not already granted)
   let permission = Notification.permission;
   if (permission === 'default') {
     console.log('Requesting notification permission...');
     permission = await Notification.requestPermission();
   }
+  
+  // 3. Handle permission state
   if (permission === 'denied') {
     console.warn('Notification permission was denied.');
     return;
   }
+  
   if (permission === 'granted') {
-    if (delayInMinutes <= 0) return;
+    if (delayInMinutes <= 0) return; // Don't schedule for 0 or less minutes
+    
     const delayInMs = delayInMinutes * 60 * 1000;
-    const icon = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgGVNd8uPcpbKOagpnwi5e8ai6v82sMiSRdWD0ZEgqIayvesaHtPrec7QGQSx-TXtbWb9D5SdZrcXuHCIAvPbHRGqUQV7MKxR_VyjvTs37suGOlDaqS1RuVuN2EsMNm50GDCG_N-ugnwwutUb9OfyJbkGz9k06YvTi0ynwW9jJaBNhIsEkPJ5NOzExt3xzN/s192/10cb804e-ab18-4d8a-8ce0-600bbe8ab10d.png';
+    const icon = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png'; // New icon
+    
     try {
+      // 4. Pass the job to the Service Worker
       const swRegistration = await navigator.serviceWorker.ready;
       swRegistration.active.postMessage({
         type: 'scheduleNotification',
@@ -915,11 +1057,15 @@ async function scheduleNotification(title, body, delayInMinutes) {
   }
 }
 
+/**
+ * Formats the log data (JSON) into readable HTML for the history page.
+ */
 function formatLogData(log) {
   let inputsHtml = '<div class="log-details-title">Inputs:</div><ul>';
   let resultHtml = '<div class="log-details-title">Result:</div><ul>';
   const inputs = log.inputs || {};
   const result = log.result || {};
+  
   try {
     switch (log.tool_name) {
       case 'heparin_initial':
@@ -959,16 +1105,20 @@ function formatLogData(log) {
         resultHtml += `<li>Rate: ${result.rate_ml_hr} mL/hr</li>`;
         break;
       default:
+        // Fallback for any other tool
         Object.keys(inputs).forEach(key => { inputsHtml += `<li>${key.replace(/_/g, ' ')}: ${inputs[key]}</li>`; });
         Object.keys(result).forEach(key => { resultHtml += `<li>${key.replace(/_/g, ' ')}: ${result[key]}</li>`; });
     }
   } catch (e) {
     console.error("Error formatting log:", e);
+    // Fallback if data is corrupted
     inputsHtml = `<strong>Inputs:</strong><pre>${JSON.stringify(inputs, null, 2)}</pre>`;
     resultHtml = `<strong>Result:</strong><pre>${JSON.stringify(result, null, 2)}</pre>`;
   }
+  
   inputsHtml += '</ul>';
   resultHtml += '</ul>';
+  
   return `${inputsHtml}${resultHtml}`;
 }
 
@@ -977,9 +1127,12 @@ document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
   initializeEventListeners();
   initializeDarkMode(); // ** NEW: Check and apply dark mode on load **
+  
   // Set initial view
   navigateTo('view-dashboard', 'CHG Toolkit');
+  
   // Trigger live calculation for converters/renal on load
+  // This populates them with default values (e.g., 1 kg = 2.2 lbs)
   handleConverterInput();
   handleRenalInput();
 });
