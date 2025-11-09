@@ -30,8 +30,6 @@ const passwordForm = $('#password-form');
 const appState = {
   currentView: 'dashboard',
   currentHeparinMode: 'initial',
-  currentPatientName: '',
-  currentPatientIdentifier: '',
 };
 
 // --- (4) NAVIGATION ---
@@ -58,9 +56,18 @@ function navigateTo(viewId, title) {
   
   // 4. Update Bottom Nav active state
   allNavButtons.forEach(btn => {
-    const isHistoryBtn = btn.id === 'nav-history' && viewId.includes('history');
-    const isHomeBtn = btn.id === 'nav-home' && !viewId.includes('history');
-    btn.classList.toggle('active', isHomeBtn || isHistoryBtn);
+    const navId = btn.dataset.nav;
+    let isActive = false;
+    
+    if (navId === 'dashboard' && (viewId === 'view-dashboard' || viewId.startsWith('view-'))) {
+        // 'Home' is active if we are on dashboard OR any calculator view
+        isActive = (viewId !== 'view-history');
+    } else if (navId === 'history') {
+        // 'History' is active only if we are on the history view
+        isActive = (viewId === 'view-history');
+    }
+    
+    btn.classList.toggle('active', isActive);
   });
   
   // 5. Scroll content to top
@@ -72,9 +79,27 @@ function navigateTo(viewId, title) {
     $('#view-history').innerHTML = ''; 
     // Show password prompt
     passwordPrompt.classList.remove('hidden');
+    $('#password-input').value = ''; // Clear password field
     $('#password-input').focus();
   }
 }
+
+/**
+ * Formats a date string (from ISO) into a readable format.
+ * @param {string} isoString - The ISO 8601 date string.
+ * @returns {string} - Formatted date/time.
+ */
+function formatDateTime(isoString) {
+  try {
+    return new Date(isoString).toLocaleString('en-US', {
+      year: '2-digit', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  } catch (e) {
+    return isoString;
+  }
+}
+
 
 // --- (5) EVENT LISTENER INITIALIZATION ---
 
@@ -188,7 +213,7 @@ async function loadHistoryLogs() {
     const logsHtml = logs.map(log => `
       <div class="log-entry">
         <div class="log-header">
-          <span class="log-tool-name">${log.tool_name.replace(/_/g, ' ')}</span>
+          <span class="log-tool-name">${(log.tool_name || 'N/A').replace(/_/g, ' ')}</span>
           <span class="log-timestamp">${formatDateTime(log.created_at)}</span>
         </div>
         <p class="log-patient">
@@ -200,7 +225,7 @@ async function loadHistoryLogs() {
       </div>
     `).join('');
     
-    historyView.innerHTML = logsHtml;
+    historyView.innerHTML = `<div class="history-view">${logsHtml}</div>`;
     
   } catch (error) {
     console.error('Error fetching history:', error);
@@ -221,6 +246,7 @@ function toggleHeparinMode(mode) {
   
   // Toggle 'required' attribute
   $('#heparin-indication').required = isInitial;
+  // Make maintenance fields required only if in maintenance mode
   $('#heparin-currentRate').required = !isInitial;
   $('#heparin-currentPtt').required = !isInitial;
   
@@ -247,9 +273,17 @@ async function handleHeparinSubmit(e) {
       currentPtt: parseFloat($('#heparin-currentPtt').value),
     };
     
+    // Validation
+    if (!formData.patientName || !formData.patientIdentifier) {
+        throw new Error('Patient Name and ID are required.');
+    }
+    
     let result, inputs, toolName;
     
     if (appState.currentHeparinMode === 'initial') {
+      if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || !formData.indication) {
+         throw new Error('Weight, Concentration, and Indication are required for initial dose.');
+      }
       result = calculateInitialHeparinRate(formData);
       toolName = 'heparin_initial';
       inputs = {
@@ -257,7 +291,10 @@ async function handleHeparinSubmit(e) {
         concentration: formData.heparinConcentration,
         indication: formData.indication
       };
-    } else {
+    } else { // Maintenance mode
+      if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || isNaN(formData.currentInfusionRate) || isNaN(formData.currentPtt)) {
+         throw new Error('Weight, Concentration, Current Rate, and Current PTT are required for maintenance.');
+      }
       result = calculateMaintenanceHeparinRate(formData);
       toolName = 'heparin_maintenance';
       inputs = {
@@ -341,6 +378,10 @@ async function handleProphylaxisSubmit(e) {
     const patientName = $('#prophylaxis-patientName').value;
     const patientIdentifier = $('#prophylaxis-patientIdentifier').value;
     
+    if (!patientName || !patientIdentifier) {
+        throw new Error('Patient Name and ID are required to save.');
+    }
+    
     await saveCalculation(
       'stress_ulcer_prophylaxis',
       patientName,
@@ -406,6 +447,10 @@ async function handlePaduaSubmit(e) {
 
     const patientName = $('#padua-patientName').value;
     const patientIdentifier = $('#padua-patientIdentifier').value;
+    
+    if (!patientName || !patientIdentifier) {
+        throw new Error('Patient Name and ID are required to save.');
+    }
 
     await saveCalculation(
       'padua_score',
@@ -449,6 +494,10 @@ async function handleIVSubmit(e) {
     
     const patientName = $('#iv-patientName').value;
     const patientIdentifier = $('#iv-patientIdentifier').value;
+    
+    if (!patientName || !patientIdentifier) {
+        throw new Error('Patient Name and ID are required.');
+    }
 
     const result = calculateIVRate(inputs);
     resultArea.innerHTML = result.html;
@@ -495,11 +544,20 @@ function handleRenalInput() {
 // --- Unit Converter (Live) ---
 function handleConverterInput() {
   const resultField = $('#converter-toValue');
+  const fromUnit = $('#converter-fromUnit').value;
+  const toUnitField = $('#converter-toUnit');
+
+  // Auto-select "to" unit for weight conversions
+  if (fromUnit === 'lbs_kg') toUnitField.value = 'kg_lbs';
+  if (fromUnit === 'kg_lbs') toUnitField.value = 'lbs_kg';
+  
+  const toUnit = toUnitField.value;
+
   try {
     const inputs = {
       value: parseFloat($('#converter-fromValue').value),
-      fromUnit: $('#converter-fromUnit').value,
-      toUnit: $('#converter-toUnit').value
+      fromUnit: fromUnit,
+      toUnit: toUnit
     };
     
     if (isNaN(inputs.value)) {
@@ -566,7 +624,7 @@ function calculateInitialHeparinRate(formData) {
       <p class="text-lg mt-2">Initial Infusion Rate: <span class="font-bold">${logData.initial_rate}</span></p>
       <p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData.next_ptt}</span></p>
     </div>
-    <div class="result-box" style="background-color: #fffde7; border-color: #fdd835; color: #6f6f00;">
+    <div class="result-box-notification">
       <p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes} minute(s) for PTT check.</p>
     </div>
   `;
@@ -686,7 +744,7 @@ function calculateMaintenanceHeparinRate(formData) {
       body: `TEST: Time to RESTART infusion (Original stop: ${stopInfusionMin} min).`,
       delayInMinutes: stopDelay
     };
-    html += `<div class="result-box" style="background-color: #fffde7; border-color: #fdd835; color: #6f6f00;"><p class="font-bold">TEST: Notification set for ${patientName} in ${stopDelay} min to restart infusion.</p></div>`;
+    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${stopDelay} min to restart infusion.</p></div>`;
   }
   
   // Add PTT check notification (TEST: 1 minute)
@@ -696,7 +754,7 @@ function calculateMaintenanceHeparinRate(formData) {
       body: `TEST: Time for scheduled PTT check (Original: ${logData.next_ptt}).`,
       delayInMinutes: repeatPttMinutes
     };
-    html += `<div class="result-box" style="background-color: #fffde7; border-color: #fdd835; color: #6f6f00;"><p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes} min for PTT check.</p></div>`;
+    html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes} min for PTT check.</p></div>`;
   }
 
   return {
@@ -716,7 +774,7 @@ function calculateStressUlcerProphylaxis(selectedFactors) {
     'History of Peptic Ulcer Disease', 'Dual Antiplatelet', 'Septic Shock'
   ];
   const moderateRiskFactors = [
-    'Mechanical Ventilation with enteral nutrition', 'Single Antiplatelet Therapy', 'Oral Anticoagulation', 'Sepsis',
+    'Mechanical Ventilation with enteral nutrition', 'Single Antiplatelet Therapy', 'Oral Anticoagulation', 'SepsIS', // Fixed typo from 'Sepsis'
     'ICU stay > 7 days', 'Renal Replacement Therapy', 'High Dose Steroids or Immunosuppressant', 'Shock'
   ];
   
@@ -888,20 +946,16 @@ function convertUnits(inputs) {
   } else if (fromUnit in volumeConversions && toUnit in volumeConversions) {
     const baseValue = value * volumeConversions[fromUnit];
     result = baseValue / volumeConversions[toUnit];
-  } else if (fromUnit === 'lbs' && toUnit === 'kg') {
-    result = value * weightConversions['lbs_kg'];
-  } else if (fromUnit === 'kg' && toUnit === 'lbs') {
-    result = value * weightConversions['kg_lbs'];
-  } else if (fromUnit === 'lbs' && toUnit === 'lbs_kg') {
-    result = value * weightConversions['lbs_kg'];
-  } else if (fromUnit === 'kg' && toUnit === 'kg_lbs') {
-    result = value * weightConversions['kg_lbs'];
+  } else if (fromUnit === 'lbs_kg' && toUnit === 'kg_lbs') {
+      result = value * weightConversions['lbs_kg'];
+  } else if (fromUnit === 'kg_lbs' && toUnit === 'lbs_kg') {
+      result = value * weightConversions['kg_lbs'];
   } else {
     return 'N/A'; // Incompatible units
   }
   
   // Format result nicely
-  if (result < 0.0001) return result.toExponential(4);
+  if (result < 0.0001 && result > 0) return result.toExponential(4);
   if (result.toString().split('.')[1]?.length > 4) return result.toFixed(4);
   return result.toString();
 }
@@ -931,12 +985,18 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
   } catch (error) {
     console.error('Error saving to Supabase:', error.message);
     // Show a non-blocking error to the user
-    const resultArea = $(`#${appState.currentView.replace('view-','_')}result-area`);
+    // Find the current active result area
+    const currentViewId = appState.currentView;
+    const resultArea = $(`#${currentViewId} .result-box, #${currentViewId} .error-box`);
+    
     if (resultArea) {
+      // Create a new div for the save error
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'error-box mt-4';
+      errorDiv.className = 'error-box';
+      errorDiv.style.marginTop = '1rem';
       errorDiv.innerHTML = `<p><strong>Save Error:</strong> Log was not saved. ${error.message}</p>`;
-      resultArea.appendChild(errorDiv); // Append error
+      // Append it after the result box
+      resultArea.parentNode.insertBefore(errorDiv, resultArea.nextSibling);
     }
   }
 }
@@ -1036,11 +1096,17 @@ function formatLogData(log) {
         break;
         
       default:
-        inputsHtml += `<li>${JSON.stringify(inputs)}</li>`;
-        resultHtml += `<li>${JSON.stringify(result)}</li>`;
+        // Fallback for any other tools
+        Object.keys(inputs).forEach(key => {
+          inputsHtml += `<li>${key.replace(/_/g, ' ')}: ${inputs[key]}</li>`;
+        });
+        Object.keys(result).forEach(key => {
+          resultHtml += `<li>${key.replace(/_/g, ' ')}: ${result[key]}</li>`;
+        });
     }
   } catch (e) {
     console.error("Error formatting log:", e);
+    // Safer fallback
     inputsHtml = `<strong>Inputs:</strong><pre>${JSON.stringify(inputs, null, 2)}</pre>`;
     resultHtml = `<strong>Result:</strong><pre>${JSON.stringify(result, null, 2)}</pre>`;
   }
@@ -1056,7 +1122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeEventListeners();
   // Set initial view
   navigateTo('view-dashboard', 'CHG Toolkit');
-  // Trigger live calculation for converters on load
+  // Trigger live calculation for converters/renal on load
   handleConverterInput();
   handleRenalInput();
 });
