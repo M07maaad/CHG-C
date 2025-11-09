@@ -2,7 +2,7 @@
   "name": "CHG - Clinical Toolkit",
   "short_name": "CHG Toolkit",
   "description": "A Progressive Web App for critical clinical calculations.",
-  "start_url": "/index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#e0f7fa",
   "theme_color": "#00bcd4",
