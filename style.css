@@ -1,7 +1,7 @@
 /*
-  APPLICATION STYLES (style.css) - VERSION 2.0
-  This is the actual "Futuristic" Redesign with Light/Dark Mode Toggle
-  and a complete app shell structure.
+  APPLICATION STYLES (style.css) - VERSION 3.0 (Redesign)
+  This redesign uses a more "open" layout with glassmorphism,
+  as requested by the user.
 */
 
 /* 1. Tailwind Base & Fonts */
@@ -18,33 +18,33 @@
 /* 2. Custom App Layout & Themes */
 :root {
   /* --- Light Mode (Default) --- */
-  --bg-primary: linear-gradient(170deg, #e0f7fa 0%, #f0f4f8 100%); /* Light Blue to Grey */
+  --bg-primary: #f0f4f8; /* Softer solid light grey */
   --bg-header: linear-gradient(to right, #00bcd4, #4dd0e1); /* Vibrant Cyan */
   --bg-header-border: rgba(255, 255, 255, 0.2);
   --bg-content: transparent;
-  --bg-bottom-nav: #ffffff;
+  --bg-bottom-nav: rgba(255, 255, 255, 0.7); /* Light Glass */
   --bg-bottom-nav-border: #e2e8f0;
   --bg-bottom-nav-shadow: 0 -5px 15px rgba(0, 0, 0, 0.04);
-  --bg-card: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); /* Blue Glowing Card */
-  --bg-card-border: rgba(255, 255, 255, 0.2);
-  --bg-card-shadow: 0 10px 20px rgba(0, 151, 167, 0.2), 0 6px 6px rgba(0, 151, 167, 0.2);
-  --bg-card-hover-shadow: 0 20px 30px rgba(0, 151, 167, 0.3), 0 10px 10px rgba(0, 151, 167, 0.2);
-  --bg-view: #ffffff;
-  --bg-view-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  --bg-input: #f8fafc;
-  --bg-input-focus: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.6); /* Light Glass Card */
+  --bg-card-border: rgba(0, 0, 0, 0.08);
+  --bg-card-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-card-icon-wrapper: #e0f7fa; /* Light cyan circle */
+  --bg-input: rgba(255, 255, 255, 0.5);
+  --bg-input-focus: rgba(255, 255, 255, 0.9);
   
   --text-header: #ffffff;
   --text-nav-idle: #a0aec0;
   --text-nav-active: #00bcd4;
-  --text-card: #ffffff;
-  --text-card-icon: #ffffff;
+  --text-card-title: #006064; /* Dark Cyan */
+  --text-card-desc: #527a7d;
+  --text-card-icon: #00bcd4;
   --text-primary: #006064; /* Dark Cyan for headings */
   --text-secondary: #2d3748; /* Dark Grey for general text */
   --text-label: #2d3748;
   --text-input: #000000;
   
-  --border-input: #b2ebf2;
+  --border-input: rgba(0, 188, 212, 0.3);
   --border-input-focus: #00bcd4;
   --focus-ring: rgba(0, 188, 212, 0.3);
   
@@ -55,40 +55,40 @@
   --bg-bottom-nav-dark: rgba(15, 23, 42, 0.7); /* Glassmorphism */
   --bg-bottom-nav-border-dark: rgba(129, 236, 236, 0.2);
   --bg-bottom-nav-shadow-dark: 0 -5px 20px rgba(0, 0, 0, 0.3);
-  --bg-card-dark: rgba(30, 41, 59, 0.5); /* Glassmorphism */
-  --bg-card-border-dark: rgba(129, 236, 236, 0.5); /* Glowing Border */
-  --bg-card-shadow-dark: 0 0 20px rgba(129, 236, 236, 0.15); /* Glow Effect */
-  --bg-card-hover-shadow-dark: 0 0 30px rgba(129, 236, 236, 0.3);
-  --bg-view-dark: rgba(30, 41, 59, 0.8); /* Dark Glass */
-  --bg-view-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.2);
-  --bg-input-dark: #1e293b;
-  --bg-input-focus-dark: #0f172a;
+  --bg-card-dark: rgba(30, 41, 59, 0.5); /* Glassmorphism Card */
+  --bg-card-border-dark: rgba(129, 236, 236, 0.3); /* Glowing Border */
+  --bg-card-shadow-dark: 0 8px 20px rgba(0, 0, 0, 0.2); /* Glow Effect */
+  --bg-card-hover-dark: rgba(30, 41, 59, 0.8);
+  --bg-card-icon-wrapper-dark: rgba(15, 23, 42, 0.8);
+  --bg-input-dark: rgba(30, 41, 59, 0.6);
+  --bg-input-focus-dark: rgba(15, 23, 42, 0.8);
   
   --text-header-dark: #e2e8f0;
   --text-nav-idle-dark: #64748b;
   --text-nav-active-dark: #22d3ee; /* Bright Cyan */
-  --text-card-dark: #e2e8f0;
+  --text-card-title-dark: #e2e8f0;
+  --text-card-desc-dark: #94a3b8;
   --text-card-icon-dark: #22d3ee; /* Bright Cyan */
   --text-primary-dark: #e2e8f0;
   --text-secondary-dark: #94a3b8;
   --text-label-dark: #94a3b8;
   --text-input-dark: #ffffff;
   
-  --border-input-dark: #334155;
+  --border-input-dark: rgba(34, 211, 238, 0.4);
   --border-input-focus-dark: #22d3ee; /* Bright Cyan */
   --focus-ring-dark: rgba(34, 211, 238, 0.3);
 }
 
 html, body {
   height: 100%;
-  overflow: hidden; /* Prevent body scroll, app-content handles scroll */
+  overflow: hidden; 
   font-family: 'Inter', sans-serif;
 }
 
 body {
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background-color: var(--bg-primary); /* Use solid color for performance */
   color: var(--text-secondary);
   transition: background 0.3s ease, color 0.3s ease;
 }
@@ -103,77 +103,82 @@ body.dark {
   color: var(--text-header);
   border-bottom: 1px solid var(--bg-header-border);
   box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
-  padding: 1rem 1.25rem;
+  padding: 1rem 1rem; /* Reduced horizontal padding */
   display: flex;
   align-items: center;
-  z-index: 10; /* Ensure header is above content */
+  z-index: 10; 
   transition: all 0.3s ease;
-  position: relative; /* For z-index to work */
+  position: relative; 
 }
 body.dark .app-header {
   background: var(--bg-header-dark);
   color: var(--text-header-dark);
   border-bottom: 1px solid var(--bg-header-border-dark);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px); 
 }
 
 .app-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-left: 0.75rem;
-  line-height: 1; /* Prevent text from being too tall */
+  line-height: 1; 
 }
 .app-header-logo {
-  width: 32px; /* Adjusted size for the new logo */
+  width: 32px; 
   height: auto;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); /* Subtle glow for logo */
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); 
 }
-#header-back-button, #dark-mode-toggle {
+/* *** FIXED: New shared class for header buttons *** */
+.header-button {
   background: none;
   border: none;
   color: var(--text-header);
-  margin-right: 0.5rem;
   padding: 0.25rem;
   border-radius: 50%;
   transition: background-color 0.2s, color 0.3s ease;
   cursor: pointer;
+  flex-shrink: 0; /* Prevent buttons from shrinking */
 }
-body.dark .header-back-button, body.dark #dark-mode-toggle {
+body.dark .header-button {
   color: var(--text-header-dark);
 }
-.header-back-button:hover, #dark-mode-toggle:hover {
+.header-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
-body.dark .header-back-button:hover, body.dark #dark-mode-toggle:hover {
+body.dark .header-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-.header-back-button {
+/* *** FIXED: Target back button by ID to hide it *** */
+#header-back-button {
   display: none; /* Hidden by default */
+  margin-right: 0.5rem;
+}
+#dark-mode-toggle {
+  display: block; /* Ensure it's visible */
 }
 #dark-mode-toggle .icon-sun { display: block; }
 #dark-mode-toggle .icon-moon { display: none; }
 body.dark #dark-mode-toggle .icon-sun { display: none; }
 body.dark #dark-mode-toggle .icon-moon { display: block; }
 
-/* Spacer for Dark Mode Toggle */
 .header-spacer {
-  flex-grow: 1; /* Pushes the toggle to the right */
+  flex-grow: 1; 
 }
 
 .app-content {
-  flex-grow: 1; /* Takes up all available space */
-  overflow-y: auto; /* Allows content to scroll */
-  padding: 1.5rem;
+  flex-grow: 1; 
+  overflow-y: auto; 
+  padding: 1.25rem; /* Standard padding */
 }
 
 .view {
-  display: none; /* Hidden by default, shown by JS */
+  display: none; 
 }
 .view.active {
   display: block;
-  animation: fadeIn 0.3s ease-in-out; /* Smooth transition for views */
+  animation: fadeIn 0.3s ease-in-out; 
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -187,15 +192,15 @@ body.dark #dark-mode-toggle .icon-moon { display: block; }
   border-top: 1px solid var(--bg-bottom-nav-border);
   box-shadow: var(--bg-bottom-nav-shadow);
   padding: 0.5rem 0;
-  z-index: 10; /* Ensure nav is above content */
+  z-index: 10; 
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 body.dark .app-bottom-nav {
   background: var(--bg-bottom-nav-dark);
   border-top: 1px solid var(--bg-bottom-nav-border-dark);
   box-shadow: var(--bg-bottom-nav-shadow-dark);
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
 }
 .nav-button {
   display: flex;
@@ -229,25 +234,24 @@ body.dark .nav-button.active {
   transform: scale(1.1);
 }
 
-/* 4. Dashboard Grid (Futuristic) */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns for cards */
-  gap: 1.25rem; /* Space between cards */
+/* 4. Dashboard (NEW DESIGN) */
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Space between cards */
 }
 .tool-card {
   background: var(--bg-card);
   border: 1px solid var(--bg-card-border);
   box-shadow: var(--bg-card-shadow);
-  border-radius: 1rem;
-  padding: 1.5rem 1rem;
+  border-radius: 1rem; /* Softer radius */
+  padding: 1rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 body.dark .tool-card {
   background: var(--bg-card-dark);
@@ -255,49 +259,87 @@ body.dark .tool-card {
   box-shadow: var(--bg-card-shadow-dark);
 }
 .tool-card:hover {
-  transform: translateY(-6px) scale(1.03); /* Lift effect on hover */
-  box-shadow: var(--bg-card-hover-shadow);
+  transform: translateY(-4px) scale(1.02); /* More subtle lift */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  background: var(--bg-card-hover);
 }
 body.dark .tool-card:hover {
-  box-shadow: var(--bg-card-hover-shadow-dark);
-  border-color: #22d3ee; /* Stronger glow on hover in dark mode */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  background: var(--bg-card-hover-dark);
+  border-color: var(--border-input-focus-dark);
 }
-.tool-card svg {
-  width: 36px;
-  height: 36px;
+.tool-card-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card-icon-wrapper);
   color: var(--text-card-icon);
-  margin-bottom: 0.75rem;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); /* Subtle shadow for icons */
-  transition: color 0.3s ease;
+  margin-right: 1rem;
+  transition: all 0.3s ease;
 }
-body.dark .tool-card svg {
+body.dark .tool-card-icon {
+  background: var(--bg-card-icon-wrapper-dark);
   color: var(--text-card-icon-dark);
 }
+.tool-card-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
 .tool-card-title {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-card);
+  color: var(--text-card-title);
   line-height: 1.4;
   transition: color 0.3s ease;
 }
 body.dark .tool-card-title {
-  color: var(--text-card-dark);
+  color: var(--text-card-title-dark);
+}
+.tool-card-desc {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-card-desc);
+  transition: color 0.3s ease;
+}
+body.dark .tool-card-desc {
+  color: var(--text-card-desc-dark);
+}
+.tool-card-arrow {
+  flex-shrink: 0;
+  color: var(--text-nav-idle);
+  transition: color 0.3s ease;
+}
+body.dark .tool-card-arrow {
+  color: var(--text-nav-idle-dark);
 }
 
-/* 5. Calculator View & Forms */
-.calculator-view {
-  background: var(--bg-view);
+/* 5. Calculator View & Forms (NEW DESIGN) */
+/* *** REMOVED: .calculator-view background/shadow removed *** */
+/* This class is no longer in the HTML, but we leave this
+   rule here to control the search bar wrapper */
+.calculator-view, .search-bar-wrapper {
+  background: var(--bg-card); /* Use card background */
+  border: 1px solid var(--bg-card-border);
+  box-shadow: var(--bg-card-shadow);
   border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: var(--bg-view-shadow);
+  padding: 1.25rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  margin-bottom: 1.25rem;
   transition: all 0.3s ease;
 }
-body.dark .calculator-view {
-  background: var(--bg-view-dark);
-  box-shadow: var(--bg-view-shadow-dark);
-  backdrop-filter: blur(8px); /* Subtle glassmorphism */
-  -webkit-backdrop-filter: blur(8px);
+body.dark .calculator-view, 
+body.dark .search-bar-wrapper {
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
+  box-shadow: var(--bg-card-shadow-dark);
 }
+
 .calculator-title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -310,43 +352,46 @@ body.dark .calculator-title {
   color: var(--text-primary-dark);
 }
 
-/* Mode Toggle (e.g., Heparin Initial/Maintenance) */
+/* Mode Toggle (Heparin) */
 .mode-toggle-buttons {
   display: flex;
   margin-bottom: 1.5rem;
   border-radius: 0.75rem;
-  overflow: hidden; /* For rounded corners */
+  overflow: hidden; 
   border: 1px solid var(--border-input);
-  transition: border 0.3s ease;
+  background: var(--bg-input);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
 }
 body.dark .mode-toggle-buttons {
   border-color: var(--border-input-dark);
+  background: var(--bg-input-dark);
 }
 .mode-btn {
-  flex-grow: 1; /* Distribute space evenly */
+  flex-grow: 1; 
   padding: 0.75rem 1rem;
   font-weight: 600;
   cursor: pointer;
-  background-color: var(--bg-input);
+  background-color: transparent; /* Handled by parent */
   color: var(--text-primary);
   border: none;
   transition: all 0.2s ease-in-out;
 }
 body.dark .mode-btn {
-  background-color: var(--bg-input-dark);
   color: var(--text-secondary-dark);
 }
 .mode-btn.active {
-  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); /* Active button uses gradient */
+  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); 
   color: white;
   box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
 }
 body.dark .mode-btn.active {
-  background-image: linear-gradient(to right, #0e7490, #22d3ee); /* Darker gradient for dark mode */
+  background-image: linear-gradient(to right, #0e7490, #22d3ee); 
   box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);
 }
 
-/* Inputs & Labels */
+/* Inputs & Labels (NEW DESIGN) */
 .input-group {
   margin-bottom: 1.25rem;
 }
@@ -372,6 +417,8 @@ body.dark .input-group label {
   background-color: var(--bg-input);
   color: var(--text-input);
   transition: all 0.2s ease-in-out;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 body.dark .input-group input, 
 body.dark .input-group select,
@@ -396,16 +443,16 @@ body.dark .search-bar:focus {
   background-color: var(--bg-input-focus-dark);
 }
 .search-bar {
-  margin-bottom: 1rem;
+  margin-bottom: 0; /* Wrapper handles margin */
 }
 
-/* Checkboxes / Risk Factors */
+/* Checkboxes / Risk Factors (NEW DESIGN) */
 .risk-group-heading {
   font-weight: 700;
   color: var(--text-primary);
   font-size: 1.1rem;
   margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   border-bottom: 2px solid var(--border-input);
   padding-bottom: 0.25rem;
   transition: all 0.3s ease;
@@ -425,22 +472,24 @@ body.dark .risk-group-heading {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   margin-bottom: 0.5rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 body.dark .risk-factor-card {
   background-color: var(--bg-input-dark);
   border-color: var(--border-input-dark);
 }
 .risk-factor-card:hover {
-  background-color: #eefcff; /* Light hover effect */
+  background-color: var(--bg-input-focus);
   border-color: #b2ebf2;
 }
 body.dark .risk-factor-card:hover {
   background-color: #1e293b;
-  border-color: var(--border-input-focus-dark); /* Glowing border on hover */
+  border-color: var(--border-input-focus-dark); 
 }
 .risk-factor-card input[type="checkbox"] {
-  transform: scale(1.2); /* Slightly larger checkbox */
-  accent-color: #00bcd4; /* Accent color for checkbox */
+  transform: scale(1.2); 
+  accent-color: #00bcd4; 
 }
 body.dark .risk-factor-card input[type="checkbox"] {
   accent-color: #22d3ee;
@@ -464,7 +513,7 @@ body.dark .risk-factor-card span {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); /* Primary button gradient */
+  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); 
   color: white;
   box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
   border: none;
@@ -476,7 +525,7 @@ body.dark .risk-factor-card span {
 .btn:hover:not(:disabled) {
   background-image: linear-gradient(to right, #00acc1, #26c6da);
   box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
-  transform: translateY(-2px); /* Slight lift on hover */
+  transform: translateY(-2px); 
 }
 body.dark .btn {
   background-image: linear-gradient(to right, #0e7490, #22d3ee);
@@ -512,7 +561,7 @@ body.dark .btn-save:hover:not(:disabled) {
   box-shadow: 0 6px 25px rgba(34, 197, 94, 0.4);
 }
 
-/* 6. Result / Error Boxes */
+/* 6. Result / Error Boxes (NEW DESIGN) */
 .result-box, .error-box, .result-box-notification {
   padding: 1.25rem;
   border-radius: 1rem;
@@ -521,39 +570,41 @@ body.dark .btn-save:hover:not(:disabled) {
   line-height: 1.6;
   box-shadow: 0 5px 15px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 .result-box {
-  background-color: #e0f7fa; /* Light blue result */
+  background-color: rgba(224, 247, 250, 0.8); /* Light blue glass */
   border: 1px solid #00bcd4;
   color: #006064;
 }
 .error-box {
-  background-color: #ffebee; /* Light red error */
+  background-color: rgba(255, 235, 238, 0.8); /* Light red glass */
   border: 1px solid #ef5350;
   color: #c62828;
 }
 .result-box-notification {
-  background-color: #fffde7; /* Light yellow notification */
+  background-color: rgba(255, 253, 231, 0.8); /* Light yellow glass */
   border: 1px solid #fdd835;
   color: #6f6f00;
 }
 body.dark .result-box {
-  background-color: #1e3a40; /* Dark blue result */
+  background-color: rgba(30, 58, 64, 0.8); /* Dark blue glass */
   border-color: #0e7490;
   color: #a5f3fc;
 }
 body.dark .error-box {
-  background-color: #2f1a1a; /* Dark red error */
+  background-color: rgba(47, 26, 26, 0.8); /* Dark red glass */
   border-color: #b91c1c;
   color: #fca5a5;
 }
 body.dark .result-box-notification {
-  background-color: #3f3c19; /* Dark yellow notification */
+  background-color: rgba(63, 60, 25, 0.8); /* Dark yellow glass */
   border-color: #a16207;
   color: #fef08a;
 }
 .result-box .font-bold, .error-box .font-bold, .result-box-notification .font-bold {
-  color: inherit; /* Inherit color from parent box */
+  color: inherit; 
   font-weight: 700;
 }
 .result-box .result-title, .error-box .result-title {
@@ -562,31 +613,34 @@ body.dark .result-box-notification {
   margin-bottom: 0.5rem;
 }
 
-/* 7. History / Log Styling */
+/* 7. History / Log Styling (NEW DESIGN) */
 .history-view {
-  background: var(--bg-view); /* Matches calculator-view */
+  background: var(--bg-card); /* Matches card background */
+  border: 1px solid var(--bg-card-border);
   border-radius: 1rem;
-  padding: 0.5rem; /* Slightly less padding for list */
-  box-shadow: var(--bg-view-shadow);
+  padding: 0.5rem; /* Less padding for list */
+  box-shadow: var(--bg-card-shadow);
   transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 body.dark .history-view {
-  background: var(--bg-view-dark);
-  box-shadow: var(--bg-view-shadow-dark);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
+  box-shadow: var(--bg-card-shadow-dark);
 }
 .log-entry {
-  background: var(--bg-view); /* Each entry can have a background in light mode */
+  background: transparent;
   border-bottom: 1px solid var(--border-input);
   margin-bottom: 0;
   padding: 1.25rem;
   transition: all 0.3s ease;
 }
 body.dark .log-entry {
-  background: transparent; /* Transparent in dark mode, blending with parent */
   border-bottom-color: var(--border-input-dark);
 }
 .log-entry:last-child {
-  border-bottom: none; /* No border for the last item */
+  border-bottom: none; 
 }
 .log-header {
   display: flex;
@@ -602,7 +656,7 @@ body.dark .log-entry {
   transition: color 0.3s ease;
 }
 body.dark .log-tool-name {
-  color: var(--text-nav-active-dark); /* Bright cyan for tool name in dark mode */
+  color: var(--text-nav-active-dark); 
 }
 .log-timestamp {
   font-size: 0.75rem;
@@ -635,12 +689,12 @@ body.dark .log-details {
 }
 .log-details-title {
   font-weight: 600;
-  color: #00796b; /* Specific color for detail titles */
+  color: #00796b; 
   margin-top: 0.5rem;
   transition: color 0.3s ease;
 }
 body.dark .log-details-title {
-  color: #14b8a6; /* Brighter teal for dark mode */
+  color: #14b8a6; 
 }
 .log-details ul {
   list-style-type: disc;
@@ -650,7 +704,7 @@ body.dark .log-details-title {
 
 /* 8. Password Prompt */
 #password-prompt {
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+  background-color: rgba(0, 0, 0, 0.5); 
   position: fixed;
   top: 0;
   left: 0;
@@ -659,22 +713,22 @@ body.dark .log-details-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50; /* Above all other content */
-  backdrop-filter: blur(5px); /* Blurred background */
+  z-index: 50; 
+  backdrop-filter: blur(5px); 
   -webkit-backdrop-filter: blur(5px);
 }
 #password-modal {
-  background: var(--bg-view);
+  background: var(--bg-card); /* Use card background */
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 400px;
   transition: all 0.3s ease;
+  border: 1px solid var(--bg-card-border);
 }
 body.dark #password-modal {
-  background: var(--bg-view-dark);
+  background: var(--bg-card-dark);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--bg-card-border-dark);
 }
