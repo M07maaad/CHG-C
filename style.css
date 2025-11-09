@@ -1,6 +1,6 @@
 /*
   APPLICATION STYLES (style.css)
-  This contains the new, professional "App" layout.
+  This is the new "Dazzling" Redesign.
 */
 
 /* 1. Tailwind Base */
@@ -25,7 +25,8 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
-  background-color: #f0f4f8; /* Light gray-blue background */
+  /* --- DESIGN UPGRADE: Soft Gradient Background --- */
+  background: linear-gradient(170deg, #e0f7fa 0%, #f0f4f8 100%);
 }
 
 /* App Header (Fixed Top)
@@ -39,6 +40,8 @@ body {
   display: flex;
   align-items: center;
   z-index: 10;
+  /* --- DESIGN UPGRADE: Added slight border --- */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 .app-header h1 {
   font-size: 1.5rem; /* 24px */
@@ -57,7 +60,13 @@ body {
   margin-right: 0.5rem;
   padding: 0.25rem;
   display: none; /* Hidden by default, shown by JS */
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
+.header-back-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 
 /* Main Content Area (Scrollable)
   This is where the views (pages) will be shown.
@@ -76,6 +85,12 @@ body {
 }
 .view.active {
   display: block; /* The active view is shown */
+  /* --- DESIGN UPGRADE: Fade-in animation --- */
+  animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Bottom Tab Bar (Fixed Bottom)
@@ -86,7 +101,8 @@ body {
   justify-content: space-around;
   background-color: #ffffff;
   border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  /* --- DESIGN UPGRADE: More professional shadow --- */
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.04);
   padding: 0.5rem 0;
   z-index: 10;
 }
@@ -98,6 +114,7 @@ body {
   border: none;
   padding: 0.5rem;
   font-size: 0.75rem; /* 12px */
+  font-weight: 500;
   color: #a0aec0; /* Gray */
   transition: all 0.2s ease-in-out;
 }
@@ -105,57 +122,89 @@ body {
   width: 24px;
   height: 24px;
   margin-bottom: 0.25rem;
+  transition: all 0.2s ease-in-out;
 }
 .nav-button.active {
   color: #00bcd4; /* Active color */
 }
+.nav-button:hover:not(.active) {
+  color: #4a5568;
+}
+.nav-button.active svg {
+  transform: scale(1.1);
+}
 
-/* Dashboard Screen Styling
-  The new "Grid" layout for tool cards.
+/* --- DASHBOARD REDESIGN ---
+  This is the new "Dazzling" Grid
 */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  gap: 1rem;
+  gap: 1.25rem; /* 20px */
 }
 .tool-card {
-  background-color: #ffffff;
+  /* --- DESIGN UPGRADE: Gradient background --- */
+  background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
   border-radius: 1rem; /* 16px */
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem; /* 24px 16px */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease-in-out;
+  /* --- DESIGN UPGRADE: Professional Shadow --- */
+  box-shadow: 0 10px 20px rgba(0, 151, 167, 0.2), 0 6px 6px rgba(0, 151, 167, 0.2);
+  transition: all 0.3s ease-in-out;
   cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .tool-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  /* --- DESIGN UPGRADE: "Pop" effect --- */
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 20px 30px rgba(0, 151, 167, 0.3), 0 10px 10px rgba(0, 151, 167, 0.2);
 }
 .tool-card svg {
-  width: 40px;
-  height: 40px;
-  color: #00bcd4;
+  width: 36px;
+  height: 36px;
+  /* --- DESIGN UPGRADE: White icon --- */
+  color: #ffffff;
   margin-bottom: 0.75rem;
+  /* --- DESIGN UPGRADE: Soft shadow on icon --- */
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
 }
 .tool-card-title {
   font-size: 1rem; /* 16px */
   font-weight: 600;
-  color: #2d3748;
+  /* --- DESIGN UPGRADE: White text --- */
+  color: #ffffff;
+  line-height: 1.4;
+}
+/* Special style for History card */
+.tool-card.history-card {
+  background: #607d8b;
+  border-color: #607d8b;
+  box-shadow: 0 10px 20px rgba(96, 125, 139, 0.2), 0 6px 6px rgba(96, 125, 139, 0.2);
+}
+.tool-card.history-card:hover {
+  box-shadow: 0 20px 30px rgba(96, 125, 139, 0.3);
+  background: #546e7a;
+}
+.tool-card.history-card svg {
+  color: #ffffff;
+}
+.tool-card.history-card .tool-card-title {
+  color: #ffffff;
 }
 
-/* Calculator Form Styling
-  This styles all forms (Heparin, IV, etc.)
+/* --- CALCULATOR FORM STYLING ---
+  (Kept clean and white for usability)
 */
 .calculator-view {
   background-color: #ffffff;
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* --- DESIGN UPGRADE: Stronger shadow to "float" above bg --- */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 .calculator-title {
   font-size: 1.75rem; /* 28px */
@@ -242,6 +291,7 @@ body {
 }
 .risk-factor-card:hover {
   background-color: #eefcff;
+  border-color: #b2ebf2;
 }
 .risk-factor-card input[type="checkbox"] {
   transform: scale(1.2);
@@ -255,7 +305,7 @@ body {
 
 /* Main Action Buttons (Calculate, Save) */
 .btn {
-  width: 100%; /* Reverted back to 100% width */
+  width: 100%; 
   padding: 1rem;
   border-radius: 0.75rem;
   font-weight: 700;
@@ -271,7 +321,7 @@ body {
   justify-content: center;
   gap: 0.5rem;
 }
-.btn:hover {
+.btn:hover:not(:disabled) {
   background-image: linear-gradient(to right, #00acc1, #26c6da);
   box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
   transform: translateY(-2px);
@@ -281,19 +331,20 @@ body {
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
+  opacity: 0.7;
 }
 /* Specific button for Save (Green) */
 .btn-save {
   background-image: linear-gradient(to right, #4caf50, #66bb6a);
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
 }
-.btn-save:hover {
+.btn-save:hover:not(:disabled) {
   background-image: linear-gradient(to right, #43a047, #57a95b);
   box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
 }
 
-/* Result / Error Boxes */
-.result-box, .error-box {
+/* Result / Error / Notification Boxes */
+.result-box, .error-box, .result-box-notification {
   padding: 1.25rem;
   border-radius: 1rem;
   margin-top: 1.5rem;
@@ -311,7 +362,13 @@ body {
   border: 1px solid #ef5350;
   color: #c62828;
 }
-.result-box .font-bold, .error-box .font-bold {
+/* This is the yellow box for "Notification Set" */
+.result-box-notification {
+  background-color: #fffde7;
+  border: 1px solid #fdd835;
+  color: #6f6f00;
+}
+.result-box .font-bold, .error-box .font-bold, .result-box-notification .font-bold {
   color: inherit;
   font-weight: 700;
 }
@@ -325,22 +382,17 @@ body {
 .history-view {
   background-color: #ffffff;
   border-radius: 1rem;
-  padding: 1.5rem;
+  padding: 0.5rem; /* Less padding, cards have padding */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-.history-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #006064;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
 .log-entry {
-  background-color: #f8fafc;
-  border: 1px solid #e0f2f7;
-  border-radius: 0.75rem;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0f2f7;
+  margin-bottom: 0;
+  padding: 1.25rem;
+}
+.log-entry:last-child {
+  border-bottom: none;
 }
 .log-header {
   display: flex;
@@ -352,6 +404,7 @@ body {
   font-size: 1.2rem;
   font-weight: 700;
   color: #006064;
+  text-transform: capitalize;
 }
 .log-timestamp {
   font-size: 0.75rem;
@@ -392,6 +445,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 50;
+  backdrop-filter: blur(5px);
 }
 #password-modal {
   background-color: white;
