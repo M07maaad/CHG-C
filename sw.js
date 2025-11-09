@@ -1,162 +1,136 @@
-// --- (1) CACHE CONFIGURATION ---
-// IMPORTANT: Change this name every time you update the app
-const CACHE_NAME = 'chg-toolkit-cache-v3'; 
+/*
+  SERVICE WORKER (sw.js)
+  This file handles offline caching and push notifications.
+*/
 
-// This list MUST include every critical file for the app to work offline
+// ** NEW: Cache version v4 to force update **
+const CACHE_NAME = 'chg-toolkit-cache-v4';
 const urlsToCache = [
-  '/', // The base page
+  '/', // Caches the root
   'index.html',
-  'style.css', // The new CSS file
+  'style.css',
   'index.js',
   'manifest.json',
-  
-  // --- CDNs ---
-  // Supabase
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  // Tailwind (imported by style.css, caching it is safer)
-  'https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css',
-  // Google Font
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display.swap',
-  
-  // --- Core Images (from HTML & Manifest) ---
-  // 192px icon
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png',
-  // 512px icon
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s1600/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png'
+  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png' // New Logo
 ];
 
-// --- (2) PWA LIFECYCLE: INSTALL ---
-// Install event: cache all critical assets
+// 1. Install Event: Cache all essential app files
 self.addEventListener('install', event => {
-  console.log('[SW] Install event started. Caching assets...');
+  console.log('[SW] Install event');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cache opened. Adding files...');
-        // We use addAll which fails if any single file fails
+        console.log('[SW] Caching app shell');
         return cache.addAll(urlsToCache);
       })
-      .catch(error => {
-        console.error('[SW] Failed to cache assets during install:', error);
+      .then(() => {
+        console.log('[SW] All files cached. Activating...');
+        // Force the waiting service worker to become the active service worker.
+        return self.skipWaiting();
+      })
+      .catch(err => {
+        console.error('[SW] Cache addAll failed:', err);
       })
   );
-  // Force the new service worker to activate immediately
-  self.skipWaiting();
 });
 
-// --- (3) PWA LIFECYCLE: ACTIVATE ---
-// Activate event: clean up old caches
+// 2. Activate Event: Clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate event started. Cleaning old caches...');
-  const cacheWhitelist = [CACHE_NAME]; // Only keep the current cache
+  console.log('[SW] Activate event');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            // If it's not our current cache, delete it
-            console.log('[SW] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
+        cacheNames.filter(cacheName => {
+          // Find all caches that are NOT our new cache and delete them
+          return cacheName.startsWith('chg-toolkit-cache-') &&
+                 cacheName !== CACHE_NAME;
+        }).map(cacheName => {
+          console.log('[SW] Deleting old cache:', cacheName);
+          return caches.delete(cacheName);
         })
       );
+    }).then(() => {
+      // Tell the active service worker to take control of the page immediately.
+      return self.clients.claim();
     })
   );
-  // Take control of all open clients immediately
-  return self.clients.claim();
 });
 
-// --- (4) PWA LIFECYCLE: FETCH ---
-// Fetch event: serve from cache first (Cache-First strategy)
+// 3. Fetch Event: Serve from cache first (Offline-first)
 self.addEventListener('fetch', event => {
   // We only want to cache GET requests
   if (event.request.method !== 'GET') {
-    event.respondWith(fetch(event.request));
     return;
   }
-
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response from cache
         if (response) {
+          // If we have it in cache, return it
+          // console.log('[SW] Serving from cache:', event.request.url);
           return response;
         }
         
-        // Not in cache - fetch from network
-        return fetch(event.request).then(
-          networkResponse => {
-            // Check if we received a valid response
-            // We don't cache Supabase API calls
-            if(!networkResponse || networkResponse.status !== 200 || 
-               event.request.url.includes('supabase.co')) {
-              return networkResponse;
-            }
-
-            // IMPORTANT: Clone the response. A response is a stream
-            const responseToCache = networkResponse.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
+        // If not in cache, fetch from network
+        // console.log('[SW] Fetching from network:', event.request.url);
+        return fetch(event.request)
+          .then(networkResponse => {
+            // OPTIONAL: Cache new requests dynamically?
+            // Be careful with this, especially with Supabase requests.
+            // For now, we only cache the core files on install.
             return networkResponse;
-          }
-        ).catch(error => {
-          // Network fetch failed
-          console.error('[SW] Network fetch failed:', event.request.url, error);
-          // You could return an offline fallback page here if you had one
-        });
-      }
-    )
+          })
+          .catch(error => {
+            console.error('[SW] Fetch failed:', error);
+            // You could return a generic offline page here if you had one
+          });
+      })
   );
 });
 
-// --- (5) NOTIFICATION LOGIC ---
+// --- NOTIFICATION LOGIC ---
 
-// Listen for messages from the main page (index.js)
+// 4. Message Event: Listen for notification jobs from index.js
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'scheduleNotification') {
     const { title, body, delayInMs, icon } = event.data.payload;
-
-    console.log(`[SW] Received notification request. Scheduling in ${delayInMs}ms`);
+    console.log(`[SW] Notification job received. Scheduling "${title}" in ${delayInMs}ms`);
 
     // Use setTimeout to delay the notification
-    // This is more reliable in a Service Worker
     setTimeout(() => {
-      console.log('[SW] Triggering notification:', title);
-      // Show the notification using the Service Worker's registration
+      // Show the notification
       self.registration.showNotification(title, {
         body: body,
         icon: icon,
-        badge: icon, // Icon for Android notification tray
+        badge: icon, // Icon for Android notification bar
         vibrate: [200, 100, 200] // Vibrate pattern
       });
+      console.log(`[SW] Notification shown: "${title}"`);
     }, delayInMs);
   }
 });
 
-// Handle notification click (e.g., to open/focus the app)
+// 5. Notification Click Event: What happens when user clicks the notification
 self.addEventListener('notificationclick', event => {
-  console.log('[SW] Notification clicked');
-  event.notification.close();
+  console.log('[SW] Notification clicked.');
+  event.notification.close(); // Close the notification
 
-  // This attempts to focus an existing app window or open a new one
+  // Focus the PWA if it's already open, or open it if it's not
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientsArr => {
-      // Check if there's already a window open
-      const hadWindowToFocus = clientsArr.some(windowClient =>
-        windowClient.url === self.location.origin + '/'
-          ? (windowClient.focus(), true)
-          : null
-      );
-      
-      // If not, open a new window
-      if (!hadWindowToFocus) {
-        clients.openWindow(self.location.origin)
-          .then(windowClient => (windowClient ? windowClient.focus() : null));
-      }
-    })
+    clients.matchAll({ type: 'window' })
+      .then(clientList => {
+        // Check if there's already a window open
+        for (let i = 0; i < clientList.length; i++) {
+          let client = clientList[i];
+          if (client.url === '/' && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // If not, open a new window
+        if (clients.openWindow) {
+          return clients.openWindow('/');
+        }
+      })
   );
 });
