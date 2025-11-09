@@ -6,6 +6,15 @@
 /* 1. Tailwind Base */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
 
+/* *** CRITICAL FIX: ***
+  Manually define the .hidden class as a fallback.
+  This fixes the bug where the password modal appears on load
+  if Tailwind hasn't loaded yet.
+*/
+.hidden {
+  display: none !important; 
+}
+
 /* 2. Custom App Layout */
 html, body {
   height: 100%;
