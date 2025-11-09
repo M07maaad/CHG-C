@@ -1,91 +1,175 @@
 /*
   APPLICATION STYLES (style.css)
-  This is the new "Dazzling" Redesign.
+  This is the new "Futuristic" Redesign with Light/Dark Mode Toggle.
 */
 
 /* 1. Tailwind Base */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* *** CRITICAL FIX: ***
   Manually define the .hidden class as a fallback.
-  This fixes the bug where the password modal appears on load
-  if Tailwind hasn't loaded yet.
 */
 .hidden {
   display: none !important; 
 }
 
-/* 2. Custom App Layout */
+/* 2. Custom App Layout & Themes */
+:root {
+  /* --- Light Mode (Default) --- */
+  --bg-primary: linear-gradient(170deg, #e0f7fa 0%, #f0f4f8 100%);
+  --bg-header: linear-gradient(to right, #00bcd4, #4dd0e1);
+  --bg-header-border: rgba(255, 255, 255, 0.2);
+  --bg-content: transparent;
+  --bg-bottom-nav: #ffffff;
+  --bg-bottom-nav-border: #e2e8f0;
+  --bg-bottom-nav-shadow: 0 -5px 15px rgba(0, 0, 0, 0.04);
+  --bg-card: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+  --bg-card-border: rgba(255, 255, 255, 0.2);
+  --bg-card-shadow: 0 10px 20px rgba(0, 151, 167, 0.2), 0 6px 6px rgba(0, 151, 167, 0.2);
+  --bg-card-hover-shadow: 0 20px 30px rgba(0, 151, 167, 0.3), 0 10px 10px rgba(0, 151, 167, 0.2);
+  --bg-view: #ffffff;
+  --bg-view-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  --bg-input: #f8fafc;
+  --bg-input-focus: #ffffff;
+  
+  --text-header: #ffffff;
+  --text-nav-idle: #a0aec0;
+  --text-nav-active: #00bcd4;
+  --text-card: #ffffff;
+  --text-card-icon: #ffffff;
+  --text-primary: #006064;
+  --text-secondary: #2d3748;
+  --text-label: #2d3748;
+  --text-input: #000000;
+  
+  --border-input: #b2ebf2;
+  --border-input-focus: #00bcd4;
+  --focus-ring: rgba(0, 188, 212, 0.3);
+  
+  /* --- Dark Mode Variables (When .dark is added) --- */
+  --bg-primary-dark: #0f172a; /* Dark Navy Blue */
+  --bg-header-dark: rgba(15, 23, 42, 0.7); /* Glassmorphism */
+  --bg-header-border-dark: rgba(129, 236, 236, 0.2);
+  --bg-bottom-nav-dark: rgba(15, 23, 42, 0.7); /* Glassmorphism */
+  --bg-bottom-nav-border-dark: rgba(129, 236, 236, 0.2);
+  --bg-bottom-nav-shadow-dark: 0 -5px 20px rgba(0, 0, 0, 0.3);
+  --bg-card-dark: rgba(30, 41, 59, 0.5); /* Glassmorphism */
+  --bg-card-border-dark: rgba(129, 236, 236, 0.5); /* Glowing Border */
+  --bg-card-shadow-dark: 0 0 20px rgba(129, 236, 236, 0.15); /* Glow Effect */
+  --bg-card-hover-shadow-dark: 0 0 30px rgba(129, 236, 236, 0.3);
+  --bg-view-dark: rgba(30, 41, 59, 0.8); /* Dark Glass */
+  --bg-view-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --bg-input-dark: #1e293b;
+  --bg-input-focus-dark: #0f172a;
+  
+  --text-header-dark: #e2e8f0;
+  --text-nav-idle-dark: #64748b;
+  --text-nav-active-dark: #22d3ee; /* Bright Cyan */
+  --text-card-dark: #e2e8f0;
+  --text-card-icon-dark: #22d3ee; /* Bright Cyan */
+  --text-primary-dark: #e2e8f0;
+  --text-secondary-dark: #94a3b8;
+  --text-label-dark: #94a3b8;
+  --text-input-dark: #ffffff;
+  
+  --border-input-dark: #334155;
+  --border-input-focus-dark: #22d3ee; /* Bright Cyan */
+  --focus-ring-dark: rgba(34, 211, 238, 0.3);
+}
+
 html, body {
   height: 100%;
-  overflow: hidden; /* Prevents scrolling on the body */
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
 }
 
 body {
   display: flex;
   flex-direction: column;
-  /* --- DESIGN UPGRADE: Soft Gradient Background --- */
-  background: linear-gradient(170deg, #e0f7fa 0%, #f0f4f8 100%);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+body.dark {
+  background: var(--bg-primary-dark);
+  color: var(--text-secondary-dark);
 }
 
-/* App Header (Fixed Top)
-  This is the new "App" header.
-*/
+/* 3. App Shell (Header, Content, Nav) */
 .app-header {
-  background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
-  color: white;
-  padding: 1rem 1.25rem;
+  background: var(--bg-header);
+  color: var(--text-header);
+  border-bottom: 1px solid var(--bg-header-border);
   box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   z-index: 10;
-  /* --- DESIGN UPGRADE: Added slight border --- */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
+body.dark .app-header {
+  background: var(--bg-header-dark);
+  color: var(--text-header-dark);
+  border-bottom: 1px solid var(--bg-header-border-dark);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .app-header h1 {
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.5rem;
   font-weight: 700;
   margin-left: 0.75rem;
   line-height: 1;
 }
 .app-header-logo {
-  width: 32px; /* Small logo in header */
+  width: 32px;
   height: auto;
 }
-.header-back-button {
+.header-back-button, #dark-mode-toggle {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-header);
   margin-right: 0.5rem;
   padding: 0.25rem;
-  display: none; /* Hidden by default, shown by JS */
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.3s ease;
+  cursor: pointer;
 }
-.header-back-button:hover {
+body.dark .header-back-button, body.dark #dark-mode-toggle {
+  color: var(--text-header-dark);
+}
+.header-back-button:hover, #dark-mode-toggle:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
+body.dark .header-back-button:hover, body.dark #dark-mode-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.header-back-button {
+  display: none; /* Hidden by default */
+}
+#dark-mode-toggle .icon-sun { display: block; }
+#dark-mode-toggle .icon-moon { display: none; }
+body.dark #dark-mode-toggle .icon-sun { display: none; }
+body.dark #dark-mode-toggle .icon-moon { display: block; }
 
+/* Spacer for Dark Mode Toggle */
+.header-spacer {
+  flex-grow: 1;
+}
 
-/* Main Content Area (Scrollable)
-  This is where the views (pages) will be shown.
-*/
 .app-content {
-  flex-grow: 1; /* Takes up all available space */
-  overflow-y: auto; /* Allows only this area to scroll */
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 1.5rem;
 }
 
-/* View Container
-  Each "page" (like Heparin, IV, etc.) is a view.
-*/
 .view {
-  display: none; /* All views are hidden by default */
+  display: none;
 }
 .view.active {
-  display: block; /* The active view is shown */
-  /* --- DESIGN UPGRADE: Fade-in animation --- */
+  display: block;
   animation: fadeIn 0.3s ease-in-out;
 }
 @keyframes fadeIn {
@@ -93,18 +177,22 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Bottom Tab Bar (Fixed Bottom)
-  This is the new "App" navigation.
-*/
 .app-bottom-nav {
   display: flex;
   justify-content: space-around;
-  background-color: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  /* --- DESIGN UPGRADE: More professional shadow --- */
-  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.04);
+  background: var(--bg-bottom-nav);
+  border-top: 1px solid var(--bg-bottom-nav-border);
+  box-shadow: var(--bg-bottom-nav-shadow);
   padding: 0.5rem 0;
   z-index: 10;
+  transition: all 0.3s ease;
+}
+body.dark .app-bottom-nav {
+  background: var(--bg-bottom-nav-dark);
+  border-top: 1px solid var(--bg-bottom-nav-border-dark);
+  box-shadow: var(--bg-bottom-nav-shadow-dark);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .nav-button {
   display: flex;
@@ -113,10 +201,19 @@ body {
   background: none;
   border: none;
   padding: 0.5rem;
-  font-size: 0.75rem; /* 12px */
+  font-size: 0.75rem;
   font-weight: 500;
-  color: #a0aec0; /* Gray */
+  color: var(--text-nav-idle);
   transition: all 0.2s ease-in-out;
+}
+body.dark .nav-button {
+  color: var(--text-nav-idle-dark);
+}
+.nav-button.active {
+  color: var(--text-nav-active);
+}
+body.dark .nav-button.active {
+  color: var(--text-nav-active-dark);
 }
 .nav-button svg {
   width: 24px;
@@ -124,121 +221,126 @@ body {
   margin-bottom: 0.25rem;
   transition: all 0.2s ease-in-out;
 }
-.nav-button.active {
-  color: #00bcd4; /* Active color */
-}
-.nav-button:hover:not(.active) {
-  color: #4a5568;
-}
 .nav-button.active svg {
   transform: scale(1.1);
 }
 
-/* --- DASHBOARD REDESIGN ---
-  This is the new "Dazzling" Grid
-*/
+/* 4. Dashboard Grid (Futuristic) */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  gap: 1.25rem; /* 20px */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
 }
 .tool-card {
-  /* --- DESIGN UPGRADE: Gradient background --- */
-  background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
-  border-radius: 1rem; /* 16px */
-  padding: 1.5rem 1rem; /* 24px 16px */
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  box-shadow: var(--bg-card-shadow);
+  border-radius: 1rem;
+  padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* --- DESIGN UPGRADE: Professional Shadow --- */
-  box-shadow: 0 10px 20px rgba(0, 151, 167, 0.2), 0 6px 6px rgba(0, 151, 167, 0.2);
   transition: all 0.3s ease-in-out;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+body.dark .tool-card {
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
+  box-shadow: var(--bg-card-shadow-dark);
 }
 .tool-card:hover {
-  /* --- DESIGN UPGRADE: "Pop" effect --- */
   transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 20px 30px rgba(0, 151, 167, 0.3), 0 10px 10px rgba(0, 151, 167, 0.2);
+  box-shadow: var(--bg-card-hover-shadow);
+}
+body.dark .tool-card:hover {
+  box-shadow: var(--bg-card-hover-shadow-dark);
+  border-color: #22d3ee;
 }
 .tool-card svg {
   width: 36px;
   height: 36px;
-  /* --- DESIGN UPGRADE: White icon --- */
-  color: #ffffff;
+  color: var(--text-card-icon);
   margin-bottom: 0.75rem;
-  /* --- DESIGN UPGRADE: Soft shadow on icon --- */
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+  transition: color 0.3s ease;
+}
+body.dark .tool-card svg {
+  color: var(--text-card-icon-dark);
 }
 .tool-card-title {
-  font-size: 1rem; /* 16px */
+  font-size: 1rem;
   font-weight: 600;
-  /* --- DESIGN UPGRADE: White text --- */
-  color: #ffffff;
+  color: var(--text-card);
   line-height: 1.4;
+  transition: color 0.3s ease;
 }
-/* Special style for History card */
-.tool-card.history-card {
-  background: #607d8b;
-  border-color: #607d8b;
-  box-shadow: 0 10px 20px rgba(96, 125, 139, 0.2), 0 6px 6px rgba(96, 125, 139, 0.2);
-}
-.tool-card.history-card:hover {
-  box-shadow: 0 20px 30px rgba(96, 125, 139, 0.3);
-  background: #546e7a;
-}
-.tool-card.history-card svg {
-  color: #ffffff;
-}
-.tool-card.history-card .tool-card-title {
-  color: #ffffff;
+body.dark .tool-card-title {
+  color: var(--text-card-dark);
 }
 
-/* --- CALCULATOR FORM STYLING ---
-  (Kept clean and white for usability)
-*/
+/* 5. Calculator View & Forms */
 .calculator-view {
-  background-color: #ffffff;
+  background: var(--bg-view);
   border-radius: 1rem;
   padding: 1.5rem;
-  /* --- DESIGN UPGRADE: Stronger shadow to "float" above bg --- */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--bg-view-shadow);
+  transition: all 0.3s ease;
+}
+body.dark .calculator-view {
+  background: var(--bg-view-dark);
+  box-shadow: var(--bg-view-shadow-dark);
 }
 .calculator-title {
-  font-size: 1.75rem; /* 28px */
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #006064;
+  color: var(--text-primary);
   text-align: center;
   margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
+}
+body.dark .calculator-title {
+  color: var(--text-primary-dark);
 }
 
-/* Mode Toggle Buttons (Heparin) */
+/* Mode Toggle */
 .mode-toggle-buttons {
   display: flex;
   margin-bottom: 1.5rem;
   border-radius: 0.75rem;
   overflow: hidden;
-  border: 1px solid #b2ebf2;
+  border: 1px solid var(--border-input);
+  transition: border 0.3s ease;
+}
+body.dark .mode-toggle-buttons {
+  border-color: var(--border-input-dark);
 }
 .mode-btn {
   flex-grow: 1;
   padding: 0.75rem 1rem;
   font-weight: 600;
   cursor: pointer;
-  background-color: #f0fcfd;
-  color: #006064;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
   border: none;
   transition: all 0.2s ease-in-out;
+}
+body.dark .mode-btn {
+  background-color: var(--bg-input-dark);
+  color: var(--text-secondary-dark);
 }
 .mode-btn.active {
   background-image: linear-gradient(to right, #00bcd4, #4dd0e1);
   color: white;
   box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
 }
+body.dark .mode-btn.active {
+  background-image: linear-gradient(to right, #0e7490, #22d3ee);
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);
+}
 
-/* Input Fields */
+/* Inputs & Labels */
 .input-group {
   margin-bottom: 1.25rem;
 }
@@ -246,41 +348,70 @@ body {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #2d3748;
-  font-size: 0.9rem; /* 14px */
+  color: var(--text-label);
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+body.dark .input-group label {
+  color: var(--text-label-dark);
 }
 .input-group input, 
-.input-group select {
+.input-group select,
+.search-bar {
   width: 100%;
   padding: 0.85rem;
-  border: 1px solid #b2ebf2;
+  border: 1px solid var(--border-input);
   border-radius: 0.75rem;
   font-size: 1rem;
-  background-color: #f8fafc;
+  background-color: var(--bg-input);
+  color: var(--text-input);
   transition: all 0.2s ease-in-out;
 }
+body.dark .input-group input, 
+body.dark .input-group select,
+body.dark .search-bar {
+  background-color: var(--bg-input-dark);
+  border-color: var(--border-input-dark);
+  color: var(--text-input-dark);
+}
 .input-group input:focus, 
-.input-group select:focus {
+.input-group select:focus,
+.search-bar:focus {
   outline: none;
-  border-color: #00bcd4;
-  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.3);
-  background-color: #ffffff;
+  border-color: var(--border-input-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background-color: var(--bg-input-focus);
+}
+body.dark .input-group input:focus, 
+body.dark .input-group select:focus,
+body.dark .search-bar:focus {
+  border-color: var(--border-input-focus-dark);
+  box-shadow: 0 0 0 3px var(--focus-ring-dark);
+  background-color: var(--bg-input-focus-dark);
+}
+.search-bar {
+  margin-bottom: 1rem;
 }
 
-/* Checkbox / Risk Factors Styling */
+/* Checkboxes */
 .risk-group-heading {
   font-weight: 700;
-  color: #006064;
+  color: var(--text-primary);
   font-size: 1.1rem;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  border-bottom: 2px solid #e0f7fa;
+  border-bottom: 2px solid var(--border-input);
   padding-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+body.dark .risk-group-heading {
+  color: var(--text-primary-dark);
+  border-bottom-color: var(--border-input-dark);
 }
 .risk-factor-card {
   padding: 0.75rem 1rem;
-  background-color: #f8fafc;
-  border: 1px solid #e0f2f7;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-input);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
@@ -289,21 +420,36 @@ body {
   transition: all 0.2s ease-in-out;
   margin-bottom: 0.5rem;
 }
+body.dark .risk-factor-card {
+  background-color: var(--bg-input-dark);
+  border-color: var(--border-input-dark);
+}
 .risk-factor-card:hover {
   background-color: #eefcff;
   border-color: #b2ebf2;
+}
+body.dark .risk-factor-card:hover {
+  background-color: #1e293b;
+  border-color: var(--border-input-focus-dark);
 }
 .risk-factor-card input[type="checkbox"] {
   transform: scale(1.2);
   accent-color: #00bcd4;
 }
+body.dark .risk-factor-card input[type="checkbox"] {
+  accent-color: #22d3ee;
+}
 .risk-factor-card span {
   font-weight: 500;
-  color: #2d3748;
+  color: var(--text-label);
   font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+body.dark .risk-factor-card span {
+  color: var(--text-label-dark);
 }
 
-/* Main Action Buttons (Calculate, Save) */
+/* Buttons */
 .btn {
   width: 100%; 
   padding: 1rem;
@@ -326,14 +472,23 @@ body {
   box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
   transform: translateY(-2px);
 }
+body.dark .btn {
+  background-image: linear-gradient(to right, #0e7490, #22d3ee);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.25);
+}
+body.dark .btn:hover:not(:disabled) {
+  background-image: linear-gradient(to right, #0891b2, #22d3ee);
+  box-shadow: 0 6px 25px rgba(34, 211, 238, 0.4);
+}
 .btn:disabled {
-  background: #9e9e9e; /* Gray when disabled */
+  background: #9e9e9e;
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
   opacity: 0.7;
 }
-/* Specific button for Save (Green) */
+
+/* Save Button (Green) */
 .btn-save {
   background-image: linear-gradient(to right, #4caf50, #66bb6a);
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
@@ -342,8 +497,16 @@ body {
   background-image: linear-gradient(to right, #43a047, #57a95b);
   box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
 }
+body.dark .btn-save {
+  background-image: linear-gradient(to right, #16a34a, #22c55e);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
+}
+body.dark .btn-save:hover:not(:disabled) {
+  background-image: linear-gradient(to right, #15803d, #16a34a);
+  box-shadow: 0 6px 25px rgba(34, 197, 94, 0.4);
+}
 
-/* Result / Error / Notification Boxes */
+/* 6. Result / Error Boxes */
 .result-box, .error-box, .result-box-notification {
   padding: 1.25rem;
   border-radius: 1rem;
@@ -351,6 +514,7 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
 }
 .result-box {
   background-color: #e0f7fa;
@@ -362,11 +526,25 @@ body {
   border: 1px solid #ef5350;
   color: #c62828;
 }
-/* This is the yellow box for "Notification Set" */
 .result-box-notification {
   background-color: #fffde7;
   border: 1px solid #fdd835;
   color: #6f6f00;
+}
+body.dark .result-box {
+  background-color: #1e3a40;
+  border-color: #0e7490;
+  color: #a5f3fc;
+}
+body.dark .error-box {
+  background-color: #2f1a1a;
+  border-color: #b91c1c;
+  color: #fca5a5;
+}
+body.dark .result-box-notification {
+  background-color: #3f3c19;
+  border-color: #a16207;
+  color: #fef08a;
 }
 .result-box .font-bold, .error-box .font-bold, .result-box-notification .font-bold {
   color: inherit;
@@ -378,18 +556,28 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* History / Log Styling */
+/* 7. History / Log Styling */
 .history-view {
-  background-color: #ffffff;
+  background: var(--bg-view);
   border-radius: 1rem;
-  padding: 0.5rem; /* Less padding, cards have padding */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem;
+  box-shadow: var(--bg-view-shadow);
+  transition: all 0.3s ease;
+}
+body.dark .history-view {
+  background: var(--bg-view-dark);
+  box-shadow: var(--bg-view-shadow-dark);
 }
 .log-entry {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0f2f7;
+  background: var(--bg-view);
+  border-bottom: 1px solid var(--border-input);
   margin-bottom: 0;
   padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+body.dark .log-entry {
+  background: transparent;
+  border-bottom-color: var(--border-input-dark);
 }
 .log-entry:last-child {
   border-bottom: none;
@@ -403,29 +591,50 @@ body {
 .log-tool-name {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #006064;
+  color: var(--text-primary);
   text-transform: capitalize;
+  transition: color 0.3s ease;
+}
+body.dark .log-tool-name {
+  color: var(--text-nav-active-dark);
 }
 .log-timestamp {
   font-size: 0.75rem;
-  color: #718096;
+  color: var(--text-nav-idle);
+  transition: color 0.3s ease;
+}
+body.dark .log-timestamp {
+  color: var(--text-nav-idle-dark);
 }
 .log-patient {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
-  border-bottom: 1px dashed #b2ebf2;
+  border-bottom: 1px dashed var(--border-input);
   padding-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+body.dark .log-patient {
+  color: var(--text-secondary-dark);
+  border-bottom-color: var(--border-input-dark);
 }
 .log-details {
   font-size: 0.9rem;
-  color: #2d3748;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+body.dark .log-details {
+  color: var(--text-secondary-dark);
 }
 .log-details-title {
   font-weight: 600;
   color: #00796b;
   margin-top: 0.5rem;
+  transition: color 0.3s ease;
+}
+body.dark .log-details-title {
+  color: #14b8a6;
 }
 .log-details ul {
   list-style-type: disc;
@@ -433,7 +642,7 @@ body {
   margin-top: 0.25rem;
 }
 
-/* Password Prompt */
+/* 8. Password Prompt */
 #password-prompt {
   background-color: rgba(0, 0, 0, 0.5);
   position: fixed;
@@ -446,12 +655,18 @@ body {
   justify-content: center;
   z-index: 50;
   backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 #password-modal {
-  background-color: white;
+  background: var(--bg-view);
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 400px;
+  transition: all 0.3s ease;
+}
+body.dark #password-modal {
+  background: var(--bg-view-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
