@@ -16,7 +16,7 @@ const headerBackButton = $('#header-back-button');
 const allViews = $$('.view');
 const allNavButtons = $$('.nav-button');
 const passwordPrompt = $('#password-prompt');
-const darkModeToggle = $('#dark-mode-toggle'); // ** NEW: Dark Mode Button **
+const darkModeToggle = $('#dark-mode-toggle'); 
 
 // Forms & Inputs
 const heparinForm = $('#heparin-form');
@@ -26,13 +26,13 @@ const ivForm = $('#iv-form');
 const renalForm = $('#renal-form');
 const converterForm = $('#converter-form');
 const passwordForm = $('#password-form');
-const historySearch = $('#history-search'); // ** NEW: Search Bar **
+const historySearch = $('#history-search'); 
 
 // --- (3) APPLICATION STATE ---
 const appState = {
   currentView: 'dashboard',
   currentHeparinMode: 'initial',
-  historyLogs: [], // ** NEW: To store logs for searching **
+  historyLogs: [], 
 };
 
 // --- (4) NAVIGATION ---
@@ -86,6 +86,12 @@ function navigateTo(viewId, title) {
     passwordPrompt.classList.remove('hidden');
     $('#password-input').value = ''; // Clear password field
     $('#password-input').focus();
+    
+    // Clear any old password error messages
+    const oldError = passwordForm.querySelector('.error-box');
+    if (oldError) {
+      oldError.remove();
+    }
   }
 }
 
@@ -136,7 +142,7 @@ function initializeEventListeners() {
   // Header Back Button
   headerBackButton.addEventListener('click', () => navigateTo('view-dashboard', 'CHG Toolkit'));
   
-  // ** NEW: Dark Mode Toggle **
+  // ** Dark Mode Toggle **
   darkModeToggle.addEventListener('click', toggleDarkMode);
 
   // Dashboard Cards
@@ -183,21 +189,21 @@ function initializeEventListeners() {
     navigateTo('view-dashboard', 'CHG Toolkit'); // Go back home
   });
   
-  // ** NEW: History Search **
+  // ** History Search **
   historySearch.addEventListener('input', handleHistorySearch);
 }
 
 // --- (6) EVENT HANDLERS (Form Submission & Logic) ---
 
 // --- Dark Mode ---
+// *** FIX: This function now defaults to LIGHT mode ***
 function initializeDarkMode() {
   // Check for saved user preference
   const savedMode = localStorage.getItem('darkMode');
-  
-  // Check for OS-level preference
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-  if (savedMode === 'true' || (savedMode === null && prefersDark)) {
+  // We no longer check OS preference (prefers-color-scheme).
+  // Default is light mode. Only go dark if user *explicitly* set it.
+  if (savedMode === 'true') {
     document.body.classList.add('dark');
   } else {
     document.body.classList.remove('dark');
@@ -215,12 +221,25 @@ function toggleDarkMode() {
 function handlePasswordSubmit(e) {
   e.preventDefault();
   const password = $('#password-input').value;
+  
+  // Clear any old error messages
+  const oldError = passwordForm.querySelector('.error-box');
+  if (oldError) {
+    oldError.remove();
+  }
+  
   if (password === HISTORY_PASSWORD) {
     passwordPrompt.classList.add('hidden');
     loadHistoryLogs();
   } else {
-    alert('Incorrect password. Please try again.');
+    // *** FIX: Use a custom error box instead of alert() ***
+    const errorBox = document.createElement('div');
+    errorBox.className = 'error-box';
+    errorBox.style.marginTop = '1rem';
+    errorBox.innerHTML = '<p>Incorrect password. Please try again.</p>';
+    passwordForm.appendChild(errorBox); // Append error to the form
     $('#password-input').value = '';
+    $('#password-input').focus();
   }
 }
 
@@ -242,8 +261,8 @@ async function loadHistoryLogs() {
       return;
     }
     
-    appState.historyLogs = logs; // ** NEW: Store logs for searching **
-    renderHistoryLogs(logs); // ** NEW: Call render function **
+    appState.historyLogs = logs; // Store logs for searching
+    renderHistoryLogs(logs); // Call render function
     
   } catch (error) {
     console.error('Error fetching history:', error);
@@ -251,7 +270,7 @@ async function loadHistoryLogs() {
   }
 }
 
-// ** NEW: Renders logs into HTML (so search can call it) **
+// Renders logs into HTML (so search can call it)
 function renderHistoryLogs(logs) {
   const historyContainer = $('#history-logs-container');
   
@@ -279,12 +298,11 @@ function renderHistoryLogs(logs) {
   historyContainer.innerHTML = logsHtml;
 }
 
-// ** NEW: Search/Filter Function **
+// Search/Filter Function
 function handleHistorySearch(e) {
   const searchTerm = e.target.value.toLowerCase();
   
   // This is a client-side filter (fast)
-  // It filters the logs we already fetched from Supabase
   const filteredLogs = appState.historyLogs.filter(log => {
     // Check if the patient_name (if it exists) includes the search term
     return (log.patient_name || '').toLowerCase().includes(searchTerm);
@@ -315,7 +333,7 @@ function toggleHeparinMode(mode) {
 }
 
 async function handleHeparinSubmit(e) {
-  e.preventDefault(); // Prevent form from reloading page
+  e.preventDefault(); 
   const resultArea = $('#heparin-result-area');
   const calculateBtn = $('#heparin-calculate-btn');
   
@@ -343,7 +361,6 @@ async function handleHeparinSubmit(e) {
     let result, inputs, toolName;
     
     if (appState.currentHeparinMode === 'initial') {
-      // Validate fields for initial mode
       if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || !formData.indication) {
          throw new Error('Weight, Concentration, and Indication are required for initial dose.');
       }
@@ -355,7 +372,6 @@ async function handleHeparinSubmit(e) {
         indication: formData.indication
       };
     } else { // Maintenance mode
-      // Validate fields for maintenance mode
       if (isNaN(formData.weight) || isNaN(formData.heparinConcentration) || isNaN(formData.currentInfusionRate) || isNaN(formData.currentPtt)) {
          throw new Error('Weight, Concentration, Current Rate, and Current PTT are required for maintenance.');
       }
@@ -376,7 +392,6 @@ async function handleHeparinSubmit(e) {
       resultArea.innerHTML = result.html; // Display calculation HTML
       
       // --- Schedule Notifications ---
-      // This function will handle permission request
       if (result.notification) {
         scheduleNotification(
           result.notification.title,
@@ -403,10 +418,8 @@ async function handleHeparinSubmit(e) {
     }
     
   } catch (error) {
-    // Catch any unexpected errors (like "Patient Name required")
     resultArea.innerHTML = `<div class="error-box"><p>An unexpected error occurred: ${error.message}</p></div>`;
   } finally {
-    // Always re-enable the button
     calculateBtn.disabled = false;
     calculateBtn.querySelector('span').textContent = 'Calculate';
   }
@@ -414,28 +427,34 @@ async function handleHeparinSubmit(e) {
 
 // --- Prophylaxis ---
 function handleProphylaxisCheck() {
-  // This function runs every time a checkbox is clicked
   const selectedFactors = Array.from(prophylaxisForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
   const resultArea = $('#prophylaxis-result-area');
   
   if (selectedFactors.length === 0) {
-    resultArea.innerHTML = ''; // Clear result if no factors selected
+    resultArea.innerHTML = ''; 
     return;
   }
   
-  // Calculate and display the result live
   const result = calculateStressUlcerProphylaxis(selectedFactors);
   resultArea.innerHTML = result.html;
 }
 
 async function handleProphylaxisSubmit(e) {
-  e.preventDefault(); // This is now a "Save" button
+  e.preventDefault(); 
   const resultArea = $('#prophylaxis-result-area');
   const saveBtn = $('#prophylaxis-save-btn');
   
-  // Check if there is a result to save
+  // Clear any old save errors
+  const oldError = prophylaxisForm.querySelector('.save-error-box');
+  if(oldError) oldError.remove();
+
   if (resultArea.innerHTML === '') {
-    alert('Please select risk factors to calculate a result before saving.');
+    // *** FIX: Use a custom error box instead of alert() ***
+    const errorBox = document.createElement('div');
+    errorBox.className = 'error-box save-error-box'; 
+    errorBox.style.marginTop = '1rem';
+    errorBox.innerHTML = '<p>Please select risk factors to calculate a result before saving.</p>';
+    resultArea.parentNode.insertBefore(errorBox, saveBtn);
     return;
   }
   
@@ -443,7 +462,6 @@ async function handleProphylaxisSubmit(e) {
   saveBtn.querySelector('span').textContent = 'Saving...';
   
   try {
-    // Re-calculate to get clean data
     const selectedFactors = Array.from(prophylaxisForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
     const result = calculateStressUlcerProphylaxis(selectedFactors); 
     
@@ -454,7 +472,6 @@ async function handleProphylaxisSubmit(e) {
         throw new Error('Patient Name and ID are required to save.');
     }
     
-    // Save to Supabase
     await saveCalculation(
       'stress_ulcer_prophylaxis',
       patientName,
@@ -467,10 +484,8 @@ async function handleProphylaxisSubmit(e) {
     
   } catch (error) {
     saveBtn.querySelector('span').textContent = 'Save Failed';
-    // Show error below the save button
     resultArea.innerHTML += `<div class="error-box mt-4"><p><strong>Save Error:</strong> ${error.message}</p></div>`;
   } finally {
-    // Reset button text after 2 seconds
     setTimeout(() => {
       saveBtn.disabled = false;
       saveBtn.querySelector('span').textContent = 'Save Result';
@@ -480,7 +495,6 @@ async function handleProphylaxisSubmit(e) {
 
 // --- Padua ---
 function handlePaduaCheck() {
-  // This function runs every time a checkbox is clicked
   const resultArea = $('#padua-result-area');
   
   let score = 0;
@@ -491,22 +505,30 @@ function handlePaduaCheck() {
   const selectedFactors = Array.from(paduaForm.querySelectorAll('input[name="riskFactor"]:checked')).map(cb => cb.value);
   
   if (selectedFactors.length === 0) {
-    resultArea.innerHTML = ''; // Clear result if nothing selected
+    resultArea.innerHTML = ''; 
     return;
   }
   
-  // Calculate and display result live
   const result = calculatePaduaScore(score);
   resultArea.innerHTML = result.html;
 }
 
 async function handlePaduaSubmit(e) {
-  e.preventDefault(); // This is a "Save" button
+  e.preventDefault(); 
   const resultArea = $('#padua-result-area');
   const saveBtn = $('#padua-save-btn');
 
+  // Clear any old save errors
+  const oldError = paduaForm.querySelector('.save-error-box');
+  if(oldError) oldError.remove();
+
   if (resultArea.innerHTML === '') {
-    alert('Please select risk factors to calculate a score before saving.');
+    // *** FIX: Use a custom error box instead of alert() ***
+    const errorBox = document.createElement('div');
+    errorBox.className = 'error-box save-error-box'; 
+    errorBox.style.marginTop = '1rem';
+    errorBox.innerHTML = '<p>Please select risk factors to calculate a score before saving.</p>';
+    resultArea.parentNode.insertBefore(errorBox, saveBtn);
     return;
   }
 
@@ -514,7 +536,6 @@ async function handlePaduaSubmit(e) {
   saveBtn.querySelector('span').textContent = 'Saving...';
 
   try {
-    // Re-calculate to get clean data
     let score = 0;
     const selectedFactors = [];
     paduaForm.querySelectorAll('input[name="riskFactor"]:checked').forEach(cb => {
@@ -530,7 +551,6 @@ async function handlePaduaSubmit(e) {
         throw new Error('Patient Name and ID are required to save.');
     }
 
-    // Save to Supabase
     await saveCalculation(
       'padua_score',
       patientName,
@@ -582,11 +602,9 @@ async function handleIVSubmit(e) {
         throw new Error('All calculation fields must be valid numbers.');
     }
 
-    // Calculate and display
     const result = calculateIVRate(inputs);
     resultArea.innerHTML = result.html;
     
-    // Save to Supabase (in the background)
     saveCalculation(
       'iv_calculator',
       patientName,
@@ -605,7 +623,6 @@ async function handleIVSubmit(e) {
 
 // --- Renal Dosing (Live) ---
 function handleRenalInput() {
-  // This calculates live as the user types
   const resultArea = $('#renal-result-area');
   try {
     const inputs = {
@@ -615,12 +632,11 @@ function handleRenalInput() {
       gender: $('#renal-gender').value
     };
     
-    // Check if all fields are valid numbers > 0
     if (inputs.age > 0 && inputs.weight_kg > 0 && inputs.creatinine_mg_dl > 0) {
       const result = calculateCrCl(inputs);
       resultArea.innerHTML = result.html;
     } else {
-      resultArea.innerHTML = ''; // Clear result if inputs are incomplete
+      resultArea.innerHTML = ''; 
     }
   } catch (error) {
     resultArea.innerHTML = `<div class="error-box"><p>Calculation error: ${error.message}</p></div>`;
@@ -633,7 +649,6 @@ function handleConverterInput() {
   const fromUnit = $('#converter-fromUnit').value;
   const toUnitField = $('#converter-toUnit');
 
-  // Auto-pair logic for lbs/kg
   if (fromUnit === 'lbs_kg') toUnitField.value = 'kg_lbs';
   if (fromUnit === 'kg_lbs') toUnitField.value = 'lbs_kg';
   
@@ -662,8 +677,6 @@ function handleConverterInput() {
 
 /**
  * Calculates Initial Heparin Dose
- * This is the translated logic from your code.gs
- * ** INCLUDES 1-MINUTE NOTIFICATION TEST **
  */
 function calculateInitialHeparinRate(formData) {
   const { weight, heparinConcentration, indication, patientName } = formData;
@@ -686,7 +699,7 @@ function calculateInitialHeparinRate(formData) {
       break;
     case 'Acute coronary syndrome':
       suggestedLoadingDoseUnits = 70 * weight;
-      suggestedInitialInfusionRateUnitsPerKg = 18; // Your code.gs said 18, ACS protocol is often 12. Sticking to your code.gs logic.
+      suggestedInitialInfusionRateUnitsPerKg = 18; 
       break;
     default:
       return { error: 'Invalid indication selected.' };
@@ -699,14 +712,12 @@ function calculateInitialHeparinRate(formData) {
   // *** TEST: 1 Minute Notification ***
   const repeatPttMinutes = 1; 
   
-  // Data for logging
   const logData = {
     loading_dose: `${suggestedLoadingDoseUnits.toFixed(0)} units (${loadingDoseMl} mL)`,
     initial_rate: `${initialInfusionRateMl} mL/hour`,
-    next_ptt: `in ${repeatPttMinutes} minutes (TEST)`
+    next_ptt: `in 6 hours (TEST: 1 min)`
   };
   
-  // HTML for display
   const html = `
     <div class="result-box">
       <p class="result-title">Initial Dose Calculation</p>
@@ -725,15 +736,13 @@ function calculateInitialHeparinRate(formData) {
     notification_ptt: {
       title: `Heparin Alert: ${patientName}`,
       body: `Time for scheduled PTT check.`,
-      delayInMinutes: repeatPttMinutes // Send 1-minute test
+      delayInMinutes: repeatPttMinutes
     }
   };
 }
 
 /**
  * Calculates Maintenance Heparin Dose
- * This is the translated logic from your code.gs
- * ** INCLUDES 1-MINUTE NOTIFICATION TEST **
  */
 function calculateMaintenanceHeparinRate(formData) {
   const { weight, heparinConcentration, currentInfusionRate, currentPtt, patientName } = formData;
@@ -751,7 +760,6 @@ function calculateMaintenanceHeparinRate(formData) {
   let repeatPttHours = 6; // Default PTT check
   let boxClass = 'result-box';
 
-  // Your exact logic from code.gs
   if (currentPtt < 40) {
     bolusDoseUnits = 25 * weight; newUnitsPerKgPerHour += 3; message = 'Very low PTT (<40).'; boxClass = 'error-box';
   } else if (currentPtt <= 49) {
@@ -772,7 +780,7 @@ function calculateMaintenanceHeparinRate(formData) {
     stopInfusionMin = 180; newUnitsPerKgPerHour = 0; message = `Critically high PTT (>150). Stop infusion for ${stopInfusionMin} min.`; repeatPttHours = 0; boxClass = 'error-box';
   }
   
-  if (newUnitsPerKgPerHour < 0) newUnitsPerKgPerHour = 0; // Prevent negative rate
+  if (newUnitsPerKgPerHour < 0) newUnitsPerKgPerHour = 0; 
   
   const newUnitsPerHour = newUnitsPerKgPerHour * weight;
   const newRateMl = (newUnitsPerHour / heparinConcentration).toFixed(2);
@@ -790,7 +798,7 @@ function calculateMaintenanceHeparinRate(formData) {
     new_rate: `${newRateMl} mL/hour`,
     bolus_dose: bolusDoseUnits > 0 ? `${bolusDoseUnits.toFixed(0)} units (${bolusDoseMl} mL)` : 'N/A',
     stop_infusion_min: stopInfusionMin > 0 ? stopInfusionMin : 'N/A',
-    next_ptt: nextPttText,
+    next_ptt: `${nextPttText} (TEST: 1 min)`,
     message: message
   };
 
@@ -799,12 +807,11 @@ function calculateMaintenanceHeparinRate(formData) {
   if (logData.bolus_dose !== 'N/A') html += `<p class="text-lg mt-2">Suggested Bolus: <span class="font-bold">${logData.bolus_dose}</span></p>`;
   if (logData.stop_infusion_min !== 'N/A') html += `<p class="text-lg mt-2 font-bold text-red-700 dark:text-red-400">Stop Infusion: <span class="font-bold">${logData.stop_infusion_min} minutes</span></p>`;
   html += `<p class="text-lg mt-2">New Infusion Rate: <span class="font-bold">${logData.new_rate}</span></p>`;
-  html += `<p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${logData.next_ptt}</span></p>`;
+  html += `<p class="text-lg mt-2">Next PTT Check: <span class="font-bold">${nextPttText}</span></p>`;
   html += `<p class="text-sm mt-3 opacity-80">${logData.message}</p></div>`;
   
   let notifications = {};
   
-  // Add notification for STOP infusion (TEST: 1 min)
   if (stopInfusionMin > 0) {
     const stopDelay_TEST = 1; // *** TEST: 1 Minute Notification ***
     notifications.notification = { 
@@ -815,11 +822,10 @@ function calculateMaintenanceHeparinRate(formData) {
     html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${stopDelay_TEST} min to restart infusion.</p></div>`;
   }
   
-  // Add notification for PTT check (TEST: 1 min)
   if (repeatPttHours > 0) {
     notifications.notification_ptt = { 
       title: `Heparin Alert: ${patientName}`, 
-      body: `TEST: Time for scheduled PTT check (Original: ${logData.next_ptt}).`, 
+      body: `TEST: Time for scheduled PTT check (Original: ${nextPttText}).`, 
       delayInMinutes: repeatPttMinutes_TEST 
     };
     html += `<div class="result-box-notification"><p class="font-bold">TEST: Notification set for ${patientName} in ${repeatPttMinutes_TEST} min for PTT check.</p></div>`;
@@ -830,7 +836,6 @@ function calculateMaintenanceHeparinRate(formData) {
 
 /**
  * Calculates Stress Ulcer Prophylaxis Risk
- * This is the translated logic from your code.gs
  */
 function calculateStressUlcerProphylaxis(selectedFactors) {
   const highRiskFactors = [
@@ -949,7 +954,6 @@ function calculateCrCl(inputs) {
 function convertUnits(inputs) {
   const { value, fromUnit, toUnit } = inputs;
   
-  // Base units: mcg, mL, kg
   const massConversions = { 'kg': 1000000000, 'g': 1000000, 'mg': 1000, 'mcg': 1 };
   const volumeConversions = { 'L': 1000, 'mL': 1 };
   const weightConversions = { 'lbs_kg': 0.453592, 'kg_lbs': 2.20462 };
@@ -980,7 +984,6 @@ function convertUnits(inputs) {
 
 /**
  * Saves a calculation log to Supabase.
- * Runs in the background, does not block UI.
  */
 async function saveCalculation(toolName, patientName, patientIdentifier, inputs, result) {
   try {
@@ -1000,13 +1003,12 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
     
   } catch (error) {
     console.error('Error saving to Supabase:', error.message);
-    // Find the result area of the *current* view and append an error
     const currentViewId = appState.currentView;
     const resultArea = $(`#${currentViewId} .result-box, #${currentViewId} .error-box`);
     
     if (resultArea && !resultArea.parentNode.querySelector('.save-error-box')) {
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'error-box save-error-box'; // Add specific class
+      errorDiv.className = 'error-box save-error-box'; 
       errorDiv.style.marginTop = '1rem';
       errorDiv.innerHTML = `<p><strong>Save Error:</strong> Log was not saved. ${error.message}</p>`;
       resultArea.parentNode.insertBefore(errorDiv, resultArea.nextSibling);
@@ -1018,33 +1020,30 @@ async function saveCalculation(toolName, patientName, patientIdentifier, inputs,
  * Requests permission and schedules a notification via the Service Worker.
  */
 async function scheduleNotification(title, body, delayInMinutes) {
-  // 1. Check for browser support
   if (!('Notification' in window) || !('serviceWorker' in navigator)) {
     console.warn('Notifications or Service Worker not supported.');
     return;
   }
   
-  // 2. Request permission (if not already granted)
   let permission = Notification.permission;
   if (permission === 'default') {
     console.log('Requesting notification permission...');
     permission = await Notification.requestPermission();
   }
   
-  // 3. Handle permission state
   if (permission === 'denied') {
     console.warn('Notification permission was denied.');
+    // Maybe show a non-intrusive message in the UI?
     return;
   }
   
   if (permission === 'granted') {
-    if (delayInMinutes <= 0) return; // Don't schedule for 0 or less minutes
+    if (delayInMinutes <= 0) return; 
     
     const delayInMs = delayInMinutes * 60 * 1000;
-    const icon = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png'; // New icon
+    const icon = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png'; 
     
     try {
-      // 4. Pass the job to the Service Worker
       const swRegistration = await navigator.serviceWorker.ready;
       swRegistration.active.postMessage({
         type: 'scheduleNotification',
@@ -1126,13 +1125,12 @@ function formatLogData(log) {
 document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
   initializeEventListeners();
-  initializeDarkMode(); // ** NEW: Check and apply dark mode on load **
+  initializeDarkMode(); // ** This function is now modified **
   
   // Set initial view
   navigateTo('view-dashboard', 'CHG Toolkit');
   
   // Trigger live calculation for converters/renal on load
-  // This populates them with default values (e.g., 1 kg = 2.2 lbs)
   handleConverterInput();
   handleRenalInput();
 });
