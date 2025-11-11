@@ -3,8 +3,8 @@
   This file handles offline caching and push notifications.
 */
 
-// ** NEW: Cache version v5 to force update after fixes **
-const CACHE_NAME = 'chg-toolkit-cache-v5';
+// ** NEW: Cache version v6 to force update after ALL fixes **
+const CACHE_NAME = 'chg-toolkit-cache-v6';
 const urlsToCache = [
   '/', // Caches the root
   'index.html',
@@ -16,7 +16,7 @@ const urlsToCache = [
 
 // 1. Install Event: Cache all essential app files
 self.addEventListener('install', event => {
-  console.log('[SW] Install event');
+  console.log('[SW] Install event (v6)');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -36,7 +36,7 @@ self.addEventListener('install', event => {
 
 // 2. Activate Event: Clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate event');
+  console.log('[SW] Activate event (v6)');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -58,7 +58,6 @@ self.addEventListener('activate', event => {
 
 // 3. Fetch Event: Serve from cache first (Offline-first)
 self.addEventListener('fetch', event => {
-  // We only want to cache GET requests
   if (event.request.method !== 'GET') {
     return;
   }
@@ -67,24 +66,12 @@ self.addEventListener('fetch', event => {
     caches.match(event.request)
       .then(response => {
         if (response) {
-          // If we have it in cache, return it
-          // console.log('[SW] Serving from cache:', event.request.url);
           return response;
         }
-        
-        // If not in cache, fetch from network
-        // console.log('[SW] Fetching from network:', event.request.url);
-        return fetch(event.request)
-          .then(networkResponse => {
-            // OPTIONAL: Cache new requests dynamically?
-            // Be careful with this, especially with Supabase requests.
-            // For now, we only cache the core files on install.
-            return networkResponse;
-          })
-          .catch(error => {
-            console.error('[SW] Fetch failed:', error);
-            // You could return a generic offline page here if you had one
-          });
+        return fetch(event.request);
+      })
+      .catch(error => {
+        console.error('[SW] Fetch failed:', error);
       })
   );
 });
@@ -98,8 +85,7 @@ self.addEventListener('message', event => {
     const triggerTime = Date.now() + delayInMs;
     console.log(`[SW] Notification job received. Scheduling "${title}" for ${new Date(triggerTime)}`);
 
-    // Check if Notification Triggers are supported
-    // This is the reliable, modern way.
+    // *** FIX: Use Notification Triggers API (the reliable, modern way) ***
     if ('showTrigger' in Notification.prototype) {
       try {
         self.registration.showNotification(title, {
@@ -112,22 +98,29 @@ self.addEventListener('message', event => {
         console.log(`[SW] Notification scheduled successfully with showTrigger.`);
       } catch (e) {
         console.error('[SW] showTrigger failed. Falling back to setTimeout (unreliable).', e);
-        // Fallback to the unreliable setTimeout if showTrigger fails
-        setTimeout(() => {
-          self.registration.showNotification(title, { body, icon, badge: icon, vibrate: [200, 100, 200] });
-          console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
-        }, delayInMs);
+        // Fallback to the unreliable setTimeout if showTrigger fails (e.g., Firefox)
+        fallbackTimeout(title, body, delayInMs, icon);
       }
     } else {
-      // Fallback for browsers without showTrigger (like Firefox, older Safari)
+      // Fallback for browsers without showTrigger (like Firefox)
       console.warn('[SW] showTrigger not supported, using setTimeout fallback (unreliable).');
-      setTimeout(() => {
-        self.registration.showNotification(title, { body, icon, badge: icon, vibrate: [200, 100, 200] });
-        console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
-      }, delayInMs);
+      fallbackTimeout(title, body, delayInMs, icon);
     }
   }
 });
+
+// Fallback function for browsers that don't support TimestampTrigger
+function fallbackTimeout(title, body, delayInMs, icon) {
+   setTimeout(() => {
+      self.registration.showNotification(title, { 
+        body: body, 
+        icon: icon, 
+        badge: icon, 
+        vibrate: [200, 100, 200] 
+      });
+      console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
+    }, delayInMs);
+}
 
 // 5. Notification Click Event: What happens when user clicks the notification
 self.addEventListener('notificationclick', event => {
@@ -138,14 +131,12 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window' })
       .then(clientList => {
-        // Check if there's already a window open
         for (let i = 0; i < clientList.length; i++) {
           let client = clientList[i];
           if (client.url === '/' && 'focus' in client) {
             return client.focus();
           }
         }
-        // If not, open a new window
         if (clients.openWindow) {
           return clients.openWindow('/');
         }
