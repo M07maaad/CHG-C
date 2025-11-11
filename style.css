@@ -1,150 +1,191 @@
 /*
-  APPLICATION STYLES (style.css) - VERSION 2.1 (Calmer Indigo Theme)
-  This version changes the color theme and fixes UI bugs.
+  APPLICATION STYLES (style.css) - VERSION 3.0 (Glassmorphism Redesign)
+  - Implemented full Glassmorphism UI (Header, Nav, Cards)
+  - Added dynamic 'Aurora' background for blur effect
+  - Reverted to original CYAN color theme (hospital identity)
+  - Fixed Dark Mode button visibility
+  - Fixed Mobile Notch/Safe-Area padding
 */
 
 /* 1. Tailwind Base & Fonts */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* *** CRITICAL FIX: ***
-  Manually define the .hidden class as a fallback.
-*/
 .hidden {
   display: none !important; 
 }
 
 /* 2. Custom App Layout & Themes */
 :root {
-  /* --- NEW: Light Mode (Calmer Indigo/Violet) --- */
-  --bg-primary: linear-gradient(170deg, #eef2ff 0%, #f0f4f8 100%); /* Light Indigo to Grey */
-  --bg-header: linear-gradient(to right, #4f46e5, #7c3aed); /* Vibrant Indigo to Violet */
-  --bg-header-border: rgba(255, 255, 255, 0.3);
-  --bg-content: transparent;
-  --bg-bottom-nav: #ffffff;
-  --bg-bottom-nav-border: #e2e8f0;
-  --bg-bottom-nav-shadow: 0 -5px 15px rgba(0, 0, 0, 0.04);
-  --bg-card: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%); /* Indigo Glowing Card */
-  --bg-card-border: rgba(255, 255, 255, 0.2);
-  --bg-card-shadow: 0 10px 20px rgba(79, 70, 229, 0.2), 0 6px 6px rgba(79, 70, 229, 0.2);
-  --bg-card-hover-shadow: 0 20px 30px rgba(79, 70, 229, 0.3), 0 10px 10px rgba(79, 70, 229, 0.2);
-  --bg-view: #ffffff;
-  --bg-view-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  --bg-input: #f8fafc;
-  --bg-input-focus: #ffffff;
+  /* --- Light Mode (Original Cyan Theme) --- */
+  --bg-primary-light: #f0f4f8; /* Base color */
+  --bg-blur-blob-1-light: #00bcd4;
+  --bg-blur-blob-2-light: #4dd0e1;
   
-  --text-header: #ffffff;
+  --bg-glass-light: rgba(255, 255, 255, 0.7);
+  --bg-glass-border-light: rgba(255, 255, 255, 0.3);
+  
+  --bg-card-light: rgba(255, 255, 255, 0.6);
+  --bg-card-border-light: rgba(255, 255, 255, 0.4);
+  --bg-card-shadow-light: 0 8px 32px 0 rgba(0, 188, 212, 0.2);
+
+  --bg-input-light: rgba(255, 255, 255, 0.8);
+  --bg-input-focus-light: rgba(255, 255, 255, 1);
+  
+  --text-header-light: #006064;
   --text-nav-idle: #a0aec0;
-  --text-nav-active: #4f46e5; /* Indigo */
-  --text-card: #ffffff;
-  --text-card-icon: #ffffff;
-  --text-primary: #3730a3; /* Dark Indigo for headings */
+  --text-nav-active: #00bcd4;
+  --text-primary: #006064; /* Dark Cyan for headings */
   --text-secondary: #2d3748; /* Dark Grey for general text */
   --text-label: #2d3748;
   --text-input: #000000;
   
-  --border-input: #c7d2fe; /* Light Indigo border */
-  --border-input-focus: #4f46e5; /* Indigo */
-  --focus-ring: rgba(79, 70, 229, 0.3);
+  --border-input: #b2ebf2;
+  --border-input-focus: #00bcd4;
+  --focus-ring: rgba(0, 188, 212, 0.3);
+
+  /* --- Dark Mode (Original Cyan Theme) --- */
+  --bg-primary-dark: #0f172a; /* Dark Navy Blue */
+  --bg-blur-blob-1-dark: #0e7490;
+  --bg-blur-blob-2-dark: #0097a7;
+
+  --bg-glass-dark: rgba(15, 23, 42, 0.7);
+  --bg-glass-border-dark: rgba(129, 236, 236, 0.2);
   
-  /* --- NEW: Dark Mode Variables (Calmer Indigo/Violet) --- */
-  --bg-primary-dark: #0f172a; /* Dark Navy Blue (Same) */
-  --bg-header-dark: rgba(15, 23, 42, 0.7); /* Glassmorphism (Same) */
-  --bg-header-border-dark: rgba(165, 180, 252, 0.2); /* Light Indigo */
-  --bg-bottom-nav-dark: rgba(15, 23, 42, 0.7); /* Glassmorphism (Same) */
-  --bg-bottom-nav-border-dark: rgba(165, 180, 252, 0.2); /* Light Indigo */
-  --bg-bottom-nav-shadow-dark: 0 -5px 20px rgba(0, 0, 0, 0.3);
-  --bg-card-dark: rgba(30, 41, 59, 0.5); /* Glassmorphism (Same) */
-  --bg-card-border-dark: rgba(165, 180, 252, 0.5); /* Glowing Border (Light Indigo) */
-  --bg-card-shadow-dark: 0 0 20px rgba(165, 180, 252, 0.15); /* Glow Effect */
-  --bg-card-hover-shadow-dark: 0 0 30px rgba(165, 180, 252, 0.3);
-  --bg-view-dark: rgba(30, 41, 59, 0.8); /* Dark Glass (Same) */
-  --bg-view-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.2);
-  --bg-input-dark: #1e293b;
-  --bg-input-focus-dark: #0f172a;
+  --bg-card-dark: rgba(30, 41, 59, 0.6);
+  --bg-card-border-dark: rgba(129, 236, 236, 0.3);
+  --bg-card-shadow-dark: 0 8px 32px 0 rgba(34, 211, 238, 0.15);
+
+  --bg-input-dark: rgba(30, 41, 59, 0.8);
+  --bg-input-focus-dark: rgba(15, 23, 42, 1);
   
   --text-header-dark: #e2e8f0;
   --text-nav-idle-dark: #64748b;
-  --text-nav-active-dark: #a5b4fc; /* Bright Indigo */
-  --text-card-dark: #e2e8f0;
-  --text-card-icon-dark: #a5b4fc; /* Bright Indigo */
+  --text-nav-active-dark: #22d3ee; /* Bright Cyan */
   --text-primary-dark: #e2e8f0;
   --text-secondary-dark: #94a3b8;
   --text-label-dark: #94a3b8;
   --text-input-dark: #ffffff;
   
   --border-input-dark: #334155;
-  --border-input-focus-dark: #a5b4fc; /* Bright Indigo */
-  --focus-ring-dark: rgba(165, 180, 252, 0.3);
+  --border-input-focus-dark: #22d3ee; /* Bright Cyan */
+  --focus-ring-dark: rgba(34, 211, 238, 0.3);
 }
 
 html, body {
   height: 100%;
-  overflow: hidden; /* Prevent body scroll, app-content handles scroll */
+  overflow: hidden; 
   font-family: 'Inter', sans-serif;
 }
 
+/* *** NEW: Dynamic Aurora Background *** */
 body {
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background-color: var(--bg-primary-light);
   color: var(--text-secondary);
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative; /* Needed for pseudo-elements */
+}
+/* These blobs create the blurred background effect */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(100px);
+  z-index: -1;
+  transition: background-color 0.5s ease;
+}
+body::before {
+  background-color: var(--bg-blur-blob-1-light);
+  top: -10%;
+  left: -10%;
+  animation: moveBlob1 15s infinite alternate ease-in-out;
+}
+body::after {
+  background-color: var(--bg-blur-blob-2-light);
+  bottom: -10%;
+  right: -10%;
+  animation: moveBlob2 18s infinite alternate ease-in-out;
 }
 body.dark {
-  background: var(--bg-primary-dark);
+  background-color: var(--bg-primary-dark);
   color: var(--text-secondary-dark);
+}
+body.dark::before {
+  background-color: var(--bg-blur-blob-1-dark);
+}
+body.dark::after {
+  background-color: var(--bg-blur-blob-2-dark);
+}
+@keyframes moveBlob1 {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(50vw, 30vh) scale(1.2); }
+}
+@keyframes moveBlob2 {
+  from { transform: translate(0, 0) scale(1.2); }
+  to { transform: translate(-40vw, -20vh) scale(1); }
 }
 
 /* 3. App Shell (Header, Content, Nav) */
+/* *** NEW: Glassmorphism Header (The "Container") *** */
 .app-header {
-  background: var(--bg-header);
-  color: var(--text-header);
-  border-bottom: 1px solid var(--bg-header-border);
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); /* Adjusted shadow color */
-  padding: 1rem 1.25rem;
+  background: var(--bg-glass-light);
+  border-bottom: 1px solid var(--bg-glass-border-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-header-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   
   /* --- FIX: Added padding for Mobile Notch (safe-area) --- */
+  padding: 1rem 1.25rem;
   padding-top: calc(1rem + env(safe-area-inset-top)); 
   
   display: flex;
   align-items: center;
-  z-index: 10; /* Ensure header is above content */
+  z-index: 10; 
   transition: all 0.3s ease;
-  position: relative; /* For z-index to work */
+  position: relative; 
 }
 body.dark .app-header {
-  background: var(--bg-header-dark);
+  background: var(--bg-glass-dark);
   color: var(--text-header-dark);
-  border-bottom: 1px solid var(--bg-header-border-dark);
+  border-bottom: 1px solid var(--bg-glass-border-dark);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
 }
-
 .app-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin-left: 0.75rem;
-  line-height: 1; /* Prevent text from being too tall */
+  line-height: 1; 
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+body.dark .app-header h1 {
+  text-shadow: none;
 }
 .app-header-logo {
-  width: 32px; /* Adjusted size for the new logo */
-  height: auto;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); /* Subtle glow for logo */
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 3px rgba(0, 69, 79, 0.4));
+}
+body.dark .app-header-logo {
+   filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.5));
 }
 
-/* --- FIX: New class for all header icon buttons --- */
+/* --- FIX: Class for all header icon buttons --- */
 .header-icon-button {
   background: none;
   border: none;
-  color: var(--text-header);
+  color: var(--text-header-light);
   padding: 0.25rem;
   border-radius: 50%;
   transition: background-color 0.2s, color 0.3s ease;
   cursor: pointer;
+  flex-shrink: 0; 
 }
-/* Specific margin for the back button */
 #header-back-button {
   margin-right: 0.5rem;
 }
@@ -152,66 +193,60 @@ body.dark .header-icon-button {
   color: var(--text-header-dark);
 }
 .header-icon-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 body.dark .header-icon-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-
-/* --- FIX: Hide *only* the back button by ID --- */
 #header-back-button {
   display: none; /* Hidden by default */
 }
-
-/* Dark mode toggle icon visibility */
 #dark-mode-toggle .icon-sun { display: block; }
 #dark-mode-toggle .icon-moon { display: none; }
 body.dark #dark-mode-toggle .icon-sun { display: none; }
 body.dark #dark-mode-toggle .icon-moon { display: block; }
 
-/* Spacer for Dark Mode Toggle */
 .header-spacer {
-  flex-grow: 1; /* Pushes the toggle to the right */
+  flex-grow: 1;
 }
 
 .app-content {
-  flex-grow: 1; /* Takes up all available space */
-  overflow-y: auto; /* Allows content to scroll */
+  flex-grow: 1; 
+  overflow-y: auto; 
   padding: 1.5rem;
 }
 
-.view {
-  display: none; /* Hidden by default, shown by JS */
-}
+.view { display: none; }
 .view.active {
   display: block;
-  animation: fadeIn 0.3s ease-in-out; /* Smooth transition for views */
+  animation: fadeIn 0.3s ease-in-out; 
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* *** NEW: Glassmorphism Bottom Nav *** */
 .app-bottom-nav {
   display: flex;
   justify-content: space-around;
-  background: var(--bg-bottom-nav);
-  border-top: 1px solid var(--bg-bottom-nav-border);
-  box-shadow: var(--bg-bottom-nav-shadow);
+  background: var(--bg-glass-light);
+  border-top: 1px solid var(--bg-glass-border-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
   padding: 0.5rem 0;
   
   /* --- FIX: Added padding for Mobile Home Bar (safe-area) --- */
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   
-  z-index: 10; /* Ensure nav is above content */
+  z-index: 10; 
   transition: all 0.3s ease;
 }
 body.dark .app-bottom-nav {
-  background: var(--bg-bottom-nav-dark);
-  border-top: 1px solid var(--bg-bottom-nav-border-dark);
+  background: var(--bg-glass-dark);
+  border-top: 1px solid var(--bg-glass-border-dark);
   box-shadow: var(--bg-bottom-nav-shadow-dark);
-  backdrop-filter: blur(10px); /* Glassmorphism effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
 }
 .nav-button {
   display: flex;
@@ -245,16 +280,17 @@ body.dark .nav-button.active {
   transform: scale(1.1);
 }
 
-/* 4. Dashboard Grid (Futuristic) */
+/* 4. Dashboard Grid (Tool Cards) */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns for cards */
-  gap: 1.25rem; /* Space between cards */
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 1.25rem; 
 }
+/* *** NEW: "Colored Glass" Tool Card *** */
 .tool-card {
-  background: var(--bg-card);
-  border: 1px solid var(--bg-card-border);
-  box-shadow: var(--bg-card-shadow);
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.8), rgba(0, 151, 167, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 151, 167, 0.2);
   border-radius: 1rem;
   padding: 1.5rem 1rem;
   display: flex;
@@ -264,6 +300,8 @@ body.dark .nav-button.active {
   text-align: center;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 body.dark .tool-card {
   background: var(--bg-card-dark);
@@ -271,20 +309,19 @@ body.dark .tool-card {
   box-shadow: var(--bg-card-shadow-dark);
 }
 .tool-card:hover {
-  transform: translateY(-6px) scale(1.03); /* Lift effect on hover */
-  box-shadow: var(--bg-card-hover-shadow);
+  transform: translateY(-6px) scale(1.03); 
+  box-shadow: 0 12px 30px rgba(0, 151, 167, 0.3);
 }
 body.dark .tool-card:hover {
-  box-shadow: var(--bg-card-hover-shadow-dark);
-  border-color: var(--text-nav-active-dark); /* Stronger glow on hover in dark mode */
+  box-shadow: 0 12px 30px rgba(34, 211, 238, 0.25);
+  border-color: #22d3ee; 
 }
 .tool-card svg {
   width: 36px;
   height: 36px;
-  color: var(--text-card-icon);
+  color: #ffffff;
   margin-bottom: 0.75rem;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); /* Subtle shadow for icons */
-  transition: color 0.3s ease;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
 }
 body.dark .tool-card svg {
   color: var(--text-card-icon-dark);
@@ -292,27 +329,29 @@ body.dark .tool-card svg {
 .tool-card-title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-card);
+  color: #ffffff;
   line-height: 1.4;
-  transition: color 0.3s ease;
 }
 body.dark .tool-card-title {
   color: var(--text-card-dark);
 }
 
 /* 5. Calculator View & Forms */
+/* *** NEW: Glassmorphism Calculator View *** */
 .calculator-view {
-  background: var(--bg-view);
+  background: var(--bg-card-light);
+  border: 1px solid var(--bg-card-border-light);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: var(--bg-view-shadow);
+  box-shadow: var(--bg-card-shadow-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 body.dark .calculator-view {
-  background: var(--bg-view-dark);
-  box-shadow: var(--bg-view-shadow-dark);
-  backdrop-filter: blur(8px); /* Subtle glassmorphism */
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
+  box-shadow: var(--bg-card-shadow-dark);
 }
 .calculator-title {
   font-size: 1.75rem;
@@ -326,12 +365,12 @@ body.dark .calculator-title {
   color: var(--text-primary-dark);
 }
 
-/* Mode Toggle (e.g., Heparin Initial/Maintenance) */
+/* Mode Toggle */
 .mode-toggle-buttons {
   display: flex;
   margin-bottom: 1.5rem;
   border-radius: 0.75rem;
-  overflow: hidden; /* For rounded corners */
+  overflow: hidden; 
   border: 1px solid var(--border-input);
   transition: border 0.3s ease;
 }
@@ -339,11 +378,11 @@ body.dark .mode-toggle-buttons {
   border-color: var(--border-input-dark);
 }
 .mode-btn {
-  flex-grow: 1; /* Distribute space evenly */
+  flex-grow: 1; 
   padding: 0.75rem 1rem;
   font-weight: 600;
   cursor: pointer;
-  background-color: var(--bg-input);
+  background-color: var(--bg-input-light);
   color: var(--text-primary);
   border: none;
   transition: all 0.2s ease-in-out;
@@ -353,13 +392,13 @@ body.dark .mode-btn {
   color: var(--text-secondary-dark);
 }
 .mode-btn.active {
-  background-image: linear-gradient(to right, #4f46e5, #7c3aed); /* Active button uses gradient */
+  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); 
   color: white;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 188, 212, 0.3);
 }
 body.dark .mode-btn.active {
-  background-image: linear-gradient(to right, #4338ca, #6d28d9); /* Darker gradient for dark mode */
-  box-shadow: 0 4px 15px rgba(165, 180, 252, 0.2);
+  background-image: linear-gradient(to right, #0e7490, #22d3ee); 
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);
 }
 
 /* Inputs & Labels */
@@ -385,7 +424,7 @@ body.dark .input-group label {
   border: 1px solid var(--border-input);
   border-radius: 0.75rem;
   font-size: 1rem;
-  background-color: var(--bg-input);
+  background-color: var(--bg-input-light);
   color: var(--text-input);
   transition: all 0.2s ease-in-out;
 }
@@ -402,7 +441,7 @@ body.dark .search-bar {
   outline: none;
   border-color: var(--border-input-focus);
   box-shadow: 0 0 0 3px var(--focus-ring);
-  background-color: var(--bg-input-focus);
+  background-color: var(--bg-input-focus-light);
 }
 body.dark .input-group input:focus, 
 body.dark .input-group select:focus,
@@ -416,6 +455,7 @@ body.dark .search-bar:focus {
 }
 .disabled-input {
   background-color: #e5e7eb;
+  opacity: 0.7;
 }
 body.dark .disabled-input {
   background-color: #374151;
@@ -439,7 +479,7 @@ body.dark .risk-group-heading {
 }
 .risk-factor-card {
   padding: 0.75rem 1rem;
-  background-color: var(--bg-input);
+  background-color: var(--bg-input-light);
   border: 1px solid var(--border-input);
   border-radius: 0.75rem;
   display: flex;
@@ -454,19 +494,19 @@ body.dark .risk-factor-card {
   border-color: var(--border-input-dark);
 }
 .risk-factor-card:hover {
-  background-color: #eef2ff; /* Light hover effect */
-  border-color: #c7d2fe;
+  background-color: rgba(255, 255, 255, 1); 
+  border-color: #b2ebf2;
 }
 body.dark .risk-factor-card:hover {
   background-color: #1e293b;
-  border-color: var(--border-input-focus-dark); /* Glowing border on hover */
+  border-color: var(--border-input-focus-dark); 
 }
 .risk-factor-card input[type="checkbox"] {
-  transform: scale(1.2); /* Slightly larger checkbox */
-  accent-color: #4f46e5; /* Accent color for checkbox */
+  transform: scale(1.2); 
+  accent-color: #00bcd4; 
 }
 body.dark .risk-factor-card input[type="checkbox"] {
-  accent-color: #a5b4fc;
+  accent-color: #22d3ee;
 }
 .risk-factor-card span {
   font-weight: 500;
@@ -487,9 +527,9 @@ body.dark .risk-factor-card span {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  background-image: linear-gradient(to right, #4f46e5, #7c3aed); /* Primary button gradient */
+  background-image: linear-gradient(to right, #00bcd4, #4dd0e1); 
   color: white;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
   border: none;
   display: flex;
   align-items: center;
@@ -497,17 +537,17 @@ body.dark .risk-factor-card span {
   gap: 0.5rem;
 }
 .btn:hover:not(:disabled) {
-  background-image: linear-gradient(to right, #4338ca, #6d28d9);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
-  transform: translateY(-2px); /* Slight lift on hover */
+  background-image: linear-gradient(to right, #00acc1, #26c6da);
+  box-shadow: 0 6px 20px rgba(0, 188, 212, 0.6);
+  transform: translateY(-2px); 
 }
 body.dark .btn {
-  background-image: linear-gradient(to right, #6366f1, #8b5cf6);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+  background-image: linear-gradient(to right, #0e7490, #22d3ee);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.25);
 }
 body.dark .btn:hover:not(:disabled) {
-  background-image: linear-gradient(to right, #818cf8, #a78bfa);
-  box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+  background-image: linear-gradient(to right, #0891b2, #22d3ee);
+  box-shadow: 0 6px 25px rgba(34, 211, 238, 0.4);
 }
 .btn:disabled {
   background: #9e9e9e;
@@ -542,41 +582,50 @@ body.dark .btn-save:hover:not(:disabled) {
   margin-top: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  /* Glassmorphism for results */
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
   transition: all 0.3s ease;
 }
 .result-box {
-  background-color: #eef2ff; /* Light indigo result */
-  border: 1px solid #4f46e5;
-  color: #3730a3;
+  border: 1px solid #00bcd4;
+  color: #006064;
 }
 .error-box {
-  background-color: #ffebee; /* Light red error */
+  background: rgba(255, 235, 238, 0.8);
   border: 1px solid #ef5350;
   color: #c62828;
 }
 .result-box-notification {
-  background-color: #fffde7; /* Light yellow notification */
+  background: rgba(255, 253, 231, 0.8);
   border: 1px solid #fdd835;
   color: #6f6f00;
 }
+body.dark .result-box, 
+body.dark .error-box, 
+body.dark .result-box-notification {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
 body.dark .result-box {
-  background-color: #1e293b; /* Dark indigo result */
-  border-color: #6366f1;
-  color: #c7d2fe;
+  border-color: #0e7490;
+  color: #a5f3fc;
 }
 body.dark .error-box {
-  background-color: #2f1a1a; /* Dark red error */
+  background: rgba(47, 26, 26, 0.8);
   border-color: #b91c1c;
   color: #fca5a5;
 }
 body.dark .result-box-notification {
-  background-color: #3f3c19; /* Dark yellow notification */
+  background: rgba(63, 60, 25, 0.8);
   border-color: #a16207;
   color: #fef08a;
 }
 .result-box .font-bold, .error-box .font-bold, .result-box-notification .font-bold {
-  color: inherit; /* Inherit color from parent box */
+  color: inherit; 
   font-weight: 700;
 }
 .result-box .result-title, .error-box .result-title {
@@ -587,29 +636,32 @@ body.dark .result-box-notification {
 
 /* 7. History / Log Styling */
 .history-view {
-  background: var(--bg-view); /* Matches calculator-view */
+  background: var(--bg-card-light);
+  border: 1px solid var(--bg-card-border-light);
   border-radius: 1rem;
-  padding: 0.5rem; /* Slightly less padding for list */
-  box-shadow: var(--bg-view-shadow);
+  padding: 0.5rem; 
+  box-shadow: var(--bg-card-shadow-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 body.dark .history-view {
-  background: var(--bg-view-dark);
-  box-shadow: var(--bg-view-shadow-dark);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
+  box-shadow: var(--bg-card-shadow-dark);
 }
 .log-entry {
-  background: var(--bg-view); /* Each entry can have a background in light mode */
+  background: transparent;
   border-bottom: 1px solid var(--border-input);
   margin-bottom: 0;
   padding: 1.25rem;
   transition: all 0.3s ease;
 }
 body.dark .log-entry {
-  background: transparent; /* Transparent in dark mode, blending with parent */
   border-bottom-color: var(--border-input-dark);
 }
 .log-entry:last-child {
-  border-bottom: none; /* No border for the last item */
+  border-bottom: none; 
 }
 .log-header {
   display: flex;
@@ -625,7 +677,7 @@ body.dark .log-entry {
   transition: color 0.3s ease;
 }
 body.dark .log-tool-name {
-  color: var(--text-nav-active-dark); /* Bright indigo for tool name in dark mode */
+  color: var(--text-nav-active-dark); 
 }
 .log-timestamp {
   font-size: 0.75rem;
@@ -658,12 +710,12 @@ body.dark .log-details {
 }
 .log-details-title {
   font-weight: 600;
-  color: #4338ca; /* Specific color for detail titles */
+  color: #00796b; 
   margin-top: 0.5rem;
   transition: color 0.3s ease;
 }
 body.dark .log-details-title {
-  color: #818cf8; /* Brighter indigo for dark mode */
+  color: #14b8a6; 
 }
 .log-details ul {
   list-style-type: disc;
@@ -673,7 +725,7 @@ body.dark .log-details-title {
 
 /* 8. Password Prompt */
 #password-prompt {
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+  background-color: rgba(0, 0, 0, 0.3); /* Lighter overlay */
   position: fixed;
   top: 0;
   left: 0;
@@ -682,12 +734,13 @@ body.dark .log-details-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50; /* Above all other content */
-  backdrop-filter: blur(5px); /* Blurred background */
-  -webkit-backdrop-filter: blur(5px);
+  z-index: 50; 
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);
 }
 #password-modal {
-  background: var(--bg-view);
+  background: var(--bg-card-light);
+  border: 1px solid var(--bg-card-border-light);
   padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -696,8 +749,7 @@ body.dark .log-details-title {
   transition: all 0.3s ease;
 }
 body.dark #password-modal {
-  background: var(--bg-view-dark);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--bg-card-border-dark);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
