@@ -3,15 +3,15 @@
   This file handles offline caching and push notifications.
 */
 
-// ** NEW: Cache version v4 to force update **
-const CACHE_NAME = 'chg-toolkit-cache-v4';
+// ** NEW: Cache version v5 to force update after fixes **
+const CACHE_NAME = 'chg-toolkit-cache-v5';
 const urlsToCache = [
   '/', // Caches the root
   'index.html',
   'style.css',
   'index.js',
   'manifest.json',
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png' // New Logo
+  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png' // Logo
 ];
 
 // 1. Install Event: Cache all essential app files
@@ -89,25 +89,43 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// --- NOTIFICATION LOGIC ---
+// --- NOTIFICATION LOGIC (FIXED) ---
 
 // 4. Message Event: Listen for notification jobs from index.js
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'scheduleNotification') {
     const { title, body, delayInMs, icon } = event.data.payload;
-    console.log(`[SW] Notification job received. Scheduling "${title}" in ${delayInMs}ms`);
+    const triggerTime = Date.now() + delayInMs;
+    console.log(`[SW] Notification job received. Scheduling "${title}" for ${new Date(triggerTime)}`);
 
-    // Use setTimeout to delay the notification
-    setTimeout(() => {
-      // Show the notification
-      self.registration.showNotification(title, {
-        body: body,
-        icon: icon,
-        badge: icon, // Icon for Android notification bar
-        vibrate: [200, 100, 200] // Vibrate pattern
-      });
-      console.log(`[SW] Notification shown: "${title}"`);
-    }, delayInMs);
+    // Check if Notification Triggers are supported
+    // This is the reliable, modern way.
+    if ('showTrigger' in Notification.prototype) {
+      try {
+        self.registration.showNotification(title, {
+          body: body,
+          icon: icon,
+          badge: icon,
+          vibrate: [200, 100, 200],
+          showTrigger: new TimestampTrigger(triggerTime) // The new reliable API
+        });
+        console.log(`[SW] Notification scheduled successfully with showTrigger.`);
+      } catch (e) {
+        console.error('[SW] showTrigger failed. Falling back to setTimeout (unreliable).', e);
+        // Fallback to the unreliable setTimeout if showTrigger fails
+        setTimeout(() => {
+          self.registration.showNotification(title, { body, icon, badge: icon, vibrate: [200, 100, 200] });
+          console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
+        }, delayInMs);
+      }
+    } else {
+      // Fallback for browsers without showTrigger (like Firefox, older Safari)
+      console.warn('[SW] showTrigger not supported, using setTimeout fallback (unreliable).');
+      setTimeout(() => {
+        self.registration.showNotification(title, { body, icon, badge: icon, vibrate: [200, 100, 200] });
+        console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
+      }, delayInMs);
+    }
   }
 });
 
