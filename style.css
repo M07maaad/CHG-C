@@ -5,6 +5,7 @@
   - Reverted to original CYAN color theme (hospital identity)
   - Fixed Dark Mode button visibility
   - Fixed Mobile Notch/Safe-Area padding
+  - *** FIX V3.1: Removed bottom padding from nav bar ***
 */
 
 /* 1. Tailwind Base & Fonts */
@@ -237,8 +238,8 @@ body.dark #dark-mode-toggle .icon-moon { display: block; }
   box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
   padding: 0.5rem 0;
   
-  /* --- FIX: Added padding for Mobile Home Bar (safe-area) --- */
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  /* --- FIX (v7): Removed extra padding to keep nav stuck to bottom --- */
+  /* padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); */
   
   z-index: 10; 
   transition: all 0.3s ease;
