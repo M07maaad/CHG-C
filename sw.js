@@ -4,7 +4,7 @@
 */
 
 // ** NEW: Cache version v6 to force update after ALL fixes **
-const CACHE_NAME = 'chg-toolkit-cache-v6';
+const CACHE_NAME = 'chg-toolkit-cache-v7';
 const urlsToCache = [
   '/', // Caches the root
   'index.html',
