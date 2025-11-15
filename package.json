@@ -1,0 +1,10 @@
+{
+  "name": "chg-c-notifications",
+  "version": "1.0.0",
+  "description": "Handles sending push notifications for CHG-C Toolkit",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "web-push": "^3.6.7"
+  }
+}
