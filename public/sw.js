@@ -1,13 +1,13 @@
 /*
   SERVICE WORKER (sw.js)
-  - Removed old 'message' listener (for TimestampTrigger)
-  - Added new 'push' listener to receive PUSH notifications from the server (Vercel).
+  - This file will now be served from the /public folder
+  - Added 'push' listener to receive PUSH notifications from the server (Vercel).
 */
 
-// ** NEW: Cache version v10 (Full Push Notification System) **
-const CACHE_NAME = 'chg-toolkit-cache-v14';
+// ** NEW: Cache version v14 (Fixing Vercel 'public' folder deploy) **
+const CACHE_NAME = 'chg-toolkit-cache-v15';
 const urlsToCache = [
-  '/', // Caches the root
+  '/', // Vercel serves the root from the 'public' folder
   'index.html',
   'style.css',
   'index.js',
@@ -17,7 +17,7 @@ const urlsToCache = [
 
 // 1. Install Event: Cache all essential app files
 self.addEventListener('install', event => {
-  console.log('[SW] Install event (v10)');
+  console.log('[SW] Install event (v14)');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -37,7 +37,7 @@ self.addEventListener('install', event => {
 
 // 2. Activate Event: Clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate event (v10)');
+  console.log('[SW] Activate event (v14)');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
