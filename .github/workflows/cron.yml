@@ -1,0 +1,19 @@
+# This is the GitHub Action that will trigger our Vercel function
+# (هذا الملف هو "المنبه" المجاني)
+
+name: Trigger Vercel Cron
+
+on:
+  schedule:
+    # Runs "at minute 5, 10, 15, 20..." every hour
+    # (بيشتغل كل 5 دقايق، وده أقل وقت متاح على GitHub Actions)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel Cron Endpoint
+        run: |
+          curl --request GET "https://CHG-C-git-main-chg-c-projects.vercel.app/api/send-notifications"
