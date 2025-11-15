@@ -16,4 +16,4 @@ jobs:
     steps:
       - name: Call Vercel Cron Endpoint
         run: |
-          curl --request GET "https://CHG-C-git-main-chg-c-projects.vercel.app/api/send-notifications"
+          curl --request GET "https://chg-c.vercel.app/api/send-notifications"
