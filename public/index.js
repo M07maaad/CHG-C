@@ -1,7 +1,7 @@
 // --- (1) CONSTANTS & CONFIGURATION ---
 // هذه المتغيرات آمنة هنا لأنها مجرد نصوص
 const SUPABASE_URL = 'https://kjiujbsyhxpooppmxgxb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIZDI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXVqYnN5aHhwb29wcG14Z3hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDI0MjcsImV4cCI6MjA3NzY3ODQyN30.PcG8aF4r1RjennleU_14vqxJSAoxY_MyOl9GLdbKVkw';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXVqYnN5aHhwb29wcG14Z3hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDI0MjcsImV4cCI6MjA3NzY3ODQyN30.PcG8aF4r1RjennleU_14vqxJSAoxY_MyOl9GLdbKVkw';
 const HISTORY_PASSWORD = 'CHG123';
 const VAPID_PUBLIC_KEY = 'BEmbnBlwEteOvULB_yijKhjLmyB2ElPl4ihiY3tG9NBGMuSLTnp-yFlEphfEWEOwxU1_Cm0XUN6_5zf-BLaFW0w';
 
