@@ -1,10 +1,11 @@
 /*
   SERVICE WORKER (sw.js)
-  This file handles offline caching and push notifications.
+  - Removed old 'message' listener (for TimestampTrigger)
+  - Added new 'push' listener to receive PUSH notifications from the server (Vercel).
 */
 
-// ** NEW: Cache version v6 to force update after ALL fixes **
-const CACHE_NAME = 'chg-toolkit-cache-v7';
+// ** NEW: Cache version v10 (Full Push Notification System) **
+const CACHE_NAME = 'chg-toolkit-cache-v10';
 const urlsToCache = [
   '/', // Caches the root
   'index.html',
@@ -16,7 +17,7 @@ const urlsToCache = [
 
 // 1. Install Event: Cache all essential app files
 self.addEventListener('install', event => {
-  console.log('[SW] Install event (v6)');
+  console.log('[SW] Install event (v10)');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -36,7 +37,7 @@ self.addEventListener('install', event => {
 
 // 2. Activate Event: Clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate event (v6)');
+  console.log('[SW] Activate event (v10)');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -76,58 +77,43 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// --- NOTIFICATION LOGIC (FIXED) ---
 
-// 4. Message Event: Listen for notification jobs from index.js
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'scheduleNotification') {
-    const { title, body, delayInMs, icon } = event.data.payload;
-    const triggerTime = Date.now() + delayInMs;
-    console.log(`[SW] Notification job received. Scheduling "${title}" for ${new Date(triggerTime)}`);
+// --- *** NEW: PUSH NOTIFICATION LOGIC *** ---
 
-    // *** FIX: Use Notification Triggers API (the reliable, modern way) ***
-    if ('showTrigger' in Notification.prototype) {
-      try {
-        self.registration.showNotification(title, {
-          body: body,
-          icon: icon,
-          badge: icon,
-          vibrate: [200, 100, 200],
-          showTrigger: new TimestampTrigger(triggerTime) // The new reliable API
-        });
-        console.log(`[SW] Notification scheduled successfully with showTrigger.`);
-      } catch (e) {
-        console.error('[SW] showTrigger failed. Falling back to setTimeout (unreliable).', e);
-        // Fallback to the unreliable setTimeout if showTrigger fails (e.g., Firefox)
-        fallbackTimeout(title, body, delayInMs, icon);
-      }
-    } else {
-      // Fallback for browsers without showTrigger (like Firefox)
-      console.warn('[SW] showTrigger not supported, using setTimeout fallback (unreliable).');
-      fallbackTimeout(title, body, delayInMs, icon);
+// 4. Push Event: Listen for a PUSH notification from the server.
+// (This is what wakes up the SW on iOS and Android)
+self.addEventListener('push', event => {
+  console.log('[SW] Push Notification received.');
+
+  let data = { title: 'CHG Toolkit', body: 'You have a new notification.' };
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      // If data is not JSON, just show it as text
+      data.body = event.data.text();
     }
   }
+
+  const title = data.title;
+  const options = {
+    body: data.body,
+    icon: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png',
+    badge: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFzwIoH5I9Dg_dwbN_Kc4B2KdJiTjIVJIc45xnOQ28R2dw75hGSE97vmQpYfXKO1r0qAceEw2kpp78Y_aTgD6YCZfpZiMC8bStPrEDYzOUSUV96h9kYYcS5PD_nAltwlYEL1umN-Z6KjXfyIaFEU-OP4-Ldo6r1V9ZZwfp3AG1YDJYGoOsgWKNcoT3igc4/s192/bc19f2e5-04b9-441b-a4f4-ccf4fe8e8d31.png',
+    vibrate: [200, 100, 200]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
 
-// Fallback function for browsers that don't support TimestampTrigger
-function fallbackTimeout(title, body, delayInMs, icon) {
-   setTimeout(() => {
-      self.registration.showNotification(title, { 
-        body: body, 
-        icon: icon, 
-        badge: icon, 
-        vibrate: [200, 100, 200] 
-      });
-      console.log(`[SW] Fallback notification shown (via setTimeout): "${title}"`);
-    }, delayInMs);
-}
 
-// 5. Notification Click Event: What happens when user clicks the notification
+// 5. Notification Click Event (Unchanged)
 self.addEventListener('notificationclick', event => {
   console.log('[SW] Notification clicked.');
-  event.notification.close(); // Close the notification
+  event.notification.close(); 
 
-  // Focus the PWA if it's already open, or open it if it's not
   event.waitUntil(
     clients.matchAll({ type: 'window' })
       .then(clientList => {
