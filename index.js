@@ -85,11 +85,6 @@ function formatDateTime(isoString) {
 }
 
 // --- *** NEW (Push Notification Helpers) *** ---
-
-/**
- * Gets a persistent, anonymous user ID from localStorage.
- * Creates one if it doesn't exist.
- */
 function getUserId() {
   let userId = localStorage.getItem('chg_user_id');
   if (!userId) {
@@ -98,10 +93,6 @@ function getUserId() {
   }
   return userId;
 }
-
-/**
- * Converts a VAPID key to the format needed by the push service.
- */
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -114,7 +105,6 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 // --- (5) EVENT LISTENER INITIALIZATION ---
-
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -166,10 +156,6 @@ function initializeEventListeners() {
 }
 
 // --- *** NEW: Push Notification Subscription Logic *** ---
-/**
- * Asks user for permission and subscribes them to push notifications.
- * Saves the subscription to Supabase.
- */
 async function subscribeUserToPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.warn('Push Notifications not supported by this browser.');
@@ -328,6 +314,17 @@ async function handleHeparinSubmit(e) {
   e.preventDefault(); 
   const resultArea = $('#heparin-result-area');
   const calculateBtn = $('#heparin-calculate-btn');
+  
+  // --- *** FIX: Ask for permission on first click *** ---
+  // This is our "user gesture"
+  // We run this *before* disabling the button
+  try {
+    await subscribeUserToPush();
+  } catch (subError) {
+    console.error("Failed to subscribe:", subError);
+    // Don't block calculation, just log the error
+  }
+  // --- End of fix ---
   
   calculateBtn.disabled = true;
   calculateBtn.querySelector('span').textContent = 'Calculating...';
@@ -872,7 +869,6 @@ function convertUnits(inputs) {
 }
 
 // --- (8) SUPABASE & NOTIFICATION FUNCTIONS ---
-
 async function saveCalculation(toolName, patientName, patientIdentifier, inputs, result) {
   try {
     const { data, error } = await db
@@ -967,11 +963,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeEventListeners();
   initializeDarkMode(); 
   
-  // *** NEW: Ask user to subscribe on load ***
-  // We run this *after* registering the SW and initializing listeners
-  // It will ask for permission if not already granted
-  subscribeUserToPush();
+  // --- *** FIX: We CANNOT ask for permission on load. *** ---
+  // (The call to subscribeUserToPush() was removed from here to prevent app crash)
   
+  // This will now run without errors:
   navigateTo('view-dashboard', 'CHG Toolkit');
   
   handleConverterInput();
