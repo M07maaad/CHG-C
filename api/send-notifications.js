@@ -1,7 +1,3 @@
-// Vercel Serverless Function: /api/send-notifications.js
-// هذا الكود مكتوب بـ Node.js ومتوافق 100% مع Vercel
-
-// (استخدام require بدلاً من import)
 const { createClient } = require('@supabase/supabase-js');
 const webPush = require('web-push');
 
