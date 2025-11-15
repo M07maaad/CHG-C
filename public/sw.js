@@ -5,7 +5,7 @@
 */
 
 // ** NEW: Cache version v14 (Fixing Vercel 'public' folder deploy) **
-const CACHE_NAME = 'chg-toolkit-cache-v14';
+const CACHE_NAME = 'chg-toolkit-cache-v15';
 const urlsToCache = [
   '/', // Vercel serves the root from the 'public' folder
   'index.html',
