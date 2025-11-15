@@ -5,7 +5,7 @@
 */
 
 // ** NEW: Cache version v10 (Full Push Notification System) **
-const CACHE_NAME = 'chg-toolkit-cache-v13';
+const CACHE_NAME = 'chg-toolkit-cache-v14';
 const urlsToCache = [
   '/', // Caches the root
   'index.html',
