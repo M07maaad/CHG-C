@@ -1,6 +1,6 @@
 /**
  * CHG MEDICAL TOOLKIT - MAIN APPLICATION LOGIC
- * Version: 3.0 (Lightweight & Native)
+ * Version: 3.1 (Stable - Native Calendar)
  * Features:
  * - Supabase Integration (Logs)
  * - Full Medical Calculators
@@ -11,9 +11,10 @@
 // ==========================================
 // SECTION 1: CONFIGURATION & CONSTANTS
 // ==========================================
+// تم تصحيح الرابط (كان يحتوي على نقطة بدلاً من //)
 const SUPABASE_URL = 'https://kjiujbsyhxpooppmxgxb.supabase.co';
-// ⚠️ هام: تأكد من وضع مفتاح anon الصحيح هنا
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'; 
+// تم إعادة المفتاح الأصلي كما طلبت
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXVqYnN5aHhwb29wcG14Z3hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDI0MjcsImV4cCI6MjA3NzY3ODQyN30.PcG8aF4r1RjennleU_14vqxJSAoxY_MyOl9GLdbKVkw';
 const HISTORY_PASSWORD = 'CHG123';
 
 // ==========================================
