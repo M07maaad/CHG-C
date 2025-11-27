@@ -1,11 +1,11 @@
 /**
  * CHG MEDICAL TOOLKIT - MAIN APPLICATION LOGIC
- * Version: 3.2 (Stable - Clean History Fix)
+ * Version: 3.3 (Stable - Full History Detail)
  * Features:
  * - Supabase Integration (Logs)
  * - Full Medical Calculators
  * - Native Calendar Integration (.ics)
- * - Clean History Display (Fixed)
+ * - Detailed History Display (Inputs + Results)
  */
 
 // ==========================================
@@ -35,34 +35,81 @@ let ui = {};
 // ==========================================
 
 /**
- * دالة تنسيق نتائج السجل (لإصلاح مشكلة الـ JSON)
- * تحول البيانات الخام إلى عرض HTML منظم ومقروء
+ * دالة مساعدة لإنشاء سطر بيانات (Row)
+ */
+function createRow(label, value, isAlert = false) {
+  if (value === undefined || value === null || value === 'N/A') return '';
+  const colorClass = isAlert ? 'text-red-600 font-bold' : 'text-gray-800';
+  return `<div class="flex justify-between items-center border-b border-gray-100 last:border-0 py-1">
+            <span class="font-medium text-gray-500 text-xs">${label}:</span>
+            <span class="${colorClass} text-sm">${value}</span>
+          </div>`;
+}
+
+/**
+ * دالة تنسيق المدخلات (Inputs)
+ */
+function formatLogInputs(tool, inputs) {
+  if (!inputs || typeof inputs !== 'object') return '';
+  
+  let html = '<div class="mb-3 pb-2 border-b border-gray-200">';
+  html += '<p class="text-xs font-bold text-gray-400 uppercase mb-1">Inputs</p>';
+  
+  // Generic mapping for common fields
+  const fieldMap = {
+    weight_kg: 'Weight (kg)',
+    concentration: 'Concentration',
+    indication: 'Indication',
+    current_rate_ml_hr: 'Current Rate (mL/hr)',
+    current_ptt_sec: 'Current PTT',
+    drugAmount_mg: 'Drug Amount (mg)',
+    solutionVolume_ml: 'Sol. Volume (mL)',
+    drugDose: 'Desired Dose',
+    doseUnit: 'Unit',
+    age: 'Age',
+    creatinine_mg_dl: 'Creatinine',
+    gender: 'Gender',
+    score: 'Score'
+  };
+
+  // Special handling for Arrays (Factors)
+  if (inputs.factors && Array.isArray(inputs.factors)) {
+    html += `<div class="mb-1"><span class="text-xs text-gray-500">Risk Factors:</span></div>`;
+    html += `<ul class="list-disc pl-4 text-xs text-gray-700 mb-2">
+      ${inputs.factors.map(f => `<li>${f}</li>`).join('')}
+    </ul>`;
+  }
+
+  // Iterate over other inputs
+  for (const [key, value] of Object.entries(inputs)) {
+    if (key === 'factors') continue; // Skip already handled
+    const label = fieldMap[key] || key.replace(/_/g, ' ');
+    html += createRow(label, value);
+  }
+  
+  html += '</div>';
+  return html;
+}
+
+/**
+ * دالة تنسيق النتائج (Results)
  */
 function formatLogResult(tool, result) {
   if (!result || typeof result !== 'object') return 'No details available';
   
-  let html = '<div class="space-y-1 text-sm">';
+  let html = '<div>';
+  html += '<p class="text-xs font-bold text-gray-400 uppercase mb-1">Result</p>';
   
-  // دالة مساعدة لإنشاء سطر بيانات
-  const row = (label, value, isAlert = false) => {
-    if (!value || value === 'N/A') return '';
-    const colorClass = isAlert ? 'text-red-600 font-bold' : 'text-gray-800';
-    return `<div class="flex justify-between items-center border-b border-gray-100 last:border-0 py-1">
-              <span class="font-medium text-gray-500">${label}:</span>
-              <span class="${colorClass}">${value}</span>
-            </div>`;
-  };
-
   // 1. Heparin Initial
   if (tool === 'initial' || tool === 'heparin_initial') {
-    html += row('Loading Dose', result.loading_dose);
-    html += row('Initial Rate', result.initial_rate);
+    html += createRow('Loading Dose', result.loading_dose);
+    html += createRow('Initial Rate', result.initial_rate);
   } 
   // 2. Heparin Maintenance
   else if (tool === 'maintenance' || tool === 'heparin_maintenance') {
-    html += row('New Rate', result.new_rate ? `${result.new_rate} mL/hr` : null);
-    html += row('Bolus', result.bolus_dose); // لن يظهر إذا كان فارغاً
-    html += row('Stop Infusion', result.stop_infusion_min ? `${result.stop_infusion_min} min` : null, true);
+    html += createRow('New Rate', result.new_rate ? `${result.new_rate} mL/hr` : null);
+    html += createRow('Bolus', result.bolus_dose); 
+    html += createRow('Stop Infusion', result.stop_infusion_min ? `${result.stop_infusion_min} min` : null, true);
     if (result.msg) {
       html += `<div class="mt-2 text-xs bg-yellow-50 text-yellow-800 p-2 rounded border border-yellow-100 italic">
                  ${result.msg}
@@ -72,23 +119,23 @@ function formatLogResult(tool, result) {
   // 3. Prophylaxis
   else if (tool === 'prophylaxis') {
     const isHigh = result.risk === 'High Risk' || result.indicated;
-    html += row('Risk Level', result.risk, isHigh);
-    html += row('Indicated', result.indicated ? 'YES' : 'NO', isHigh);
+    html += createRow('Risk Level', result.risk, isHigh);
+    html += createRow('Indicated', result.indicated ? 'YES' : 'NO', isHigh);
   }
   // 4. Padua
   else if (tool === 'padua') {
     const isHigh = result.score >= 4;
-    html += row('Score', result.score, isHigh);
-    html += row('Risk Category', result.risk);
+    html += createRow('Score', result.score, isHigh);
+    html += createRow('Risk Category', result.risk);
   }
   // 5. IV Calculator
   else if (tool === 'iv_calc') {
-    html += row('Infusion Rate', `${result.rate} mL/hr`, true);
+    html += createRow('Infusion Rate', `${result.rate} mL/hr`, true);
   }
   // 6. Generic / Fallback
   else {
     for (const [key, value] of Object.entries(result)) {
-       html += row(key.replace(/_/g, ' '), value);
+       html += createRow(key.replace(/_/g, ' '), value);
     }
   }
   
@@ -414,17 +461,26 @@ async function handleHeparinSubmit(e) {
     if(!common.patientName || !common.patientId) throw new Error("Patient details required");
 
     let result;
+    let inputsToSave;
+
     if (appState.currentHeparinMode === 'initial') {
-      result = calculateInitialHeparinRate({
-        ...common,
-        indication: $('#heparin-indication').value
-      });
+      const indication = $('#heparin-indication').value;
+      result = calculateInitialHeparinRate({ ...common, indication });
+      inputsToSave = { 
+        weight_kg: common.weight, 
+        concentration: common.concentration, 
+        indication: indication 
+      };
     } else {
-      result = calculateMaintenanceHeparinRate({
-        ...common,
-        rate: parseFloat($('#heparin-currentRate').value),
-        ptt: parseFloat($('#heparin-currentPtt').value)
-      });
+      const rate = parseFloat($('#heparin-currentRate').value);
+      const ptt = parseFloat($('#heparin-currentPtt').value);
+      result = calculateMaintenanceHeparinRate({ ...common, rate, ptt });
+      inputsToSave = { 
+        weight_kg: common.weight, 
+        concentration: common.concentration, 
+        current_rate_ml_hr: rate, 
+        current_ptt_sec: ptt 
+      };
     }
 
     let html = result.html;
@@ -448,7 +504,7 @@ async function handleHeparinSubmit(e) {
 
     resDiv.innerHTML = html;
     
-    await saveLog(appState.currentHeparinMode, common.patientName, common.patientId, common, result.logData);
+    await saveLog(appState.currentHeparinMode, common.patientName, common.patientId, inputsToSave, result.logData);
 
   } catch (err) {
     resDiv.innerHTML = `<div class="error-box">${err.message}</div>`;
@@ -525,10 +581,19 @@ function handleIVSubmit(e) {
       dose: parseFloat($('#iv-drugDose').value),
       unit: $('#iv-doseUnit').value
     };
+    // Rename keys to match common mapping in formatLogInputs
+    const inputsToSave = {
+      weight_kg: d.weight,
+      drugAmount_mg: d.drugMg,
+      solutionVolume_ml: d.volMl,
+      drugDose: d.dose,
+      doseUnit: d.unit
+    };
+
     const result = calculateIV(d);
     resDiv.innerHTML = result.html;
     const pName = $('#iv-patientName').value;
-    if(pName) saveLog('iv_calc', pName, $('#iv-patientIdentifier').value, d, result.logData);
+    if(pName) saveLog('iv_calc', pName, $('#iv-patientIdentifier').value, inputsToSave, result.logData);
   } catch(err) { resDiv.innerHTML = `<div class="error-box">Check inputs</div>`; }
 }
 
@@ -570,7 +635,7 @@ async function loadHistory() {
   renderLogs(data);
 }
 
-// *** FIXED: Clean Log Rendering ***
+// *** FIXED: FULL DETAIL Log Rendering ***
 function renderLogs(logs) {
   const div = $('#history-logs-container');
   div.innerHTML = logs.map(l => `
@@ -586,8 +651,13 @@ function renderLogs(logs) {
         </div>
       </div>
       
-      <!-- Display formatted result instead of JSON -->
-      <div class="bg-gray-50 p-3 rounded text-gray-700">
+      <!-- Display formatted INPUTS -->
+      <div class="bg-gray-50 p-3 rounded text-gray-700 mb-2">
+        ${formatLogInputs(l.tool_name, l.inputs)}
+      </div>
+
+      <!-- Display formatted RESULTS -->
+      <div class="bg-blue-50 p-3 rounded text-gray-700 border border-blue-100">
         ${formatLogResult(l.tool_name, l.result)}
       </div>
     </div>
