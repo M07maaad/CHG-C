@@ -1,19 +1,17 @@
 /**
  * CHG MEDICAL TOOLKIT - MAIN APPLICATION LOGIC
- * Version: 3.1 (Stable - Native Calendar)
+ * Version: 3.2 (Stable - Clean History Fix)
  * Features:
  * - Supabase Integration (Logs)
  * - Full Medical Calculators
  * - Native Calendar Integration (.ics)
- * - PWA Support
+ * - Clean History Display (Fixed)
  */
 
 // ==========================================
 // SECTION 1: CONFIGURATION & CONSTANTS
 // ==========================================
-// تم تصحيح الرابط (كان يحتوي على نقطة بدلاً من //)
 const SUPABASE_URL = 'https://kjiujbsyhxpooppmxgxb.supabase.co';
-// تم إعادة المفتاح الأصلي كما طلبت
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXVqYnN5aHhwb29wcG14Z3hiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDI0MjcsImV4cCI6MjA3NzY3ODQyN30.PcG8aF4r1RjennleU_14vqxJSAoxY_MyOl9GLdbKVkw';
 const HISTORY_PASSWORD = 'CHG123';
 
@@ -37,21 +35,80 @@ let ui = {};
 // ==========================================
 
 /**
+ * دالة تنسيق نتائج السجل (لإصلاح مشكلة الـ JSON)
+ * تحول البيانات الخام إلى عرض HTML منظم ومقروء
+ */
+function formatLogResult(tool, result) {
+  if (!result || typeof result !== 'object') return 'No details available';
+  
+  let html = '<div class="space-y-1 text-sm">';
+  
+  // دالة مساعدة لإنشاء سطر بيانات
+  const row = (label, value, isAlert = false) => {
+    if (!value || value === 'N/A') return '';
+    const colorClass = isAlert ? 'text-red-600 font-bold' : 'text-gray-800';
+    return `<div class="flex justify-between items-center border-b border-gray-100 last:border-0 py-1">
+              <span class="font-medium text-gray-500">${label}:</span>
+              <span class="${colorClass}">${value}</span>
+            </div>`;
+  };
+
+  // 1. Heparin Initial
+  if (tool === 'initial' || tool === 'heparin_initial') {
+    html += row('Loading Dose', result.loading_dose);
+    html += row('Initial Rate', result.initial_rate);
+  } 
+  // 2. Heparin Maintenance
+  else if (tool === 'maintenance' || tool === 'heparin_maintenance') {
+    html += row('New Rate', result.new_rate ? `${result.new_rate} mL/hr` : null);
+    html += row('Bolus', result.bolus_dose); // لن يظهر إذا كان فارغاً
+    html += row('Stop Infusion', result.stop_infusion_min ? `${result.stop_infusion_min} min` : null, true);
+    if (result.msg) {
+      html += `<div class="mt-2 text-xs bg-yellow-50 text-yellow-800 p-2 rounded border border-yellow-100 italic">
+                 ${result.msg}
+               </div>`;
+    }
+  }
+  // 3. Prophylaxis
+  else if (tool === 'prophylaxis') {
+    const isHigh = result.risk === 'High Risk' || result.indicated;
+    html += row('Risk Level', result.risk, isHigh);
+    html += row('Indicated', result.indicated ? 'YES' : 'NO', isHigh);
+  }
+  // 4. Padua
+  else if (tool === 'padua') {
+    const isHigh = result.score >= 4;
+    html += row('Score', result.score, isHigh);
+    html += row('Risk Category', result.risk);
+  }
+  // 5. IV Calculator
+  else if (tool === 'iv_calc') {
+    html += row('Infusion Rate', `${result.rate} mL/hr`, true);
+  }
+  // 6. Generic / Fallback
+  else {
+    for (const [key, value] of Object.entries(result)) {
+       html += row(key.replace(/_/g, ' '), value);
+    }
+  }
+  
+  html += '</div>';
+  return html;
+}
+
+/**
  * إنشاء ملف تقويم عالمي (.ics) للتعامل مع تقويم الهاتف مباشرة
- * يعمل على iOS و Android
  */
 function createNativeCalendarFile(toolName, patientName, patientId, minutesFromNow) {
   const now = new Date();
   const start = new Date(now.getTime() + minutesFromNow * 60000);
-  const end = new Date(start.getTime() + 15 * 60000); // مدة التذكير 15 دقيقة
+  const end = new Date(start.getTime() + 15 * 60000); 
 
-  // تنسيق التاريخ لصيغة ICS العالمية
   const formatDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
 
   const title = `CHG Alert: ${toolName}`;
   const description = `Patient: ${patientName}\\nID: ${patientId}\\nAction: Check PTT / Monitoring required.`;
 
-  // محتوى ملف التقويم
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -64,14 +121,13 @@ function createNativeCalendarFile(toolName, patientName, patientId, minutesFromN
     'END:VCALENDAR'
   ].join('\n');
 
-  // تحويل النص إلى رابط قابل للتحميل (Data URI)
   return 'data:text/calendar;charset=utf8,' + encodeURIComponent(icsContent);
 }
 
 function formatDateTime(isoString) {
   try {
     return new Date(isoString).toLocaleString('en-US', {
-      year: '2-digit', month: '2-digit', day: '2-digit',
+      month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: true
     });
   } catch (e) { return isoString; }
@@ -154,7 +210,7 @@ function calculateInitialHeparinRate(data) {
         <p class="mt-2">Infusion Rate: <strong>${rateMl} mL/hr</strong></p>
         <p class="mt-2 text-blue-600">Next PTT Check: <strong>in 6 hours</strong></p>
       </div>`,
-    logData: { loading_dose: `${loadUnits}u`, initial_rate: `${rateMl}ml/hr` },
+    logData: { loading_dose: `${loadUnits}u (${loadMl} mL)`, initial_rate: `${rateMl} mL/hr` },
     alert: { title: "Heparin PTT Check", delay: 360 } // 6 hours
   };
 }
@@ -240,7 +296,7 @@ function calculateMaintenanceHeparinRate(data) {
     alert = { title: "Heparin PTT Check", delay: nextPtt * 60 };
   }
 
-  return { html, logData: { new_rate: newRateMl, msg }, alert };
+  return { html, logData: { new_rate: newRateMl, msg, bolus_dose: bolus > 0 ? `${bolus.toFixed(0)}u` : null, stop_infusion_min: stopMin }, alert };
 }
 
 // --- 5.2 Prophylaxis Calculator ---
@@ -375,7 +431,6 @@ async function handleHeparinSubmit(e) {
     
     // *** NATIVE CALENDAR INTEGRATION (.ics) ***
     if (result.alert) {
-      // نولد رابط ملف .ics بدلاً من رابط جوجل
       const icsDataUrl = createNativeCalendarFile("Heparin", common.patientName, common.patientId, result.alert.delay);
       
       html += `
@@ -502,7 +557,7 @@ function handlePasswordSubmit(e) {
 
 async function loadHistory() {
   const div = $('#history-logs-container');
-  div.innerHTML = '<p class="text-center mt-8">Loading logs...</p>';
+  div.innerHTML = '<p class="text-center mt-8 text-gray-500">Loading logs...</p>';
   
   const { data, error } = await db.from('calculation_logs').select('*').order('created_at', {ascending: false}).limit(50);
   
@@ -515,17 +570,25 @@ async function loadHistory() {
   renderLogs(data);
 }
 
+// *** FIXED: Clean Log Rendering ***
 function renderLogs(logs) {
   const div = $('#history-logs-container');
   div.innerHTML = logs.map(l => `
-    <div class="log-entry">
-      <div class="flex justify-between mb-2">
-        <span class="font-bold text-teal-700 capitalize">${l.tool_name.replace(/_/g, ' ')}</span>
-        <span class="text-xs text-gray-500">${formatDateTime(l.created_at)}</span>
+    <div class="log-entry bg-white p-4 rounded-lg shadow-sm mb-3 border border-gray-100">
+      <div class="flex justify-between items-start mb-2 border-b border-gray-100 pb-2">
+        <div>
+          <span class="block font-bold text-teal-700 capitalize text-lg">${l.tool_name.replace(/_/g, ' ')}</span>
+          <span class="text-xs text-gray-400 font-mono">${formatDateTime(l.created_at)}</span>
+        </div>
+        <div class="text-right">
+          <span class="block font-semibold text-gray-800">${l.patient_name}</span>
+          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">ID: ${l.patient_identifier}</span>
+        </div>
       </div>
-      <p class="text-sm font-semibold mb-2">${l.patient_name} (ID: ${l.patient_identifier})</p>
-      <div class="text-sm bg-gray-50 p-2 rounded border">
-        Result: ${JSON.stringify(l.result)}
+      
+      <!-- Display formatted result instead of JSON -->
+      <div class="bg-gray-50 p-3 rounded text-gray-700">
+        ${formatLogResult(l.tool_name, l.result)}
       </div>
     </div>
   `).join('');
