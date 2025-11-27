@@ -1,11 +1,11 @@
 /**
  * CHG MEDICAL TOOLKIT - MAIN APPLICATION LOGIC
- * Version: 3.3 (Stable - Full History Detail)
+ * Version: 3.4 (Stable - Final Polish)
  * Features:
  * - Supabase Integration (Logs)
  * - Full Medical Calculators
  * - Native Calendar Integration (.ics)
- * - Detailed History Display (Inputs + Results)
+ * - Perfect History Display (Clean Titles, No Duplicate Data)
  */
 
 // ==========================================
@@ -35,6 +35,23 @@ let ui = {};
 // ==========================================
 
 /**
+ * تحويل الاسم البرمجي للأداة إلى اسم عرض واضح
+ */
+function getToolDisplayName(toolName) {
+  const titles = {
+    'heparin_initial': 'Heparin Initial Dose',
+    'heparin_maintenance': 'Heparin Maintenance',
+    'initial': 'Heparin Initial Dose', // For old logs
+    'maintenance': 'Heparin Maintenance', // For old logs
+    'prophylaxis': 'Stress Ulcer Prophylaxis',
+    'padua': 'Padua VTE Score',
+    'iv_calc': 'IV Rate Calculator',
+    'renal': 'Renal Dosing (CrCl)'
+  };
+  return titles[toolName] || toolName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+/**
  * دالة مساعدة لإنشاء سطر بيانات (Row)
  */
 function createRow(label, value, isAlert = false) {
@@ -47,7 +64,7 @@ function createRow(label, value, isAlert = false) {
 }
 
 /**
- * دالة تنسيق المدخلات (Inputs)
+ * دالة تنسيق المدخلات (Inputs) - تم التعديل لإخفاء بيانات المريض
  */
 function formatLogInputs(tool, inputs) {
   if (!inputs || typeof inputs !== 'object') return '';
@@ -72,6 +89,12 @@ function formatLogInputs(tool, inputs) {
     score: 'Score'
   };
 
+  // قائمة الحقول التي يجب إخفاؤها (لأنها مكررة في العنوان)
+  const ignoredFields = [
+    'patientName', 'patient_name', 
+    'patientId', 'patientIdentifier', 'patient_identifier', 'patientID'
+  ];
+
   // Special handling for Arrays (Factors)
   if (inputs.factors && Array.isArray(inputs.factors)) {
     html += `<div class="mb-1"><span class="text-xs text-gray-500">Risk Factors:</span></div>`;
@@ -82,7 +105,9 @@ function formatLogInputs(tool, inputs) {
 
   // Iterate over other inputs
   for (const [key, value] of Object.entries(inputs)) {
-    if (key === 'factors') continue; // Skip already handled
+    if (key === 'factors') continue; 
+    if (ignoredFields.includes(key)) continue; // *** FIX: Skip patient details ***
+    
     const label = fieldMap[key] || key.replace(/_/g, ' ');
     html += createRow(label, value);
   }
@@ -642,7 +667,8 @@ function renderLogs(logs) {
     <div class="log-entry bg-white p-4 rounded-lg shadow-sm mb-3 border border-gray-100">
       <div class="flex justify-between items-start mb-2 border-b border-gray-100 pb-2">
         <div>
-          <span class="block font-bold text-teal-700 capitalize text-lg">${l.tool_name.replace(/_/g, ' ')}</span>
+          <!-- استخدام دالة التسمية الجديدة هنا -->
+          <span class="block font-bold text-teal-700 capitalize text-lg">${getToolDisplayName(l.tool_name)}</span>
           <span class="text-xs text-gray-400 font-mono">${formatDateTime(l.created_at)}</span>
         </div>
         <div class="text-right">
