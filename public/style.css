@@ -1,11 +1,8 @@
 /*
-  APPLICATION STYLES (style.css) - VERSION 3.0 (Glassmorphism Redesign)
-  - Implemented full Glassmorphism UI (Header, Nav, Cards)
-  - Added dynamic 'Aurora' background for blur effect
-  - Reverted to original CYAN color theme (hospital identity)
-  - Fixed Dark Mode button visibility
-  - Fixed Mobile Notch/Safe-Area padding
-  - *** FIX V3.1: Removed bottom padding from nav bar ***
+  APPLICATION STYLES (style.css) - VERSION 3.2 (Fixed Icon Dimensions)
+  - Enforced Aspect Ratio for Icons (Prevent distortion)
+  - Increased Icon Size for better visibility
+  - Glassmorphism & Aurora Background retained
 */
 
 /* 1. Tailwind Base & Fonts */
@@ -79,16 +76,15 @@ html, body {
   font-family: 'Inter', sans-serif;
 }
 
-/* *** NEW: Dynamic Aurora Background *** */
+/* *** Dynamic Aurora Background *** */
 body {
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary-light);
   color: var(--text-secondary);
   transition: background-color 0.3s ease, color 0.3s ease;
-  position: relative; /* Needed for pseudo-elements */
+  position: relative; 
 }
-/* These blobs create the blurred background effect */
 body::before, body::after {
   content: '';
   position: fixed;
@@ -132,7 +128,6 @@ body.dark::after {
 }
 
 /* 3. App Shell (Header, Content, Nav) */
-/* *** NEW: Glassmorphism Header (The "Container") *** */
 .app-header {
   background: var(--bg-glass-light);
   border-bottom: 1px solid var(--bg-glass-border-light);
@@ -140,11 +135,8 @@ body.dark::after {
   -webkit-backdrop-filter: blur(12px);
   color: var(--text-header-light);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  
-  /* --- FIX: Added padding for Mobile Notch (safe-area) --- */
   padding: 1rem 1.25rem;
   padding-top: calc(1rem + env(safe-area-inset-top)); 
-  
   display: flex;
   align-items: center;
   z-index: 10; 
@@ -176,7 +168,6 @@ body.dark .app-header-logo {
    filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.5));
 }
 
-/* --- FIX: Class for all header icon buttons --- */
 .header-icon-button {
   background: none;
   border: none;
@@ -189,6 +180,7 @@ body.dark .app-header-logo {
 }
 #header-back-button {
   margin-right: 0.5rem;
+  display: none; 
 }
 body.dark .header-icon-button {
   color: var(--text-header-dark);
@@ -198,9 +190,6 @@ body.dark .header-icon-button {
 }
 body.dark .header-icon-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
-}
-#header-back-button {
-  display: none; /* Hidden by default */
 }
 #dark-mode-toggle .icon-sun { display: block; }
 #dark-mode-toggle .icon-moon { display: none; }
@@ -227,7 +216,6 @@ body.dark #dark-mode-toggle .icon-moon { display: block; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* *** NEW: Glassmorphism Bottom Nav *** */
 .app-bottom-nav {
   display: flex;
   justify-content: space-around;
@@ -237,17 +225,12 @@ body.dark #dark-mode-toggle .icon-moon { display: block; }
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
   padding: 0.5rem 0;
-  
-  /* --- FIX (v7): Removed extra padding to keep nav stuck to bottom --- */
-  /* padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); */
-  
   z-index: 10; 
   transition: all 0.3s ease;
 }
 body.dark .app-bottom-nav {
   background: var(--bg-glass-dark);
   border-top: 1px solid var(--bg-glass-border-dark);
-  box-shadow: var(--bg-bottom-nav-shadow-dark);
 }
 .nav-button {
   display: flex;
@@ -287,7 +270,8 @@ body.dark .nav-button.active {
   grid-template-columns: repeat(2, 1fr); 
   gap: 1.25rem; 
 }
-/* *** NEW: "Colored Glass" Tool Card *** */
+
+/* *** Tool Card Styling *** */
 .tool-card {
   background: linear-gradient(135deg, rgba(0, 188, 212, 0.8), rgba(0, 151, 167, 0.8));
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -317,16 +301,32 @@ body.dark .tool-card:hover {
   box-shadow: 0 12px 30px rgba(34, 211, 238, 0.25);
   border-color: #22d3ee; 
 }
+
+/* *** FIX: FORCE ICON DIMENSIONS *** */
+/* This ensures icons are always 42x42 and never stretched */
 .tool-card svg {
-  width: 36px;
-  height: 36px;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px;
+  min-height: 42px;
+  max-width: 42px;
+  max-height: 42px;
+  
   color: #ffffff;
   margin-bottom: 0.75rem;
+  
+  /* Prevent flexbox from squashing the icon */
+  flex-shrink: 0;
+  
+  /* Ensure correct aspect ratio */
+  object-fit: contain;
+  
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
 }
 body.dark .tool-card svg {
   color: var(--text-card-icon-dark);
 }
+
 .tool-card-title {
   font-size: 1rem;
   font-weight: 600;
@@ -338,7 +338,6 @@ body.dark .tool-card-title {
 }
 
 /* 5. Calculator View & Forms */
-/* *** NEW: Glassmorphism Calculator View *** */
 .calculator-view {
   background: var(--bg-card-light);
   border: 1px solid var(--bg-card-border-light);
@@ -463,7 +462,7 @@ body.dark .disabled-input {
   opacity: 0.7;
 }
 
-/* Checkboxes / Risk Factors */
+/* Checkboxes */
 .risk-group-heading {
   font-weight: 700;
   color: var(--text-primary);
@@ -558,24 +557,6 @@ body.dark .btn:hover:not(:disabled) {
   opacity: 0.7;
 }
 
-/* Save Button (Green) */
-.btn-save {
-  background-image: linear-gradient(to right, #4caf50, #66bb6a);
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-}
-.btn-save:hover:not(:disabled) {
-  background-image: linear-gradient(to right, #43a047, #57a95b);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
-}
-body.dark .btn-save {
-  background-image: linear-gradient(to right, #16a34a, #22c55e);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
-}
-body.dark .btn-save:hover:not(:disabled) {
-  background-image: linear-gradient(to right, #15803d, #16a34a);
-  box-shadow: 0 6px 25px rgba(34, 197, 94, 0.4);
-}
-
 /* 6. Result / Error Boxes */
 .result-box, .error-box, .result-box-notification {
   padding: 1.25rem;
@@ -583,7 +564,6 @@ body.dark .btn-save:hover:not(:disabled) {
   margin-top: 1.5rem;
   font-size: 1rem;
   line-height: 1.6;
-  /* Glassmorphism for results */
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -599,14 +579,8 @@ body.dark .btn-save:hover:not(:disabled) {
   border: 1px solid #ef5350;
   color: #c62828;
 }
-.result-box-notification {
-  background: rgba(255, 253, 231, 0.8);
-  border: 1px solid #fdd835;
-  color: #6f6f00;
-}
 body.dark .result-box, 
-body.dark .error-box, 
-body.dark .result-box-notification {
+body.dark .error-box {
   background: rgba(30, 41, 59, 0.7);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -620,12 +594,7 @@ body.dark .error-box {
   border-color: #b91c1c;
   color: #fca5a5;
 }
-body.dark .result-box-notification {
-  background: rgba(63, 60, 25, 0.8);
-  border-color: #a16207;
-  color: #fef08a;
-}
-.result-box .font-bold, .error-box .font-bold, .result-box-notification .font-bold {
+.result-box .font-bold, .error-box .font-bold {
   color: inherit; 
   font-weight: 700;
 }
@@ -636,97 +605,20 @@ body.dark .result-box-notification {
 }
 
 /* 7. History / Log Styling */
-.history-view {
-  background: var(--bg-card-light);
-  border: 1px solid var(--bg-card-border-light);
-  border-radius: 1rem;
-  padding: 0.5rem; 
-  box-shadow: var(--bg-card-shadow-light);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-body.dark .history-view {
-  background: var(--bg-card-dark);
-  border: 1px solid var(--bg-card-border-dark);
-  box-shadow: var(--bg-card-shadow-dark);
-}
 .log-entry {
-  background: transparent;
-  border-bottom: 1px solid var(--border-input);
-  margin-bottom: 0;
-  padding: 1.25rem;
-  transition: all 0.3s ease;
+  /* Handled by Tailwind classes in JS, but keeping base styles just in case */
+  background: rgba(255,255,255,0.8);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
 }
 body.dark .log-entry {
-  border-bottom-color: var(--border-input-dark);
-}
-.log-entry:last-child {
-  border-bottom: none; 
-}
-.log-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-.log-tool-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  text-transform: capitalize;
-  transition: color 0.3s ease;
-}
-body.dark .log-tool-name {
-  color: var(--text-nav-active-dark); 
-}
-.log-timestamp {
-  font-size: 0.75rem;
-  color: var(--text-nav-idle);
-  transition: color 0.3s ease;
-}
-body.dark .log-timestamp {
-  color: var(--text-nav-idle-dark);
-}
-.log-patient {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.75rem;
-  border-bottom: 1px dashed var(--border-input);
-  padding-bottom: 0.5rem;
-  transition: all 0.3s ease;
-}
-body.dark .log-patient {
-  color: var(--text-secondary-dark);
-  border-bottom-color: var(--border-input-dark);
-}
-.log-details {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
-}
-body.dark .log-details {
-  color: var(--text-secondary-dark);
-}
-.log-details-title {
-  font-weight: 600;
-  color: #00796b; 
-  margin-top: 0.5rem;
-  transition: color 0.3s ease;
-}
-body.dark .log-details-title {
-  color: #14b8a6; 
-}
-.log-details ul {
-  list-style-type: disc;
-  padding-left: 1.25rem;
-  margin-top: 0.25rem;
+  background: rgba(30, 41, 59, 0.8);
 }
 
 /* 8. Password Prompt */
 #password-prompt {
-  background-color: rgba(0, 0, 0, 0.3); /* Lighter overlay */
+  background-color: rgba(0, 0, 0, 0.3);
   position: fixed;
   top: 0;
   left: 0;
