@@ -1,8 +1,8 @@
 /*
-  APPLICATION STYLES (style.css) - VERSION 3.2 (Fixed Icon Dimensions)
-  - Enforced Aspect Ratio for Icons (Prevent distortion)
-  - Increased Icon Size for better visibility
-  - Glassmorphism & Aurora Background retained
+  APPLICATION STYLES (style.css) - VERSION 3.3 (Final Polish)
+  - Fixed Icon Aspect Ratio (No Distortion)
+  - Increased Icon Size (48px)
+  - Cleaned up Flexbox behaviors
 */
 
 /* 1. Tailwind Base & Fonts */
@@ -16,7 +16,7 @@
 /* 2. Custom App Layout & Themes */
 :root {
   /* --- Light Mode (Original Cyan Theme) --- */
-  --bg-primary-light: #f0f4f8; /* Base color */
+  --bg-primary-light: #f0f4f8;
   --bg-blur-blob-1-light: #00bcd4;
   --bg-blur-blob-2-light: #4dd0e1;
   
@@ -33,8 +33,8 @@
   --text-header-light: #006064;
   --text-nav-idle: #a0aec0;
   --text-nav-active: #00bcd4;
-  --text-primary: #006064; /* Dark Cyan for headings */
-  --text-secondary: #2d3748; /* Dark Grey for general text */
+  --text-primary: #006064;
+  --text-secondary: #2d3748;
   --text-label: #2d3748;
   --text-input: #000000;
   
@@ -43,7 +43,7 @@
   --focus-ring: rgba(0, 188, 212, 0.3);
 
   /* --- Dark Mode (Original Cyan Theme) --- */
-  --bg-primary-dark: #0f172a; /* Dark Navy Blue */
+  --bg-primary-dark: #0f172a;
   --bg-blur-blob-1-dark: #0e7490;
   --bg-blur-blob-2-dark: #0097a7;
 
@@ -59,14 +59,14 @@
   
   --text-header-dark: #e2e8f0;
   --text-nav-idle-dark: #64748b;
-  --text-nav-active-dark: #22d3ee; /* Bright Cyan */
+  --text-nav-active-dark: #22d3ee;
   --text-primary-dark: #e2e8f0;
   --text-secondary-dark: #94a3b8;
   --text-label-dark: #94a3b8;
   --text-input-dark: #ffffff;
   
   --border-input-dark: #334155;
-  --border-input-focus-dark: #22d3ee; /* Bright Cyan */
+  --border-input-focus-dark: #22d3ee;
   --focus-ring-dark: rgba(34, 211, 238, 0.3);
 }
 
@@ -287,6 +287,9 @@ body.dark .nav-button.active {
   cursor: pointer;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  
+  /* Ensure container doesn't stretch items weirdly */
+  align-content: center;
 }
 body.dark .tool-card {
   background: var(--bg-card-dark);
@@ -302,27 +305,36 @@ body.dark .tool-card:hover {
   border-color: #22d3ee; 
 }
 
-/* *** FIX: FORCE ICON DIMENSIONS *** */
-/* This ensures icons are always 42x42 and never stretched */
+/* *** FIXED ICONS: ROBUST STYLING *** */
 .tool-card svg {
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px;
-  min-height: 42px;
-  max-width: 42px;
-  max-height: 42px;
+  /* 1. Strict Dimensions */
+  width: 48px !important;
+  height: 48px !important;
   
+  /* 2. Prevent Flexbox Distortion (Crucial) */
+  flex: none !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  
+  /* 3. Positioning & Layout */
+  display: block;
+  margin: 0 auto 0.75rem auto;
+  
+  /* 4. Appearance */
   color: #ffffff;
-  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
   
-  /* Prevent flexbox from squashing the icon */
-  flex-shrink: 0;
-  
-  /* Ensure correct aspect ratio */
+  /* 5. Ensure Aspect Ratio */
   object-fit: contain;
   
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); 
+  transition: transform 0.3s ease;
 }
+
+/* Slight zoom on hover for effect */
+.tool-card:hover svg {
+  transform: scale(1.1);
+}
+
 body.dark .tool-card svg {
   color: var(--text-card-icon-dark);
 }
@@ -606,7 +618,6 @@ body.dark .error-box {
 
 /* 7. History / Log Styling */
 .log-entry {
-  /* Handled by Tailwind classes in JS, but keeping base styles just in case */
   background: rgba(255,255,255,0.8);
   padding: 1rem;
   border-radius: 0.5rem;
