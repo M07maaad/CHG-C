@@ -1,8 +1,8 @@
 /*
-  APPLICATION STYLES (style.css) - VERSION 3.3 (Final Polish)
-  - Fixed Icon Aspect Ratio (No Distortion)
-  - Increased Icon Size (48px)
-  - Cleaned up Flexbox behaviors
+  APPLICATION STYLES (style.css) - VERSION 3.4 (Solid Icons Optimization)
+  - Adjusted Icon Size to 42px (Better balance for solid shapes)
+  - Removed Stroke properties to ensure clean solid fill
+  - Maintained Layout Stability
 */
 
 /* 1. Tailwind Base & Fonts */
@@ -288,7 +288,6 @@ body.dark .nav-button.active {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   
-  /* Ensure container doesn't stretch items weirdly */
   align-content: center;
 }
 body.dark .tool-card {
@@ -305,32 +304,32 @@ body.dark .tool-card:hover {
   border-color: #22d3ee; 
 }
 
-/* *** FIXED ICONS: ROBUST STYLING *** */
+/* *** FIXED ICONS: UPDATED FOR SOLID ICONS *** */
 .tool-card svg {
-  /* 1. Strict Dimensions */
-  width: 48px !important;
-  height: 48px !important;
+  /* 1. Adjusted Dimensions for Solid Icons (42px is optimal) */
+  width: 42px !important;
+  height: 42px !important;
   
-  /* 2. Prevent Flexbox Distortion (Crucial) */
+  /* 2. Prevent Distortion */
   flex: none !important;
   flex-shrink: 0 !important;
-  flex-grow: 0 !important;
   
-  /* 3. Positioning & Layout */
+  /* 3. Positioning */
   display: block;
   margin: 0 auto 0.75rem auto;
   
-  /* 4. Appearance */
+  /* 4. Appearance: Solid Fill, No Stroke */
+  fill: currentColor;
+  stroke: none; /* Important to remove any stroke artifacts */
   color: #ffffff;
   filter: drop-shadow(0 3px 3px rgba(0,0,0,0.2));
   
-  /* 5. Ensure Aspect Ratio */
+  /* 5. Object Fit */
   object-fit: contain;
   
   transition: transform 0.3s ease;
 }
 
-/* Slight zoom on hover for effect */
 .tool-card:hover svg {
   transform: scale(1.1);
 }
